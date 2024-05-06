@@ -1,0 +1,2 @@
+inoremap <silent> jj <ESC>
+

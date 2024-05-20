@@ -2,5 +2,6 @@
 ## メモ
 - autojumpはaptなどでインストール必要
 - zshにsnapのパスを読ませる`echo 'export PATH=$PATH:/snap/bin' >> ~/.zshrc`
+- `git config -global core.editor "nvim"`
 
 

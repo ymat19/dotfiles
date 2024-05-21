@@ -12,7 +12,7 @@ if command -v apt-get >/dev/null 2>&1; then
     sudo apt-get install -y zsh neovim tmux autojump fzf 
 elif command -v brew >/dev/null 2>&1; then
     brew update
-    brew install autojump fzf
+    brew install autojump neovim tmux autojump fzf 
 else
     echo "apt-getもbrewも見つかりませんでした。手動でautojumpとfzfをインストールしてください。"
 fi

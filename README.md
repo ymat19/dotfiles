@@ -5,6 +5,6 @@
 - autojump, fzfはaptなどでインストール
 - zshにsnapのパスを読ませる`echo 'export PATH=$PATH:/snap/bin' >> ~/.zshrc`
 - `git config -global core.editor "nvim"`
-- agnosterテーマにフォント必要 https://github.com/agnoster/agnoster-zsh-theme
+- (agnosterテーマを使う場合は必要 https://github.com/agnoster/agnoster-zsh-theme)
 
 

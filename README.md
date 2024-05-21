@@ -6,5 +6,5 @@
 - zshにsnapのパスを読ませる`echo 'export PATH=$PATH:/snap/bin' >> ~/.zshrc`
 - `git config -global core.editor "nvim"`
 - (agnosterテーマを使う場合は必要 https://github.com/agnoster/agnoster-zsh-theme)
-
+- sudo -E で実行する
 

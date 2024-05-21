@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 # 現在の日時を取得
 current_time=$(date +"%y%m%d%H%M")

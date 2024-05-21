@@ -1,24 +1,23 @@
-# 基本となるイメージ
+# ベースとなる公式のUbuntuイメージを使用
 FROM ubuntu:latest
 
-# 必要なパッケージのインストール
-RUN apt-get update && apt-get install -y zsh curl git tmux neovim language-pack-en
+# パッケージインストール時の対話モードを無効化
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Oh My Zshのインストール
-RUN sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
-    sed -i 's/ZSH_THEME="robbyrussell"/ZSH_THEME="agnoster"/' /root/.zshrc && \
-    echo "bindkey -v" >> /root/.zshrc && \
-    echo "bindkey 'jj' vi-cmd-mode" >> /root/.zshrc
+# 必要なパッケージを更新・インストール
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# zshをデフォルトシェルに設定
-RUN chsh -s $(which zsh)
+# dotfilesリポジトリをクローン
+RUN git clone https://github.com/ymat19/dotfiles.git /root/dotfiles
 
-# Neovimの設定ファイルをコンテナにコピー
-COPY ./init.vim /root/.config/nvim/init.vim
+# 作業ディレクトリをdotfilesリポジトリに変更
+WORKDIR /root/dotfiles
 
-# 作業ディレクトリの設定
-WORKDIR /workspace
+# dotfilesをインストール（リポジトリにインストールスクリプトがあると仮定）
+RUN chmod +x install.sh && ./install.sh
 
-# コンテナ起動時のコマンド
-CMD ["tmux", "new-session", "zsh"]
-
+# デフォルトでzshを実行
+CMD ["zsh"]

@@ -9,7 +9,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 # autojumpとfzfのインストール
 if command -v apt-get >/dev/null 2>&1; then
     sudo apt-get update
-    sudo apt-get install -y autojump fzf
+    sudo apt-get install -y zsh neovim tmux autojump fzf 
 elif command -v brew >/dev/null 2>&1; then
     brew update
     brew install autojump fzf

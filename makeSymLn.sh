@@ -12,7 +12,7 @@ create_symlink() {
     local src_file="$1"
     local dest_file="$2"
 
-    if [ -e "$dest_file" ]; then
+    if [ -e "$dest_file" ] || [ -L "$dest_file" ]; then
         mv "$dest_file" "$backup_dir/"
     fi
 

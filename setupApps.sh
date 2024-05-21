@@ -10,6 +10,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 if command -v apt-get >/dev/null 2>&1; then
     apt-get update
     apt-get install -y neovim tmux autojump fzf 
+    ln -s $HOME/.oh-my-zsh/lib/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh
 elif command -v brew >/dev/null 2>&1; then
     brew update
     brew install autojump neovim tmux autojump fzf 

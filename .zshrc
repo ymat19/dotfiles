@@ -77,6 +77,7 @@ plugins=(
 	autojump
 	vi-mode
 	docker
+	fzf
 )
 
 source $ZSH/oh-my-zsh.sh

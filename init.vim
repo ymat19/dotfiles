@@ -3,6 +3,7 @@ let mapleader = "\<Space>"
 inoremap <silent> jj <ESC>
 nnoremap Y y$
 set clipboard+=unnamed
+inoremap <C-S-[> <Esc>
 
 " quickScope(VScode用)
 highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline

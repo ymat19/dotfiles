@@ -26,6 +26,7 @@ create_symlink "$(pwd)/.p10k.zsh" "$HOME/.p10k.zsh"
 # nvimの設定ディレクトリにinit.vimのシンボリックリンクを作成
 mkdir -p "$HOME/.config/nvim"
 create_symlink "$(pwd)/init.vim" "$HOME/.config/nvim/init.vim"
+create_symlink "$(pwd)/dein.toml" "$HOME/.config/nvim/dein.toml"
 
 # tmuxの設定ディレクトリにtmux.confのシンボリックリンクを作成
 mkdir -p "$HOME/.config/tmux"

@@ -17,7 +17,7 @@ source <(fzf --zsh)
 # autojumpとfzfのインストール
 if command -v apt-get >/dev/null 2>&1; then
     apt-get update
-    apt-get install -y neovim tmux autojump
+    apt-get install -y tmux autojump
     # バグ回避
     ln -s $HOME/.oh-my-zsh/lib/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh
 elif command -v brew >/dev/null 2>&1; then
@@ -26,6 +26,12 @@ elif command -v brew >/dev/null 2>&1; then
 else
     echo "apt-getもbrewも見つかりませんでした。手動でautojumpとfzfをインストールしてください。"
 fi
+
+# neovim insatall
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux64.tar.gz
+export PATH="$PATH:/opt/nvim-linux64/bin"
 
 # snapがあってdockerがなければsnapでdockerをインストール
 if command -v snap >/dev/null 2>&1; then

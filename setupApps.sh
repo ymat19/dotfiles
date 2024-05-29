@@ -42,6 +42,11 @@ if command -v snap >/dev/null 2>&1; then
     fi
 fi
 
+# ユーザがdockerを使えるように
+groupadd docker
+gpasswd -a $USER docker
+
+
 # snapのパスをzshに追加
 echo 'export PATH=$PATH:/snap/bin' >> ~/.zshrc
 

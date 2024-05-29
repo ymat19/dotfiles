@@ -17,7 +17,7 @@ source <(fzf --zsh)
 # autojumpとfzfのインストール
 if command -v apt-get >/dev/null 2>&1; then
     apt-get update
-    apt-get install -y tmux autojump
+    apt-get install -y tmux autojump unzip
     # バグ回避
     ln -s $HOME/.oh-my-zsh/lib/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh
 elif command -v brew >/dev/null 2>&1; then

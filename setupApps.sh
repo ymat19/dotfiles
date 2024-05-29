@@ -27,6 +27,9 @@ else
     echo "apt-getもbrewも見つかりませんでした。手動でautojumpとfzfをインストールしてください。"
 fi
 
+# Deno追加
+curl -fsSL https://deno.land/install.sh | sh
+
 # neovim insatall
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
 rm -rf /opt/nvim

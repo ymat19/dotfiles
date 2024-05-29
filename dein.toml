@@ -5,5 +5,13 @@ repo = 'unblevable/quick-scope'
 repo = 'machakann/vim-sandwich'
 
 [[plugins]]
-repo = 'easymotion/vim-easymotion'
+repo = 'rhysd/clever-f.vim'
 
+[[plugins]]
+repo = 'vim-denops/denops.vim'
+
+[[plugins]]
+repo = 'lambdalisue/vim-kensaku'
+
+[[plugins]]
+repo = 'lambdalisue/vim-kensaku-search'

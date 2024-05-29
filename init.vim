@@ -4,6 +4,12 @@ inoremap <silent> jj <ESC>
 nnoremap Y y$
 set clipboard+=unnamed
 
+" quickScope(VScode用)
+highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
+highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
+
+" https://knowledge.sakura.ad.jp/23248/ 
+" tomlに記載のあるものをインストール
 " dein.vim settings {{{
 " install dir {{{
 let s:dein_dir = expand('~/.cache/dein')

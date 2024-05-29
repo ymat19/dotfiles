@@ -8,6 +8,9 @@ set clipboard+=unnamed
 highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline
 highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline
 
+" kensaku-search用
+cnoremap <CR> <Plug>(kensaku-search-replace)<CR>
+
 " https://knowledge.sakura.ad.jp/23248/ 
 " tomlに記載のあるものをインストール
 " dein.vim settings {{{

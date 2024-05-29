@@ -20,6 +20,11 @@ if command -v apt-get >/dev/null 2>&1; then
     apt-get install -y tmux autojump unzip
     # バグ回避
     ln -s $HOME/.oh-my-zsh/lib/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh
+    # neovim insatall
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+    rm -rf /opt/nvim
+    tar -C /opt -xzf nvim-linux64.tar.gz
+    rm nvim-linux64.tar.gz
 elif command -v brew >/dev/null 2>&1; then
     brew update
     brew install neovim tmux autojump
@@ -29,12 +34,6 @@ fi
 
 # Deno追加
 curl -fsSL https://deno.land/install.sh | sh
-
-# neovim insatall
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-rm -rf /opt/nvim
-tar -C /opt -xzf nvim-linux64.tar.gz
-rm nvim-linux64.tar.gz
 
 # snapがあってdockerがなければsnapでdockerをインストール
 if command -v snap >/dev/null 2>&1; then

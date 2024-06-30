@@ -15,3 +15,6 @@ repo = 'lambdalisue/vim-kensaku'
 
 [[plugins]]
 repo = 'lambdalisue/vim-kensaku-search'
+
+[[plugins]]
+repo = 'deton/jasegment.vim'

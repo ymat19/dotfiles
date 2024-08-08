@@ -89,6 +89,10 @@ plugins=(
 	vi-mode
 	docker
 	fzf
+	asdf
+	golang
+	terraform
+	aws
 )
 
 source $ZSH/oh-my-zsh.sh

@@ -1,6 +1,7 @@
 " 諸々
 let mapleader = "\<Space>"
 inoremap <silent> jj <ESC>
+inoremap <silent> jk <ESC>:w<CR>
 nnoremap Y y$
 set clipboard+=unnamed
 inoremap <C-S-[> <Esc>

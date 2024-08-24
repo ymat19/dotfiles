@@ -34,4 +34,4 @@ create_symlink "$(pwd)/tmux.conf" "$HOME/.config/tmux/tmux.conf"
 
 # lunarvimの設定ディレクトリにtmux.confのシンボリックリンクを作成
 mkdir -p "$HOME/.config/lvim"
-create_symlink "$(pwd)/config.lua" "$HOME/config.lua"
+create_symlink "$(pwd)/config.lua" "$HOME/.config/lvim/config.lua"

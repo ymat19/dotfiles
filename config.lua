@@ -50,8 +50,18 @@ lvim.plugins = {
 
 }
 
-
--- cpilot settings
+-- copilot settings
+require('copilot').setup({
+  suggestion = {
+    auto_trigger = true,
+    keymap = {
+      accept = "<Tab>",
+      next = "<Down>",
+      prev = "<Up>",
+    }
+  }
+})
+-- copilot chat settings
 table.insert(lvim.plugins, {
   "zbirenbaum/copilot-cmp",
   event = "InsertEnter",

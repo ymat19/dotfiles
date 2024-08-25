@@ -93,6 +93,7 @@ lvim.plugins = {
 
 }
 
+
 -- copilot settings
 require('copilot').setup({
   suggestion = {
@@ -105,7 +106,7 @@ require('copilot').setup({
   }
 })
 
--- copilot chat settings
+-- copilot cmp settings
 table.insert(lvim.plugins, {
   "zbirenbaum/copilot-cmp",
   event = "InsertEnter",
@@ -118,6 +119,7 @@ table.insert(lvim.plugins, {
   end,
 })
 
+-- copilot chat settings
 -- bufferの内容を元にチャットを開く
 function CopilotChatBuffer()
   local input = vim.fn.input("Quick Chat: ")

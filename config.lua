@@ -43,8 +43,51 @@ lvim.plugins = {
     },
     build = "make tiktoken", -- Only on MacOS or Linux
     opts = {
-      debug = true, -- Enable debugging
-      -- See Configuration section for rest
+      prompts = {
+          Explain = {
+              prompt = "/COPILOT_EXPLAIN 上記のコードを日本語で説明してください",
+              description = "コードの説明をお願いする",
+          },
+          Review = {
+              prompt = '/COPILOT_REVIEW 選択したコードをレビューしてください。レビューコメントは日本語でお願いします。',
+              description = "コードのレビューをお願いする",
+          },
+          Fix = {
+              prompt = "/COPILOT_FIX このコードには問題があります。バグを修正したコードを表示してください。説明は日本語でお願いします。",
+              description = "コードの修正をお願いする",
+          },
+          Optimize = {
+              prompt = "/COPILOT_REFACTOR 選択したコードを最適化し、パフォーマンスと可読性を向上させてください。説明は日本語でお願いします。",
+              description = "コードの最適化をお願いする",
+          },
+          Docs = {
+              prompt = "/COPILOT_GENERATE 選択したコードに関するドキュメントコメントを日本語で生成してください。",
+              description = "コードのドキュメント作りをお願いする",
+          },
+          Tests = {
+              prompt = "/COPILOT_TESTS 選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
+              description = "コードのテストコード作成をお願いする",
+          },
+          FixDiagnostic = {
+              prompt = 'コードの診断結果に従って問題を修正してください。修正内容の説明は日本語でお願いします。',
+              description = "コードの静的解析結果に基づいた修正をお願いする",
+              selection = require('CopilotChat.select').diagnostics,
+          },
+          Commit = {
+              prompt =
+              '変更に対するコミットメッセージを記述してください。 メッセージは日本語でお願いします。また、その結果に従って、ファイルをステージングしてコミットするためのgitコマンドも作成してください。',
+              description = "コミットメッセージの作成をお願いする",
+              selection = require('CopilotChat.select').gitdiff,
+          },
+          CommitStaged = {
+              prompt =
+              'ステージ済みの変更に対するコミットメッセージを記述してください。メッセージは日本語でお願いします。また、その結果に従って、コミットするためのgitコマンドも作成してください。',
+              description = "ステージ済みのコミットメッセージの作成をお願いする",
+              selection = function(source)
+                  return require('CopilotChat.select').gitdiff(source, true)
+              end,
+          },
+      },
     },
   },
 
@@ -61,6 +104,7 @@ require('copilot').setup({
     }
   }
 })
+
 -- copilot chat settings
 table.insert(lvim.plugins, {
   "zbirenbaum/copilot-cmp",
@@ -72,55 +116,6 @@ table.insert(lvim.plugins, {
       require("copilot_cmp").setup() -- https://github.com/zbirenbaum/copilot-cmp/blob/master/README.md#configuration
     end, 100)
   end,
-})
--- 規定のプロンプトを上書き
-require("CopilotChat").setup({
-    debug = true,
-    prompts = {
-        Explain = {
-            prompt = "/COPILOT_EXPLAIN 上記のコードを日本語で説明してください",
-            description = "バディにコードの説明をお願いする",
-        },
-        Review = {
-            prompt = '/COPILOT_REVIEW 選択したコードをレビューしてください。レビューコメントは日本語でお願いします。',
-            description = "バディにコードのレビューをお願いする",
-        },
-        Fix = {
-            prompt = "/COPILOT_FIX このコードには問題があります。バグを修正したコードを表示してください。説明は日本語でお願いします。",
-            description = "バディにコードの修正をお願いする",
-        },
-        Optimize = {
-            prompt = "/COPILOT_REFACTOR 選択したコードを最適化し、パフォーマンスと可読性を向上させてください。説明は日本語でお願いします。",
-            description = "バディにコードの最適化をお願いする",
-        },
-        Docs = {
-            prompt = "/COPILOT_GENERATE 選択したコードに関するドキュメントコメントを日本語で生成してください。",
-            description = "バディにコードのドキュメント作りをお願いする",
-        },
-        Tests = {
-            prompt = "/COPILOT_TESTS 選択したコードの詳細なユニットテストを書いてください。説明は日本語でお願いします。",
-            description = "バディにコードのテストコード作成をお願いする",
-        },
-        FixDiagnostic = {
-            prompt = 'コードの診断結果に従って問題を修正してください。修正内容の説明は日本語でお願いします。',
-            description = "バディにコードの静的解析結果に基づいた修正をお願いする",
-            selection = require('CopilotChat.select').diagnostics,
-        },
-        Commit = {
-            prompt =
-            'commitize の規則に従って、変更に対するコミットメッセージを記述してください。 タイトルは最大50文字で、メッセージは72文字で折り返されるようにしてください。 メッセージ全体を gitcommit 言語のコード ブロックでラップしてください。メッセージは日本語でお願いします。',
-            description = "バディにコミットメッセージの作成をお願いする",
-            selection = require('CopilotChat.select').gitdiff,
-        },
-        CommitStaged = {
-            prompt =
-            'commitize の規則に従って、ステージ済みの変更に対するコミットメッセージを記述してください。 タイトルは最大50文字で、メッセージは72文字で折り返されるようにしてください。 メッセージ全体を gitcommit 言語のコード ブロックでラップしてください。メッセージは日本語でお願いします。',
-            description = "バディにステージ済みのコミットメッセージの作成をお願いする",
-            selection = function(source)
-                return require('CopilotChat.select').gitdiff(source, true)
-            end,
-        },
-    },
 })
 
 -- bufferの内容を元にチャットを開く
@@ -152,8 +147,6 @@ lvim.builtin.which_key.mappings["o"] = {
   b = { "<cmd>lua CopilotChatBuffer()<CR>", "Open Copilot Chat by Buffer" },
   -- <leader>ot  でtelescopeを用いたアクションプロンプトを表示する
   t = { "<cmd>lua ShowCopilotChatActionPrompt()<CR>", "Show Copilot Chat Action Prompt" },
-  -- <leader>os でCopilotの設定を開く
-  s = { "<cmd>edit ~/.config/lvim/config.lua<CR>", "Open Copilot Settings" },
   -- <leader>oq で一般的な質問をする
   q = { "<cmd>lua CopilotGeneralQuestion()<CR>", "Ask General Question" },
   -- <leader>ol でCopilotのログを表示する
@@ -161,6 +154,8 @@ lvim.builtin.which_key.mappings["o"] = {
   -- <leader>oc でCopilotのステータスを表示する
   c = { "<cmd>Copilot panel<CR>", "Show Copilot Panel" },
 }
+
+lvim.builtin.which_key.vmappings["o"] = lvim.builtin.which_key.mappings["o"]
 
 
 -- python settings

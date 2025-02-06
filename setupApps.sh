@@ -6,9 +6,6 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 # zsh-autosuggestionsの導入
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
-# powerlevel10kの導入
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
 # fzfインストール
 git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
 ~/.fzf/install
@@ -21,35 +18,13 @@ if command -v apt-get >/dev/null 2>&1; then
     # バグ回避
     ln -s $HOME/.oh-my-zsh/lib/key-bindings.zsh /usr/share/doc/fzf/examples/key-bindings.zsh
     # neovim insatall
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
     rm -rf /opt/nvim
-    tar -C /opt -xzf nvim-linux64.tar.gz
-    rm nvim-linux64.tar.gz
+    tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+    rm nvim-linux-x86_64.tar.gz
 elif command -v brew >/dev/null 2>&1; then
     brew update
     brew install neovim tmux autojump
 else
     echo "apt-getもbrewも見つかりませんでした。手動でautojumpとfzfをインストールしてください。"
 fi
-
-# Deno追加
-curl -fsSL https://deno.land/install.sh | sh
-
-# snapがあってdockerがなければsnapでdockerをインストール
-if command -v snap >/dev/null 2>&1; then
-    if ! command -v docker >/dev/null 2>&1; then
-        snap install docker
-    fi
-fi
-
-# ユーザがdockerを使えるように
-groupadd docker
-gpasswd -a $USER docker
-
-
-# snapのパスをzshに追加
-echo 'export PATH=$PATH:/snap/bin' >> ~/.zshrc
-
-# gitのデフォルトエディタをnvimに設定
-git config --global core.editor "nvim"
-

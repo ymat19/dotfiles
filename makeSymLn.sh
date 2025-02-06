@@ -19,19 +19,11 @@ create_symlink() {
     ln -s "$src_file" "$dest_file"
 }
 
-# ホームディレクトリに.zshrc, .p10kのシンボリックリンクを作成
-create_symlink "$(pwd)/.zshrc" "$HOME/.zshrc"
-create_symlink "$(pwd)/.p10k.zsh" "$HOME/.p10k.zsh"
-
 # nvimの設定ディレクトリにinit.vimのシンボリックリンクを作成
-mkdir -p "$HOME/.config/nvim"
-create_symlink "$(pwd)/init.vim" "$HOME/.config/nvim/init.vim"
-create_symlink "$(pwd)/dein.toml" "$HOME/.config/nvim/dein.toml"
+mkdir -p "$HOME/.config/nvim/lua/config"
+create_symlink "$(pwd)/init.lua" "$HOME/.config/nvim/init.lua"
+create_symlink "$(pwd)/lazy.lua" "$HOME/.config/nvim/lua/config/lazy.lua"
 
 # tmuxの設定ディレクトリにtmux.confのシンボリックリンクを作成
 mkdir -p "$HOME/.config/tmux"
 create_symlink "$(pwd)/tmux.conf" "$HOME/.config/tmux/tmux.conf"
-
-# lunarvimの設定ディレクトリにtmux.confのシンボリックリンクを作成
-mkdir -p "$HOME/.config/lvim"
-create_symlink "$(pwd)/config.lua" "$HOME/.config/lvim/config.lua"

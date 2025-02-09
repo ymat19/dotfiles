@@ -21,14 +21,11 @@
       }
       zle -N ghq-fzf
       bindkey '^]' ghq-fzf
-
-      # launch tmux
-      if [ -z "$TMUX" ]; then
-        tmux attach-session -t default || tmux new-session -s default
-      fi
     '';
     oh-my-zsh = {
       enable = true;
+      # not working
+      # theme = "agnoster";
       plugins = [
         "git"
         "vi-mode"

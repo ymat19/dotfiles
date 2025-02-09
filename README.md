@@ -22,4 +22,7 @@ sudo apt-get install xsel
 
 # fix lazygit error on linux
 sudo chmod a+rw /dev/tty
+
+# add ghq base (wip)
+git config --global --add ghq.root $(realpath ../)
 ```

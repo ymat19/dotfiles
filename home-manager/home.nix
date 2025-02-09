@@ -4,14 +4,16 @@ let
   moduleDir = ./modules;
   modules = builtins.map (fileName: moduleDir + "/${fileName}") (builtins.attrNames (builtins.readDir moduleDir));
 
-  username = import ./username.nix;
+  homeDirectory = import ./home-dir.nix;
+  parts = builtins.split "/" homeDirectory;
+  username = builtins.elemAt parts (builtins.length parts - 1);
 in
 {
   imports = modules;
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = username;
-  home.homeDirectory = "/home/${username}";
+  home.homeDirectory = homeDirectory;
 
   # This value determines the Home Manager release that your configuration is
   # compatible with. This helps avoid breakage when a new Home Manager release

@@ -5,6 +5,7 @@ curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix 
 
 nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 nix-channel --update
+nix-shell '<home-manager>' -A install
 ```
 
 ### apply
@@ -15,4 +16,5 @@ home-manager -f home-manager/home.nix switch
 ### etc
 ```
 sudo apt-get install xsel
+echo "\"$HOME\"" > home-manager/home-dir.nix
 ```

@@ -14,6 +14,7 @@
       bind s split-window -v
       bind x kill-pane
       bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded"
+      bind f copy-mode
       #set-option -g default-terminal screen-256color
       #set -g terminal-overrides 'xterm:colors=256'​
 

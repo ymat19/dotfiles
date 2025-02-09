@@ -1,0 +1,20 @@
+[[plugins]]
+repo = 'unblevable/quick-scope'
+
+[[plugins]]
+repo = 'machakann/vim-sandwich'
+
+[[plugins]]
+repo = 'rhysd/clever-f.vim'
+
+[[plugins]]
+repo = 'vim-denops/denops.vim'
+
+[[plugins]]
+repo = 'lambdalisue/vim-kensaku'
+
+[[plugins]]
+repo = 'lambdalisue/vim-kensaku-search'
+
+[[plugins]]
+repo = 'deton/jasegment.vim'

@@ -5,6 +5,7 @@
     enable = true;
     autosuggestion.enable = true;
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
+    syntaxHighlighting.enable = true;
     initExtra = ''
       bindkey -v
       bindkey 'jj' vi-cmd-mode
@@ -20,6 +21,11 @@
       }
       zle -N ghq-fzf
       bindkey '^]' ghq-fzf
+
+      # launch tmux
+      if [ -z "$TMUX" ]; then
+        tmux attach-session -t default || tmux new-session -s default
+      fi
     '';
     oh-my-zsh = {
       enable = true;

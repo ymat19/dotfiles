@@ -26,3 +26,7 @@ sudo chmod a+rw /dev/tty
 # add ghq base (wip)
 git config --global --add ghq.root $(realpath ../)
 ```
+
+### docs
+https://home-manager-options.extranix.com/?query=&release=release-24.05
+https://search.nixos.org/packages?channel=24.11&from=0&size=50&sort=relevance&type=packages&query=vimPlugins

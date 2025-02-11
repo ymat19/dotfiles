@@ -5,14 +5,11 @@
     asdf-vm
   ]);
 
-  programs.bash.initExtra = lib.mkAfter ''
-    . "${pkgs.asdf-vm}/share/asdf-vm/asdf.sh"
-    . "${pkgs.asdf-vm}/share/asdf-vm/completions/asdf.bash"
+  programs.bash.bashrcExtra = lib.mkAfter ''
+    export PATH="''${ASDF_DATA_DIR:-''$HOME/.asdf}/shims:''$PATH"
   '';
 
   programs.zsh.initExtra = lib.mkAfter ''
-    . "${pkgs.asdf-vm}/share/asdf-vm/asdf.sh"
-    autoload -Uz bashcompinit && bashcompinit
-    . "${pkgs.asdf-vm}/share/asdf-vm/completions/asdf.bash"
+    export PATH="''${ASDF_DATA_DIR:-''$HOME/.asdf}/shims:''$PATH"
   '';
 }

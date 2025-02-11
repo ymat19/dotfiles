@@ -7,7 +7,8 @@
     vimAlias = true;
     plugins = with pkgs.vimPlugins; [
       nvim-lspconfig
-      nvim-treesitter
+      nvim-treesitter.withAllGrammars
+      tokyonight-nvim
       vim-airline
       hlchunk-nvim
       quick-scope
@@ -35,14 +36,21 @@
       vim.o.shiftwidth = 2
       vim.o.expandtab = true
 
-      require'substitute'.setup({})
-      require'nvim-surround'.setup({})
+      require'substitute'.setup{}
+      require'nvim-surround'.setup{}
       require'lspconfig'.nixd.setup{}
-      require'hlchunk'.setup({
+      require'hlchunk'.setup{
           chunk = {
               enable = true
           }
-      })
+      }
+      require'nvim-treesitter.configs'.setup{
+        highlight = {
+          enable = true,
+        }
+      }
+
+      vim.cmd[[colorscheme tokyonight]]
 
       -- substitute-nvim
       vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })

@@ -6,11 +6,14 @@
     viAlias = true;
     vimAlias = true;
     plugins = with pkgs.vimPlugins; [
-      vim-airline
-      quick-scope
       nvim-lspconfig
+      nvim-treesitter
+      vim-airline
+      hlchunk-nvim
+      quick-scope
       substitute-nvim
       nvim-surround
+      dial-nvim
     ];
     extraLuaConfig = ''
       vim.opt.number = true
@@ -35,6 +38,11 @@
       require'substitute'.setup({})
       require'nvim-surround'.setup({})
       require'lspconfig'.nixd.setup{}
+      require'hlchunk'.setup({
+          chunk = {
+              enable = true
+          }
+      })
 
       -- substitute-nvim
       vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })

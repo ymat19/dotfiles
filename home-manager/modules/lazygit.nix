@@ -27,6 +27,6 @@
 
   programs.tmux.extraConfig = lib.mkAfter ''
       # https://www.m3tech.blog/entry/dotfiles-bonsai#Tmux%E7%B7%A8
-      bind g popup -w90% -h90% -E zsh -c lazygit # (prefix) gでlazygitを起動する
+      bind g popup -w90% -h90% -E zsh -c "source ~/.zshrc && lazygit" # (prefix) gでlazygitを起動する
   '';
 }

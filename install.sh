@@ -12,17 +12,14 @@ nix-shell '<home-manager>' -A install
 # setup home dir func
 echo "\"$HOME\"" > home-manager/home-dir.nix
 
-# apply
+# apply settings
 home-manager -f home-manager/home.nix switch
 
-# Prompt the user with the parent path in English
+# Add the parent path to ghq.root
 PARENT_PATH=$(realpath ../)
 echo "The parent path is: $PARENT_PATH"
 read -p "Do you want to add this path to ghq.root? (y/N): " RESPONSE
-
-# Check the user's response
 if [[ "$RESPONSE" == "y" ]]; then
-    # Add the path to ghq.root
     git config --global --add ghq.root "$PARENT_PATH"
     echo "The path has been added to ghq.root."
 else
@@ -36,4 +33,11 @@ if [[ "$(uname)" == "Linux" ]]; then
 
   # fix lazygit error on linux
   sudo chmod a+rw /dev/tty
+
+  read -p "Do you want to make neovim symlink for wsl.exe? (y/N):" RESPONSE
+  if [[ "$RESPONSE" == "y" ]]; then
+      sudo ln -s $(which nvim) /usr/local/bin/nvim
+      echo "Symlink was created"
+  fi
 fi
+

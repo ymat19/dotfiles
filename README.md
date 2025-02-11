@@ -26,6 +26,9 @@ sudo chmod a+rw /dev/tty
 
 # add ghq base
 git config --global --add ghq.root $(realpath ../)
+
+# Make neovim symlink for wsl.exe (vscode neovim needs this)
+sudo ln -s $(which nvim) /usr/local/bin/nvim
 ```
 
 ### docs

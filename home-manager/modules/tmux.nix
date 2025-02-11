@@ -18,9 +18,6 @@
       set-option -g default-terminal screen-256color
       set -g terminal-overrides 'xterm:colors=256'​
 
-      # https://www.m3tech.blog/entry/dotfiles-bonsai#Tmux%E7%B7%A8
-      bind g popup -w90% -h90% -E lazygit # (prefix) gでlazygitを起動する
-
       # https://qiita.com/mnishiguchi/items/b8526fecd69aa87d2f7e
       # OS が Linux の時は xsel を使う
       if-shell -b '[ "$(uname)" = "Linux" ]' {

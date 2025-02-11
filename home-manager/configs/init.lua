@@ -57,5 +57,6 @@ vim.api.nvim_create_autocmd("InsertEnter", {
           }
         }
       })
+      require('CopilotChat').setup{}
     end
 })

@@ -16,6 +16,8 @@
       nvim-surround
       dial-nvim
       copilot-lua
+      plenary-nvim
+      CopilotChat-nvim
     ];
     extraLuaConfig = builtins.readFile ../configs/init.lua;
   };

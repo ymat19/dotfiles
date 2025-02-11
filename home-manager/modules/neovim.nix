@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   programs.neovim = {
@@ -41,4 +41,8 @@
       require'lspconfig'.nixd.setup{}
     '';
   };
+
+  home.packages = lib.mkAfter (with pkgs; [
+    nixd
+  ]);
 }

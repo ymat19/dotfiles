@@ -7,11 +7,12 @@ nix-channel --add https://github.com/nix-community/home-manager/archive/master.t
 nix-channel --update
 
 nix-shell '<home-manager>' -A install
+
+echo "\"$HOME\"" > home-manager/home-dir.nix
 ```
 
 ### apply
 ```
-echo "\"$HOME\"" > home-manager/home-dir.nix
 home-manager -f home-manager/home.nix switch
 ```
 
@@ -23,7 +24,7 @@ sudo apt-get install xsel
 # fix lazygit error on linux
 sudo chmod a+rw /dev/tty
 
-# add ghq base (wip)
+# add ghq base
 git config --global --add ghq.root $(realpath ../)
 ```
 

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   programs.zsh = {
@@ -41,4 +41,8 @@
     enable = true;
     enableZshIntegration = true;
   };
+
+  home.packages = lib.mkAfter (with pkgs; [
+    ghq
+  ]);
 }

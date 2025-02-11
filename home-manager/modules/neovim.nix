@@ -32,14 +32,15 @@
       vim.o.shiftwidth = 2
       vim.o.expandtab = true
 
+      require'substitute'.setup({})
+      require'nvim-surround'.setup({})
+      require'lspconfig'.nixd.setup{}
+
       -- substitute-nvim
       vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })
       vim.keymap.set("n", "ss", require('substitute').line, { noremap = true })
       vim.keymap.set("n", "S", require('substitute').eol, { noremap = true })
       vim.keymap.set("x", "s", require('substitute').visual, { noremap = true })
-
-      require'nvim-surround'.setup({})
-      require'lspconfig'.nixd.setup{}
     '';
   };
 

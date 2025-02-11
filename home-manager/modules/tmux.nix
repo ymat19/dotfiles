@@ -5,7 +5,7 @@
   programs.tmux = {
     enable = true;
     keyMode = "vi";
-    prefix = "C-f";
+    prefix = "C-s";
     mouse = true;
     customPaneNavigationAndResize = true;
     shell = "${pkgs.zsh}/bin/zsh";
@@ -14,7 +14,7 @@
       bind s split-window -v
       bind x kill-pane
       bind r source-file ~/.config/tmux/tmux.conf \; display "Reloaded"
-      bind f copy-mode
+      bind s copy-mode
       set-option -g default-terminal screen-256color
       set -g terminal-overrides 'xterm:colors=256'​
 

@@ -13,6 +13,7 @@
       nvim-surround
     ];
     extraLuaConfig = ''
+      vim.opt.number = true
       vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
       vim.api.nvim_set_keymap('i', 'jk', '<ESC>:w<CR>', { noremap = true, silent = true })
       vim.opt.clipboard:append({ "unnamed", "unnamedplus" })

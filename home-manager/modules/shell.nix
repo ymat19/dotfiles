@@ -25,10 +25,11 @@
     };
   };
 
+  programs.bash.bashrcExtra = "";
+
   #powerline-go
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
   };
-
 }

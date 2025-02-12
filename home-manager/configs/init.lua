@@ -20,10 +20,12 @@ vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent
 --vim.api.nvim_set_keymap('n', '<C-h>', '^', { noremap = true, silent = true })
 --vim.api.nvim_set_keymap('n', '<C-l>', '$', { noremap = true, silent = true })
 
+
 -- plugins setup
 require'substitute'.setup{}
 require'nvim-surround'.setup{}
 require'lspconfig'.nixd.setup{}
+require('neoscroll').setup({ mappings = {'<C-u>', '<C-d>'} })
 require'hlchunk'.setup{
     chunk = {
         enable = true
@@ -35,7 +37,13 @@ require'nvim-treesitter.configs'.setup{
   }
 }
 
+require("oil").setup()
+vim.keymap.set("n", "-", "<CMD>vs<CR><CMD>Oil<CR>", { desc = "Open parent directory" })
+vim.keymap.set("n", "_", "<CMD>vnew<CR><CMD>Oil<CR>", { desc = "Open parent directory" })
+
 vim.cmd[[colorscheme tokyonight]]
+
+
 
 -- substitute-nvim
 vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })
@@ -60,9 +68,9 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     end
 })
 -- lazy setup
-vim.api.nvim_create_autocmd("VimEnter", {
-    --pattern = "*",
-    --callback = function()
-    --  require('CopilotChat').setup{}
-    --end
-})
+--vim.api.nvim_create_autocmd("VimEnter", {
+--    pattern = "*",
+--    callback = function()
+--      require('CopilotChat').setup{}
+--    end
+--})

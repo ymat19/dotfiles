@@ -6,18 +6,27 @@
     viAlias = true;
     vimAlias = true;
     plugins = with pkgs.vimPlugins; [
+      # essentials
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
+      # buffer
+      oil-nvim
+      # visual
       tokyonight-nvim
       vim-airline
       hlchunk-nvim
+      # movement
       quick-scope
+      clever-f-vim
+      neoscroll-nvim
+      # util
       substitute-nvim
       nvim-surround
       dial-nvim
+      # AI
       copilot-lua
-      plenary-nvim
-      CopilotChat-nvim
+      #plenary-nvim
+      #CopilotChat-nvim
     ];
     extraLuaConfig = builtins.readFile ../configs/init.lua;
   };

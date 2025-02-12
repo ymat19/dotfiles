@@ -25,8 +25,10 @@
     };
   };
 
-  programs.bash.enable = true;
-  programs.bash.bashrcExtra = "";
+  programs.bash = {
+    enable = true;
+    bashrcExtra = "";
+  };
 
   #powerline-go
   programs.starship = {

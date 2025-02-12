@@ -61,8 +61,8 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 })
 -- lazy setup
 vim.api.nvim_create_autocmd("VimEnter", {
-    pattern = "*",
-    callback = function()
-      require('CopilotChat').setup{}
-    end
+    --pattern = "*",
+    --callback = function()
+    --  require('CopilotChat').setup{}
+    --end
 })

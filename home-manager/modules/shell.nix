@@ -25,6 +25,7 @@
     };
   };
 
+  programs.bash.enable = true;
   programs.bash.bashrcExtra = "";
 
   #powerline-go

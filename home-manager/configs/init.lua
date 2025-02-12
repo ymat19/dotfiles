@@ -43,7 +43,9 @@ vim.keymap.set("n", "_", "<CMD>vnew<CR><CMD>Oil<CR>", { desc = "Open parent dire
 
 vim.cmd[[colorscheme tokyonight]]
 
-
+-- https://zenn.dev/neo/scraps/49266fed7ce6b6
+vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline]]
+vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
 -- substitute-nvim
 vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })

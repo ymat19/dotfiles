@@ -29,9 +29,9 @@ vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent
 require'substitute'.setup{}
 require'nvim-surround'.setup{}
 vim.api.nvim_del_keymap('v', 'S')
+require('leap').create_default_mappings()
 require'lspconfig'.nixd.setup{}
 require("hardtime").setup()
-require('leap').create_default_mappings() 
 require('neoscroll').setup({ mappings = {'<C-u>', '<C-d>'} })
 require'hlchunk'.setup{
     chunk = {
@@ -55,10 +55,10 @@ vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 c
 vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
 -- substitute-nvim
-vim.keymap.set("n", "z", require('substitute').operator, { noremap = true })
-vim.keymap.set("n", "zz", require('substitute').line, { noremap = true })
-vim.keymap.set("n", "Z", require('substitute').eol, { noremap = true })
-vim.keymap.set("x", "z", require('substitute').visual, { noremap = true })
+vim.keymap.set("n", "r", require('substitute').operator, { noremap = true })
+vim.api.nvim_set_keymap('n', 'rr', 'r', { noremap = true, silent = true })
+vim.keymap.set("n", "R", require('substitute').eol, { noremap = true })
+vim.keymap.set("x", "r", require('substitute').visual, { noremap = true })
 
 -- clever-f
 vim.g.clever_f_smart_case = 1

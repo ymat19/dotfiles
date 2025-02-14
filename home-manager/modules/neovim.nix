@@ -19,6 +19,8 @@
       quick-scope
       clever-f-vim
       neoscroll-nvim
+      hardtime-nvim
+      leap-nvim
       # util
       substitute-nvim
       nvim-surround

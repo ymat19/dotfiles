@@ -14,6 +14,10 @@ vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', 'jk', '<ESC>:w<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-j>', '5j', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-k>', '5k', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('x', '<C-j>', '5j', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('x', '<C-k>', '5k', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent = true })
 --vim.api.nvim_set_keymap('n', 's', '"_diwP', { noremap = true, silent = true })
 --vim.api.nvim_set_keymap('n', 'S', '"_diWP', { noremap = true, silent = true })
@@ -25,6 +29,8 @@ vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent
 require'substitute'.setup{}
 require'nvim-surround'.setup{}
 require'lspconfig'.nixd.setup{}
+require("hardtime").setup()
+require('leap').create_default_mappings() 
 require('neoscroll').setup({ mappings = {'<C-u>', '<C-d>'} })
 require'hlchunk'.setup{
     chunk = {
@@ -48,10 +54,10 @@ vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 c
 vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
 -- substitute-nvim
-vim.keymap.set("n", "s", require('substitute').operator, { noremap = true })
-vim.keymap.set("n", "ss", require('substitute').line, { noremap = true })
-vim.keymap.set("n", "S", require('substitute').eol, { noremap = true })
-vim.keymap.set("x", "s", require('substitute').visual, { noremap = true })
+vim.keymap.set("n", "z", require('substitute').operator, { noremap = true })
+vim.keymap.set("n", "zz", require('substitute').line, { noremap = true })
+vim.keymap.set("n", "Z", require('substitute').eol, { noremap = true })
+vim.keymap.set("x", "z", require('substitute').visual, { noremap = true })
 
 -- clever-f
 vim.g.clever_f_smart_case = 1
@@ -81,3 +87,4 @@ vim.api.nvim_create_autocmd("InsertEnter", {
 --      require('CopilotChat').setup{}
 --    end
 --})
+

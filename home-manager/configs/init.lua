@@ -28,6 +28,7 @@ vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent
 -- plugins setup
 require'substitute'.setup{}
 require'nvim-surround'.setup{}
+vim.api.nvim_del_keymap('v', 'S')
 require'lspconfig'.nixd.setup{}
 require("hardtime").setup()
 require('leap').create_default_mappings() 

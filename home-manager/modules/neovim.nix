@@ -27,10 +27,6 @@
       substitute-nvim
       nvim-surround
       dial-nvim
-      # AI
-      #copilot-lua
-      #plenary-nvim
-      #CopilotChat-nvim
     ];
     extraLuaConfig = builtins.readFile ../configs/init.lua;
   };

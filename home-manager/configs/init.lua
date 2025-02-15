@@ -10,6 +10,7 @@ vim.o.shiftwidth = 2
 vim.o.expandtab = true
 vim.opt.clipboard:append({ "unnamed", "unnamedplus" })
 
+
 -- key bindings
 vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', 'jk', '<ESC>:w<CR>', { noremap = true, silent = true })
@@ -20,32 +21,28 @@ vim.api.nvim_set_keymap('n', '<C-k>', '5k', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('x', '<C-j>', '5j', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('x', '<C-k>', '5k', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent = true })
---vim.api.nvim_set_keymap('n', 's', '"_diwP', { noremap = true, silent = true })
---vim.api.nvim_set_keymap('n', 'S', '"_diWP', { noremap = true, silent = true })
---vim.api.nvim_set_keymap('n', '<C-h>', '^', { noremap = true, silent = true })
---vim.api.nvim_set_keymap('n', '<C-l>', '$', { noremap = true, silent = true })
 
 
 -- plugins setup
 require'substitute'.setup{}
-require'nvim-surround'.setup{}
-vim.api.nvim_del_keymap('v', 'S')
-require('leap').create_default_mappings()
 require'lspconfig'.nixd.setup{}
 require("hardtime").setup()
 require('neoscroll').setup({ mappings = {'<C-u>', '<C-d>'} })
+
+-- avoid confilict: surround, leap
+require'nvim-surround'.setup{}
+vim.api.nvim_del_keymap('v', 'S')
+require('leap').create_default_mappings()
+
+-- hlchunk
 require'hlchunk'.setup{
     chunk = {
         enable = true
     }
 }
 
-local parser_path = vim.fn.stdpath("data") .. "/treesitter"
-vim.opt.runtimepath:prepend(parser_path)
+-- treesitter
 require'nvim-treesitter.configs'.setup {
-  -- A list of parser names, or "all" (the listed parsers MUST always be installed)
-  -- ensure_installed = { "nix", "lua", "c_sharp", "python", "markdown", "markdown_inline", "json", "yaml", "toml", "html", "css", "javascript", "typescript", "tsx", "bash" },
-  parser_install_dir = parser_path,
   highlight = {
     enable = true,
   },
@@ -60,7 +57,7 @@ vim.keymap.set("n", "_", "<CMD>vnew<CR><CMD>Oil<CR>", { desc = "Open parent dire
 
 vim.cmd[[colorscheme tokyonight]]
 
--- https://zenn.dev/neo/scraps/49266fed7ce6b6
+-- quick scope https://zenn.dev/neo/scraps/49266fed7ce6b6
 vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline]]
 vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
@@ -78,28 +75,4 @@ vim.keymap.set('x', 'J', '<Plug>(expand_region_shrink)', { noremap = false, sile
 vim.g.clever_f_smart_case = 1
 vim.g.clever_f_fix_key_direction = 1
 vim.g.clever_f_chars_match_any_signs = ";"
-
--- lazy setup
---vim.api.nvim_create_autocmd("InsertEnter", {
---    pattern = "*",
---    callback = function()
---      require('copilot').setup({
---        suggestion = {
---          auto_trigger = true,
---          keymap = {
---            accept = "<Tab>",
---            next = "<Down>",
---            prev = "<Up>",
---          }
---        }
---      })
---    end
---})
--- lazy setup
---vim.api.nvim_create_autocmd("VimEnter", {
---    pattern = "*",
---    callback = function()
---      require('CopilotChat').setup{}
---    end
---})
 

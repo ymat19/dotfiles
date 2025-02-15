@@ -11,7 +11,7 @@
       nvim-treesitter.withAllGrammars
       # buffer
       oil-nvim
-      # visual
+      # ui
       tokyonight-nvim
       vim-airline
       hlchunk-nvim
@@ -21,6 +21,8 @@
       neoscroll-nvim
       hardtime-nvim
       leap-nvim
+      # visual
+      vim-expand-region
       # util
       substitute-nvim
       nvim-surround

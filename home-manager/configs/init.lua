@@ -65,10 +65,14 @@ vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 c
 vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
 -- substitute-nvim
-vim.keymap.set("n", "r", require('substitute').operator, { noremap = true })
-vim.api.nvim_set_keymap('n', 'rr', 'r', { noremap = true, silent = true })
-vim.keymap.set("n", "R", require('substitute').eol, { noremap = true })
-vim.keymap.set("x", "r", require('substitute').visual, { noremap = true })
+vim.keymap.set("n", "<C-r>", require('substitute').operator, { noremap = true })
+vim.keymap.set("n", "<C-r><C-r>", require('substitute').line, { noremap = true })
+vim.keymap.set("x", "<C-r>", require('substitute').visual, { noremap = true })
+
+-- vim-expand-region
+vim.keymap.set('n', 'K', '<Plug>(expand_region_expand)', { noremap = false, silent = true })
+vim.keymap.set('x', 'K', '<Plug>(expand_region_expand)', { noremap = false, silent = true })
+vim.keymap.set('x', 'J', '<Plug>(expand_region_shrink)', { noremap = false, silent = true })
 
 -- clever-f
 vim.g.clever_f_smart_case = 1

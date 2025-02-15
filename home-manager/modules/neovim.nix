@@ -26,7 +26,7 @@
       nvim-surround
       dial-nvim
       # AI
-      copilot-lua
+      #copilot-lua
       #plenary-nvim
       #CopilotChat-nvim
     ];

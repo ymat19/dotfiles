@@ -25,6 +25,7 @@
       substitute-nvim
       nvim-surround
       dial-nvim
+      nvim-treesitter-textsubjects
       # AI
       #copilot-lua
       #plenary-nvim

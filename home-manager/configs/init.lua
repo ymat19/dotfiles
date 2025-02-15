@@ -3,6 +3,7 @@ vim.opt.number = true
 vim.opt.hlsearch = true
 vim.opt.ignorecase = true  -- デフォルトで大文字・小文字を無視
 vim.opt.smartcase = true   -- 大文字が含まれる場合は大文字・小文字を区別
+vim.opt.scrolloff = 5
 vim.o.expandtab = true
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
@@ -38,9 +39,28 @@ require'hlchunk'.setup{
         enable = true
     }
 }
-require'nvim-treesitter.configs'.setup{
+
+local parser_path = vim.fn.stdpath("data") .. "/treesitter"
+vim.opt.runtimepath:prepend(parser_path)
+require'nvim-treesitter.configs'.setup {
+  -- A list of parser names, or "all" (the listed parsers MUST always be installed)
+  -- ensure_installed = { "nix", "lua", "c_sharp", "python", "markdown", "markdown_inline", "json", "yaml", "toml", "html", "css", "javascript", "typescript", "tsx", "bash" },
+  parser_install_dir = parser_path,
   highlight = {
     enable = true,
+  },
+  indent = {
+    enable = true,
+  },
+  textsubjects = {
+    enable = true,
+    --keymaps = {},
+    prev_selection = ',',
+    keymaps = {
+        ['.'] = 'textsubjects-smart',
+        [';'] = 'textsubjects-container-outer',
+        ['i;'] = 'textsubjects-container-inner',
+    },
   }
 }
 

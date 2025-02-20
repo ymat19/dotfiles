@@ -62,9 +62,9 @@ vim.cmd[[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 c
 vim.cmd[[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
 
 -- substitute-nvim
-vim.keymap.set("n", "<C-r>", require('substitute').operator, { noremap = true })
-vim.keymap.set("n", "<C-r><C-r>", require('substitute').line, { noremap = true })
-vim.keymap.set("x", "<C-r>", require('substitute').visual, { noremap = true })
+vim.keymap.set("n", "R", require('substitute').operator, { noremap = true })
+vim.keymap.set("n", "RR", require('substitute').line, { noremap = true })
+vim.keymap.set("x", "R", require('substitute').visual, { noremap = true })
 
 -- vim-expand-region
 vim.keymap.set('n', 'K', '<Plug>(expand_region_expand)', { noremap = false, silent = true })

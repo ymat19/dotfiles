@@ -43,6 +43,7 @@
     LC_TIME = "ja_JP.UTF-8";
   };
 
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
@@ -101,7 +102,7 @@
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
-     xsel
+    xsel
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -131,4 +132,73 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
 
+
+  # https://zenn.dev/asa1984/articles/nixos-is-the-best#%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E4%BE%BF%E5%88%A9%E3%81%AA%E8%A8%AD%E5%AE%9A
+  i18n.inputMethod = {
+    enabled = "fcitx5";
+    fcitx5.addons = [pkgs.fcitx5-mozc];
+  };
+
+  fonts = {
+    fonts = with pkgs; [
+      noto-fonts-cjk-serif
+      noto-fonts-cjk-sans
+      noto-fonts-emoji
+      nerdfonts
+      migu
+    ];
+    fontDir.enable = true;
+    fontconfig = {
+      defaultFonts = {
+        serif = ["Noto Serif CJK JP" "Noto Color Emoji"];
+        sansSerif = ["Noto Sans CJK JP" "Noto Color Emoji"];
+        monospace = ["JetBrainsMono Nerd Font" "Noto Color Emoji"];
+        emoji = ["Noto Color Emoji"];
+      };
+      localConf = ''
+        <?xml version="1.0"?>
+        <!DOCTYPE fontconfig SYSTEM "urn:fontconfig:fonts.dtd">
+        <fontconfig>
+          <description>Change default fonts for Steam client</description>
+          <match>
+            <test name="prgname">
+              <string>steamwebhelper</string>
+            </test>
+            <test name="family" qual="any">
+              <string>sans-serif</string>
+            </test>
+            <edit mode="prepend" name="family">
+              <string>Migu 1P</string>
+            </edit>
+          </match>
+        </fontconfig>
+      '';
+    };
+  };
+
+  #boot.kernelPackages = pkgs.linuxKernel.packages.linux_zen;
+
+  nix = {
+    settings = {
+      auto-optimise-store = true; # Nix storeの最適化
+      experimental-features = ["nix-command" "flakes"];
+    };
+    # ガベージコレクションを自動実行
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 7d";
+    };
+  };
+
+  services.flatpak.enable = true;
+  xdg.portal.enable = true; # flatpakに必要
+
+  # Steamをインストール
+  # Proton ExperimentalはSteamの設定から有効化する
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+  };
 }

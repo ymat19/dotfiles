@@ -34,13 +34,6 @@ require'nvim-surround'.setup{}
 vim.api.nvim_del_keymap('v', 'S')
 require('leap').create_default_mappings()
 
--- hlchunk
-require'hlchunk'.setup{
-    chunk = {
-        enable = true
-    }
-}
-
 -- treesitter
 require'nvim-treesitter.configs'.setup {
   highlight = {

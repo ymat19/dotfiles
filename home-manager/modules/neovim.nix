@@ -14,7 +14,6 @@
       # ui
       tokyonight-nvim
       vim-airline
-      hlchunk-nvim
       # movement
       quick-scope
       clever-f-vim

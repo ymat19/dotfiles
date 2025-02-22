@@ -29,6 +29,9 @@ git config --global --add ghq.root $(realpath ../)
 
 # Make neovim symlink for wsl.exe (vscode neovim needs this)
 sudo ln -s $(which nvim) /usr/local/bin/nvim
+
+# allpy on NixOS
+sudo nixos-rebuild switch -I nixos-config=configuration.nix
 ```
 
 ### docs

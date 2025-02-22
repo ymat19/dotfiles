@@ -26,6 +26,7 @@
       substitute-nvim
       nvim-surround
       dial-nvim
+      plenary-nvim
     ];
     extraLuaConfig = builtins.readFile ../configs/init.lua;
   };

@@ -49,7 +49,18 @@
 
   # Enable the GNOME Desktop Environment.
   services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  #services.xserver.desktopManager.gnome.enable = true;
+
+  # https://zenn.dev/wagomu/articles/20240906_nixos_and_sway
+  # swayを自動起動させるための設定
+  services.displayManager = {
+    defaultSession = "sway";
+  };
+  # swayを有効化
+  programs.sway = {
+    enable = true;
+    wrapperFeatures.gtk = true;
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {

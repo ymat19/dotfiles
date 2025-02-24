@@ -11,6 +11,7 @@
       nvim-treesitter.withAllGrammars
       # buffer
       oil-nvim
+      vim-startify
       # ui
       tokyonight-nvim
       vim-airline

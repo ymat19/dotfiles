@@ -13,7 +13,7 @@ echo "\"$HOME\"" > home-manager/home-dir.nix
 
 ### apply
 ```
-home-manager -f home-manager/home.nix switch
+home-manager -f home-manager/home.nix switch -b backup
 ```
 
 ### etc

@@ -1,0 +1,18 @@
+name: Test install.sh
+
+on:
+  push:
+  schedule:
+    # 毎日午前0時に実行（UTC）
+    - cron: '0 0 * * *'
+
+jobs:
+  run-install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run install.sh
+        run: ./install.sh

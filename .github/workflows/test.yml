@@ -1,4 +1,4 @@
-name: Test install.sh
+name: Test
 
 on:
   push:

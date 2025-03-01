@@ -9,7 +9,7 @@ nix-channel --add https://github.com/nix-community/home-manager/archive/master.t
 nix-channel --update
 
 # setup home-manager
-nix-shell '<home-manager>' -A install
+nix-shell '<home-manager>' -A install -b backup
 
 # setup home dir func
 echo "\"$HOME\"" > home-manager/home-dir.nix

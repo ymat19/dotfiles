@@ -3,7 +3,7 @@
 ### nix, home-manager setup
 ```
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
-. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh 
+. /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 nix-channel --update
@@ -34,6 +34,9 @@ sudo ln -s $(which nvim) /usr/local/bin/nvim
 
 # allpy on NixOS
 sudo nixos-rebuild switch -I nixos-config=configuration.nix
+
+# nix-shell with pyenv dependencies
+nix-shell -p zlib xz readline libffi libuuid openssl sqlite bzip2 tk
 ```
 
 ### docs

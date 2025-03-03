@@ -17,7 +17,6 @@
         "git"
         "vi-mode"
         "fzf"
-        "asdf"
         "docker"
         "terraform"
         "aws"

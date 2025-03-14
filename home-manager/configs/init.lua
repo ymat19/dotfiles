@@ -16,10 +16,6 @@ vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', 'jk', '<ESC>:w<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-j>', '5j', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-k>', '5k', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('x', '<C-j>', '5j', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('x', '<C-k>', '5k', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent = true })
 
 

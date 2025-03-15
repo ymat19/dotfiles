@@ -6,7 +6,7 @@
     autosuggestion.enable = true;
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
     syntaxHighlighting.enable = true;
-    initExtra = ''
+    initExtra = builtins.readFile ../configs/.zshrc + ''
       bindkey -v
       bindkey 'jj' vi-cmd-mode
     '';
@@ -26,7 +26,6 @@
 
   programs.bash = {
     enable = true;
-    bashrcExtra = "";
   };
 
   #powerline-go

@@ -6,10 +6,7 @@
     autosuggestion.enable = true;
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
     syntaxHighlighting.enable = true;
-    initExtra = builtins.readFile ../configs/.zshrc + ''
-      bindkey -v
-      bindkey 'jj' vi-cmd-mode
-    '';
+    initExtra = builtins.readFile ../configs/.zshrc;
     oh-my-zsh = {
       enable = true;
       # 管理が面倒なのでモノがあるかどうかは保証せず、あったら嬉しいものをとりあえず並べておく

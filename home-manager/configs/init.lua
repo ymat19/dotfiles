@@ -67,4 +67,6 @@ vim.keymap.set('x', 'J', '<Plug>(expand_region_shrink)', { noremap = false, sile
 vim.g.clever_f_smart_case = 1
 vim.g.clever_f_fix_key_direction = 1
 vim.g.clever_f_chars_match_any_signs = ";"
+vim.keymap.set('n', ';', '<Plug>(clever-f-repeat-forward)', { noremap = false })
+vim.keymap.set('n', ',', '<Plug>(clever-f-repeat-back)', { noremap = false })
 

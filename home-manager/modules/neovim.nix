@@ -41,8 +41,9 @@ in
     nixd
   ]);
 
+  home.file.${kvimLinkDir}.source = kvimTargetDir;
+
   programs.zsh.initExtra = lib.mkAfter ''
-    ln -fs ${kvimTargetDir} ${kvimLinkDir}
     alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
   '';
 }

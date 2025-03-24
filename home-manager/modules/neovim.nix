@@ -1,5 +1,10 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, __curPos, ... }:
 
+let
+  thisDir = builtins.dirOf __curPos.file;
+  kvimTargetDir = builtins.toPath "${thisDir}/../configs/nvim-kickstart";
+  kvimLinkDir = "${config.home.homeDirectory}/.config/nvim-kickstart";
+in
 {
   programs.neovim = {
     enable = true;
@@ -35,4 +40,9 @@
   home.packages = lib.mkAfter (with pkgs; [
     nixd
   ]);
+
+  programs.zsh.initExtra = lib.mkAfter ''
+    ln -fs ${kvimTargetDir} ${kvimLinkDir}
+    alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
+  '';
 }

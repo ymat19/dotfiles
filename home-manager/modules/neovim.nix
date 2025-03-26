@@ -2,8 +2,11 @@
 
 let
   thisDir = builtins.dirOf __curPos.file;
-  kvimTargetDir = builtins.toPath "${thisDir}/../configs/nvim-kickstart";
-  kvimLinkDir = "${config.home.homeDirectory}/.config/nvim-kickstart";
+  configDir = builtins.toPath "${thisDir}/../configs";
+  kvimTargetDir = "${configDir}/nvim-kickstart";
+  nvimTargetDir = "${configDir}/nvim";
+  nvimHomeDir = "${config.home.homeDirectory}/.config/nvim";
+  kvimHomeDir = "${config.home.homeDirectory}/.config/nvim-kickstart";
 in
 {
   programs.neovim = {
@@ -34,14 +37,15 @@ in
       dial-nvim
       plenary-nvim
     ];
-    extraLuaConfig = builtins.readFile ../configs/init.lua;
+    extraLuaConfig = builtins.readFile "${kvimTargetDir}/lua/custom/core.lua" + builtins.readFile "${nvimTargetDir}/init.lua";
   };
 
   home.packages = lib.mkAfter (with pkgs; [
     nixd
   ]);
 
-  home.file.${kvimLinkDir}.source = kvimTargetDir;
+  home.file.${kvimHomeDir}.source = kvimTargetDir;
+  home.file."${nvimHomeDir}/lua".source = nvimTargetDir;
 
   programs.zsh.initExtra = lib.mkAfter ''
     alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'

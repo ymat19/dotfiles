@@ -11,6 +11,10 @@
     enable = true;
   };
 
+  programs.fd = {
+    enable = true;
+  };
+
   programs.lazygit = {
     enable = true;
   };

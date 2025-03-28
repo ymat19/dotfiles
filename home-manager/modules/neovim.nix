@@ -17,24 +17,15 @@ in
       # essentials
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
-      # buffer
-      oil-nvim
-      vim-startify
       # ui
       tokyonight-nvim
-      vim-airline
       # movement
       quick-scope
       clever-f-vim
-      neoscroll-nvim
-      hardtime-nvim
       leap-nvim
-      # visual
-      vim-expand-region
       # util
       substitute-nvim
       nvim-surround
-      dial-nvim
       plenary-nvim
     ];
     extraLuaConfig = builtins.readFile "${kvimTargetDir}/lua/custom/core.lua" + builtins.readFile "${nvimTargetDir}/init.lua";
@@ -42,6 +33,13 @@ in
 
   home.packages = lib.mkAfter (with pkgs; [
     nixd
+
+    # for copilot chat nvim
+    lynx
+    luajitPackages.tiktoken_core
+    lua51Packages.luarocks
+    mermaid-cli
+    ghostscript_headless
   ]);
 
   home.file.${kvimHomeDir}.source = kvimTargetDir;

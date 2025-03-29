@@ -37,6 +37,9 @@ sudo nixos-rebuild switch -I nixos-config=configuration.nix
 
 # nix-shell with pyenv dependencies
 nix-shell -p zlib xz readline libffi libuuid openssl sqlite bzip2 tk
+
+# rebuild asdf shims
+asdf reshims
 ```
 
 ### docs

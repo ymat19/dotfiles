@@ -3,9 +3,8 @@
 set -e
 
 # if nix is installed, remove it
-if [ -d /nix ]; then
+if [ -f /nix/nix-installer ]; then
     /nix/nix-installer uninstall
-    rm -rf $HOME/asdf/*
 fi
 
 # setup nix

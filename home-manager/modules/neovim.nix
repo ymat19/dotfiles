@@ -16,7 +16,7 @@ in
     plugins = with pkgs.vimPlugins; [
       # essentials
       nvim-lspconfig
-      nvim-treesitter.withAllGrammars
+      # nvim-treesitter.withAllGrammars
       # ui
       tokyonight-nvim
       # movement

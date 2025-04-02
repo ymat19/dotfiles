@@ -17,6 +17,7 @@ in
       # essentials
       nvim-lspconfig
       nvim-treesitter.withAllGrammars
+      plenary-nvim
       # ui
       tokyonight-nvim
       # movement
@@ -26,7 +27,7 @@ in
       # util
       substitute-nvim
       nvim-surround
-      plenary-nvim
+      dial-nvim
     ];
     extraLuaConfig = builtins.readFile "${kvimTargetDir}/lua/custom/core.lua" + builtins.readFile "${nvimTargetDir}/init.lua";
   };

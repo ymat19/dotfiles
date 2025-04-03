@@ -3,10 +3,10 @@
 let
   thisDir = builtins.dirOf __curPos.file;
   configDir = builtins.toPath "${thisDir}/../configs";
-  kvimTargetDir = "${configDir}/nvim-kickstart";
+  kvimTargetDir = "${configDir}/kvim";
   nvimTargetDir = "${configDir}/nvim";
   nvimHomeDir = "${config.home.homeDirectory}/.config/nvim";
-  kvimHomeDir = "${config.home.homeDirectory}/.config/nvim-kickstart";
+  kvimHomeDir = "${config.home.homeDirectory}/.config/kvim";
 in
 {
   programs.neovim = {
@@ -47,6 +47,6 @@ in
   home.file."${nvimHomeDir}/lua".source = nvimTargetDir;
 
   programs.zsh.initExtra = lib.mkAfter ''
-    alias kvim='NVIM_APPNAME="nvim-kickstart" nvim'
+    alias kvim='NVIM_APPNAME="kvim" nvim'
   '';
 }

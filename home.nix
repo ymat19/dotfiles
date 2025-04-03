@@ -1,12 +1,8 @@
-{ config, pkgs, ... }:
+{ config, pkgs, username, homeDirectory, ... }:
 
 let
   moduleDir = ./modules;
   modules = builtins.map (fileName: moduleDir + "/${fileName}") (builtins.attrNames (builtins.readDir moduleDir));
-
-  homeDirectory = import ./home-dir.nix;
-  parts = builtins.split "/" homeDirectory;
-  username = builtins.elemAt parts (builtins.length parts - 1);
 in
 {
   imports = modules;

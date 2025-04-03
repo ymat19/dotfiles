@@ -56,7 +56,7 @@ return {
             end
           end,
           term_normal = {
-            'j',
+            '<esc>',
             function(self)
               self.esc_timer = self.esc_timer or (vim.uv or vim.loop).new_timer()
               if self.esc_timer:is_active() then
@@ -64,7 +64,7 @@ return {
                 vim.cmd 'stopinsert'
               else
                 self.esc_timer:start(200, 0, function() end)
-                return 'j'
+                return '<esc>'
               end
             end,
             mode = 't',
@@ -530,7 +530,7 @@ return {
       desc = 'Delete Buffer',
     },
     {
-      '<leader>bd',
+      '<leader>bo',
       function()
         Snacks.bufdelete.other()
       end,

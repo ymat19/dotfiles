@@ -10,14 +10,12 @@ nix-channel --add https://github.com/nix-community/home-manager/archive/master.t
 nix-channel --update
 
 nix-shell '<home-manager>' -A install
-
-echo "\"$HOME\"" > home-manager/home-dir.nix
 ```
 
 ### apply
 
 ```
-home-manager -f home-manager/home.nix switch -b backup
+home-manager switch --flake .#ymat19 --impure -b backup
 ```
 
 ### etc

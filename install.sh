@@ -16,9 +16,6 @@ nix-channel --update
 # setup home-manager
 nix-shell '<home-manager>' -A install
 
-# setup home dir func
-echo "\"$HOME\"" > home-manager/home-dir.nix
-
 # apply settings
-home-manager -f home-manager/home.nix switch -b backup
+home-manager switch --flake .#ymat19 --impure -b backup
 

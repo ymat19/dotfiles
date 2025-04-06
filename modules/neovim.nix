@@ -41,6 +41,8 @@ in
     lua51Packages.luarocks
     mermaid-cli
     ghostscript_headless
+    # for nil
+    cargo
   ]);
 
   home.file.${kvimHomeDir}.source = kvimTargetDir;

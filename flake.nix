@@ -17,7 +17,7 @@
       envUsername = builtins.getEnv "USER";
       envHomeDir  = builtins.getEnv "HOME";
     in {
-      homeConfigurations."ymat19" = home-manager.lib.homeManagerConfiguration {
+      homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
         # Specify your home configuration modules here, for example,

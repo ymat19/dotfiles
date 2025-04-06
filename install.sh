@@ -17,5 +17,5 @@ nix-channel --update
 nix-shell '<home-manager>' -A install
 
 # apply settings
-home-manager switch --flake .#ymat19 --impure -b backup
+home-manager switch --flake . --impure -b backup
 

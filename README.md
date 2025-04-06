@@ -16,7 +16,7 @@ nix-shell '<home-manager>' -A install
 ### apply
 
 ```
-home-manager switch --flake .#ymat19 --impure -b backup
+home-manager switch --flake . --impure -b backup
 ```
 
 ### etc

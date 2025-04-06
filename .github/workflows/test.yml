@@ -2,9 +2,17 @@ name: Test
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
   schedule:
     # 毎日午前0時に実行（UTC）
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 
 jobs:
   run-install:

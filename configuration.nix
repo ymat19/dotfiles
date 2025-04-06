@@ -15,7 +15,18 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  environment.systemPackages = with pkgs; [];
+  environment.systemPackages = with pkgs; [
+    # for pyenv
+    zlib
+    xz
+    readline
+    libffi
+    libuuid
+    openssl
+    sqlite
+    bzip2
+    tk
+  ];
 
   wsl.enable = true;
   wsl.defaultUser = "nixos";

@@ -42,6 +42,10 @@ nix-shell -p zlib xz readline libffi libuuid openssl sqlite bzip2 tk
 
 # rebuild asdf shims
 asdf reshims
+
+# wip
+
+touch ~/.gitconfig
 ```
 
 ### docs

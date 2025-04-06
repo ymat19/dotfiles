@@ -1,4 +1,4 @@
-{ config, pkgs, username, homeDirectory, ... }:
+{ pkgs, username, homeDirectory, ... }:
 
 let
   moduleDir = ./modules;

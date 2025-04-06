@@ -1,6 +1,8 @@
 [![CI/Test](https://github.com/ymat19/dotfiles/actions/workflows/test.yml/badge.svg)](https://github.com/ymat19/dotfiles/actions/workflows/test.yml)
 [![CI/Update](https://github.com/ymat19/dotfiles/actions/workflows/flake-update.yml/badge.svg)](https://github.com/ymat19/dotfiles/actions/workflows/flake-update.yml)
 
+## setup on stand alone home-manager
+
 ### nix, home-manager setup
 
 ```
@@ -17,6 +19,14 @@ nix-shell '<home-manager>' -A install
 
 ```
 home-manager switch --flake . --impure -b backup
+```
+
+## setup on NixOS
+
+```
+sudo mv /etc/nixos /etc/nixos.bak
+sudo ln -s $(realpath $(pwd)) /etc/nixos
+sudo nixos-rebuild switch --impure
 ```
 
 ### etc
@@ -42,6 +52,9 @@ nix-shell -p zlib xz readline libffi libuuid openssl sqlite bzip2 tk
 
 # rebuild asdf shims
 asdf reshims
+
+# if gh auth login permission denied
+touch ~/.gitconfig
 ```
 
 ### docs

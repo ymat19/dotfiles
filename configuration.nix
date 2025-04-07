@@ -19,6 +19,7 @@
     python313
     nodejs_23
     xsel
+    neofetch
   ];
 
   wsl.enable = true;

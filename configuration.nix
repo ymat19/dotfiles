@@ -17,6 +17,7 @@
 
   environment.systemPackages = with pkgs; [
     # for pyenv
+    gnumake
     zlib
     xz
     readline
@@ -26,6 +27,12 @@
     sqlite
     bzip2
     tk
+    stdenv.cc
+    ncurses
+    tcl
+    pkg-config
+    libxml2
+    xmlsec
   ];
 
   wsl.enable = true;

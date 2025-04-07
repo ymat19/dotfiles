@@ -495,6 +495,8 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'prettierd',
         'nil',
+        'nixpkgs-fmt',
+        'lua-language-server',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -554,7 +556,14 @@ require('lazy').setup({
         json = { 'prettierd' },
         yaml = { 'prettierd' },
         markdown = { 'prettierd' },
+        nix = { 'nixpkgs-fmt' },
       },
+      formatters = {
+        ['nixpkgs-fmt'] = {
+          command = vim.fn.stdpath("data") .. "/mason/bin/nixpkgs-fmt",
+          stdin = true,
+        },
+      }
     },
   },
 

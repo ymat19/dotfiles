@@ -16,11 +16,11 @@
       pkgs = nixpkgs.legacyPackages.${system};
       envUsername = builtins.getEnv "USER";
       envSudoUsername = builtins.getEnv "SUDO_USER";
-      envHomeDir  = builtins.getEnv "HOME";
+      envHomeDir = builtins.getEnv "HOME";
       hostName = "nixos";
       requireStandalone = !builtins.pathExists "/etc/nixos";
-    in {
-    } // (if requireStandalone then {
+    in
+    { } // (if requireStandalone then {
       homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 
@@ -35,22 +35,22 @@
           homeDirectory = envHomeDir;
         };
       };
-  } else {
+    } else {
       nixosConfigurations.${hostName} = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            ./configuration.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.${envSudoUsername} = import ./home.nix;
-              home-manager.extraSpecialArgs = {
-                username = envSudoUsername;
-                homeDirectory = "/home/${envSudoUsername}";
-              };
-            }
-          ];
-        };
-  });
+        inherit system;
+        modules = [
+          ./configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.${envSudoUsername} = import ./home.nix;
+            home-manager.extraSpecialArgs = {
+              username = envSudoUsername;
+              homeDirectory = "/home/${envSudoUsername}";
+            };
+          }
+        ];
+      };
+    });
 }

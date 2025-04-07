@@ -16,16 +16,9 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
-    # for pyenv
-    zlib
-    xz
-    readline
-    libffi
-    libuuid
-    openssl
-    sqlite
-    bzip2
-    tk
+    python313
+    nodejs_23
+    xsel
   ];
 
   wsl.enable = true;

@@ -36,21 +36,57 @@
         };
       };
     } else {
-      nixosConfigurations.${hostName} = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          ./configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.${envSudoUsername} = import ./home.nix;
-            home-manager.extraSpecialArgs = {
-              username = envSudoUsername;
-              homeDirectory = "/home/${envSudoUsername}";
-            };
-          }
-        ];
+      nixosConfigurations = {
+        wsl = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${envSudoUsername} = import ./home.nix;
+              home-manager.extraSpecialArgs = {
+                username = envSudoUsername;
+                homeDirectory = "/home/${envSudoUsername}";
+              };
+            }
+          ];
+        };
+
+        linux = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${envSudoUsername} = import ./home.nix;
+              home-manager.extraSpecialArgs = {
+                username = envSudoUsername;
+                homeDirectory = "/home/${envSudoUsername}";
+              };
+            }
+          ];
+        };
+
+        mac = nixpkgs.lib.nixosSystem {
+          system = "x86_64-darwin";
+          modules = [
+            ./configuration.nix
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.${envSudoUsername} = import ./home.nix;
+              home-manager.extraSpecialArgs = {
+                username = envSudoUsername;
+                homeDirectory = "/home/${envSudoUsername}";
+              };
+            }
+          ];
+        };
       };
     });
 }

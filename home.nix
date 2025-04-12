@@ -16,7 +16,7 @@ in
     gh
     wget
     unzip
-    stdenv
+    gcc
     #llvmPackages
   ];
 

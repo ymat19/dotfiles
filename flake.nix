@@ -55,7 +55,16 @@
         ${nixOSUserName} = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = nixOSModules;
-          specialArgs = nixOSSpecialArgs;
+          specialArgs = nixOSSpecialArgs // {
+            envName = "";
+          };
+        };
+        parallels = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = nixOSModules;
+          specialArgs = nixOSSpecialArgs // {
+            envName = "parallels";
+          };
         };
       };
     });

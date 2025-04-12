@@ -140,6 +140,9 @@ git config --global --add ghq.root $(realpath ../)
 
 # Rebuild asdf shims if needed
 asdf reshims
+
+# create gitconfig
+touch ~/.gitconfig
 ```
 
 ## Useful Documentation

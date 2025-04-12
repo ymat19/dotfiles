@@ -3,6 +3,7 @@ tags
 test.sh
 .luarc.json
 nvim
+hardware-configuration.nix
 
 spell/
 lazy-lock.json

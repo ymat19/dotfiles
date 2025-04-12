@@ -5,8 +5,6 @@
 
 This repository contains my personal dotfiles managed with [Nix](https://nixos.org/) and [home-manager](https://github.com/nix-community/home-manager). It supports both standalone home-manager and NixOS setups, with special consideration for WSL environments.
 
-[日本語のREADMEはこちら](README_ja.md)
-
 ## Features
 
 - 📦 Nix-based configuration management
@@ -36,6 +34,7 @@ This repository contains my personal dotfiles managed with [Nix](https://nixos.o
 This repository features two distinct Neovim configurations, managed through different `NVIM_APPNAME` environments:
 
 ### 1. Full IDE-like Setup (kvim)
+
 Located in `configs/kvim/`, this is a feature-rich configuration based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim).
 
 - **Usage**: `kvim` (aliased command)
@@ -49,10 +48,11 @@ Located in `configs/kvim/`, this is a feature-rich configuration based on [kicks
   - Additional tools: Mermaid diagram support, Nix language server
 
 ### 2. VSCode Integration Setup (nvim)
+
 Located in `configs/nvim/`, this is a minimal configuration designed specifically for use with the VSCode Neovim extension.
 
 - **Usage**: Regular `nvim` command when using VSCode
-- **Features**: 
+- **Features**:
   - Enhanced movement with `quick-scope`, `clever-f-vim`, and `leap-nvim`
   - Text manipulation: `substitute-nvim`, `nvim-surround`, `dial-nvim`
   - LSP and treesitter support (`nvim-lspconfig`, `nvim-treesitter`)
@@ -64,11 +64,13 @@ Located in `configs/nvim/`, this is a minimal configuration designed specificall
 ### Quick Start
 
 Run the automated installation script:
+
 ```bash
 ./install.sh
 ```
 
 This script will:
+
 1. Remove any existing Nix installation
 2. Install Nix using the Determinate Systems installer
 3. Set up home-manager
@@ -79,12 +81,14 @@ This script will:
 #### Standalone Home-manager Setup
 
 1. Install Nix:
+
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 ```
 
 2. Set up home-manager:
+
 ```bash
 nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
 nix-channel --update
@@ -92,6 +96,7 @@ nix-shell '<home-manager>' -A install
 ```
 
 3. Apply configuration:
+
 ```bash
 home-manager switch --flake . --impure -b backup
 ```
@@ -99,12 +104,15 @@ home-manager switch --flake . --impure -b backup
 #### NixOS Setup
 
 1. Back up and link configuration:
+
 ```bash
+cp /etc/nixos/hardware-configuration.nix ./
 sudo mv /etc/nixos /etc/nixos.bak
 sudo ln -s $(realpath $(pwd)) /etc/nixos
 ```
 
 2. Apply configuration:
+
 ```bash
 sudo nixos-rebuild switch --impure
 ```
@@ -112,12 +120,14 @@ sudo nixos-rebuild switch --impure
 ## Additional Setup Steps
 
 ### WSL-specific Setup
+
 ```bash
 # Make neovim symlink for WSL (required for VSCode Neovim)
 sudo ln -s $(which nvim) /usr/local/bin/nvim
 ```
 
 ### General Utilities
+
 ```bash
 # Enable clipboard on Linux
 sudo apt-get install xsel

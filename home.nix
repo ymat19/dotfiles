@@ -1,4 +1,4 @@
-{ pkgs, username, homeDirectory, ... }:
+{ pkgs, username, homeDirectory, onNixOS, ... }:
 
 let
   moduleDir = ./modules;
@@ -17,6 +17,8 @@ in
     wget
     unzip
     gcc
+    stdenv
+    gnumake
     #llvmPackages
   ];
 

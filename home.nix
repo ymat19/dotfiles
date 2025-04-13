@@ -1,4 +1,4 @@
-{ pkgs, username, homeDirectory, ... }:
+{ pkgs, username, homeDirectory, onNixOS, ... }:
 
 let
   moduleDir = ./modules;

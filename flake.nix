@@ -29,6 +29,7 @@
         username = nixOSUserName;
         homeDirectory = "/home/${nixOSUserName}";
         onWSL = onWSL;
+        onNixOS = true;
       };
       nixOSModules = [
         ./configuration.nix
@@ -48,6 +49,7 @@
         extraSpecialArgs = {
           username = envUsername;
           homeDirectory = envHomeDir;
+          onNixOS = false;
         };
       };
     } else {
@@ -59,13 +61,14 @@
             envName = nixOSUserName;
           };
         };
-        parallels = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = nixOSModules;
-          specialArgs = nixOSSpecialArgs // {
-            envName = "parallels";
-          };
-        };
+        # not supported
+        #parallels = nixpkgs.lib.nixosSystem {
+        #  inherit system;
+        #  modules = nixOSModules;
+        #  specialArgs = nixOSSpecialArgs // {
+        #    envName = "parallels";
+        #  };
+        #};
         main = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = nixOSModules;

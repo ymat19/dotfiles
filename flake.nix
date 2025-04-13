@@ -66,6 +66,13 @@
             envName = "parallels";
           };
         };
+        main = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = nixOSModules;
+          specialArgs = nixOSSpecialArgs // {
+            envName = "main";
+          };
+        };
       };
     });
 }

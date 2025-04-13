@@ -22,6 +22,7 @@
     nodejs_23
     xsel
     neofetch
+    hello
   ];
 
   networking.hostName = "nixos"; # Define your hostname.
@@ -119,14 +120,13 @@
   };
 
   programs.firefox.enable = true;
+  environment.systemPackages = lib.mkAfter (with pkgs; [
+    google-chrome
+  ]);
+
   programs.hyprland.enable = true;
 
-  #environment.systemPackages = lib.mkAfter (with pkgs; [
-  #  kitty
-  #]);
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
-    XDG_CACHE_HOME = "/home/${username}/.cache";
-    XDG_CONFIG_HOME = "/home/${username}/.config";
   };
 })

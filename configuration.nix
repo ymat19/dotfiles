@@ -35,19 +35,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Enable the X11 windowing system.
-  services.xserver.enable = true;
-
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
   # Enable CUPS to print documents.
   services.printing.enable = true;
 
@@ -70,10 +57,6 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Install firefox.
-  programs.firefox.enable = true;
-
-  # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -86,10 +69,8 @@
 
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
   time.timeZone = "Asia/Tokyo";
 
-  # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -131,11 +112,21 @@
     isNormalUser = true;
     description = "nixos";
     extraGroups = [ "networkmanager" "wheel" ];
-    #home = homeDirectory;
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     packages = with pkgs; [
-      #  thunderbird
     ];
+  };
+
+  programs.firefox.enable = true;
+  programs.hyprland.enable = true;
+
+  #environment.systemPackages = lib.mkAfter (with pkgs; [
+  #  kitty
+  #]);
+  environment.sessionVariables = {
+    NIXOS_OZONE_WL = "1";
+    XDG_CACHE_HOME = "/home/${username}/.cache";
+    XDG_CONFIG_HOME = "/home/${username}/.config";
   };
 })

@@ -56,7 +56,7 @@
           inherit system;
           modules = nixOSModules;
           specialArgs = nixOSSpecialArgs // {
-            envName = "";
+            envName = nixOSUserName;
           };
         };
         parallels = nixpkgs.lib.nixosSystem {

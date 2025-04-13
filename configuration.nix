@@ -17,15 +17,9 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  environment.systemPackages = with pkgs; [
-    python313
-    nodejs_23
-    xsel
-    neofetch
-    hello
-  ];
+  nixpkgs.config.allowUnfree = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = envName; # Define your hostname.
 
   system.stateVersion = "24.11"; # Did you read the comment?
 } // (if onWSL then {
@@ -55,10 +49,18 @@
     #media-session.enable = true;
   };
 
+  environment.systemPackages = with pkgs; [
+    python313
+    nodejs_23
+    xsel
+    neofetch
+    hello
+    google-chrome
+  ];
+
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  nixpkgs.config.allowUnfree = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -120,9 +122,6 @@
   };
 
   programs.firefox.enable = true;
-  environment.systemPackages = lib.mkAfter (with pkgs; [
-    google-chrome
-  ]);
 
   programs.hyprland.enable = true;
 

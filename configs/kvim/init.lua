@@ -256,7 +256,8 @@ require('lazy').setup({
         { '<leader>f', group = 'Find' },
         { '<leader>s', group = 'Search', mode = { 'n', 'x' } },
         { '<leader>l', group = 'Glance' },
-        { '<leader>c', group = 'Copilot', mode = { 'n', 'x' } },
+        { '<leader>a', group = 'Agent', mode = { 'n', 'x' } },
+        { '<leader>c', group = 'Comment', mode = { 'n', 'x' } },
         { '<leader>g', group = 'Git', mode = { 'n', 'x' } },
         { '<leader>u', group = 'Toggle' },
         { '<leader>d', group = 'Diff' },
@@ -388,16 +389,6 @@ require('lazy').setup({
                 vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
               end,
             })
-          end
-
-          -- The following code creates a keymap to toggle inlay hints in your
-          -- code, if the language server you are using supports them
-          --
-          -- This may be unwanted, since they displace some of your code
-          if client and client_supports_method(client, vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, '[T]oggle Inlay [H]ints')
           end
         end,
       })
@@ -560,10 +551,10 @@ require('lazy').setup({
       },
       formatters = {
         ['nixpkgs-fmt'] = {
-          command = vim.fn.stdpath("data") .. "/mason/bin/nixpkgs-fmt",
+          command = vim.fn.stdpath 'data' .. '/mason/bin/nixpkgs-fmt',
           stdin = true,
         },
-      }
+      },
     },
   },
 

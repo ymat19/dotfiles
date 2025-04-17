@@ -24,6 +24,17 @@ then
         ];
       };
     };
+    i18n.inputMethod = {
+      enabled = "fcitx5";
+      fcitx5.addons = with pkgs; [ fcitx5-mozc fcitx5-configtool ];
+    };
+
+    home.sessionVariables = lib.mkAfter ({
+      XMODIFIERS = "@im=fcitx";
+      GTK_IM_MODULE = "fcitx";
+      QT_IM_MODULE = "fcitx";
+      INPUT_METHOD = "fcitx";
+    });
   }
 else
   { })

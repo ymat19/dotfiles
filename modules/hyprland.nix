@@ -8,22 +8,29 @@ then
       wofi
       kitty
     ]);
+
     wayland.windowManager.hyprland = {
       enable = true;
+      extraConfig = builtins.readFile ../configs/hyprland.conf;
+    };
+
+    programs.hyprlock = {
+      enable = true;
+      extraConfig = builtins.readFile ../configs/hyprlock.conf;
+    };
+    ## ─ optional ─  一定時間アイドルになったら自動で Hyprlock を呼ぶ
+    services.hypridle = {
+      enable = true; # Hyprland 公式アイドaルデーモン :contentReference[oaicite:1]{index=1}
       settings = {
-        bind = [
-          "SUPER, D, exec, wofi --show drun"
-          "SUPER, Return, exec, kitty"
-          "SUPER, Q, killactive"
-          "SUPER, h, movefocus, l"
-          "SUPER, l, movefocus, r"
-          "SUPER, j, movefocus, d"
-          "SUPER, k, movefocus, u"
-          "SUPER, space, togglefloating"
-          "SUPER_SHIFT, E, exit"
+        general = { after = 300; }; # 300 秒アイドルで "lock" シグナル
+        listener = [
+          { on = "lock"; exec = "hyprlock"; } # 画面ロック
+          { on = "after"; exec = "hyprctl dispatch dpms off"; } # さらに消灯
+          { on = "resume"; exec = "hyprctl dispatch dpms on"; } # 復帰で点灯
         ];
       };
     };
+
     i18n.inputMethod = {
       enabled = "fcitx5";
       fcitx5.addons = with pkgs; [ fcitx5-mozc fcitx5-configtool ];

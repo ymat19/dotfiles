@@ -1,4 +1,4 @@
-{ config, pkgs, lib, onNixOS, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   home.packages = lib.mkAfter (with pkgs; [

@@ -7,9 +7,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    xremap.url = "github:xremap/nix-flake";
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { nixpkgs, home-manager, xremap, ... }:
     let
       requireStandalone = !builtins.pathExists "/etc/nixos";
 
@@ -40,7 +41,10 @@
           home-manager.users.${nixOSUserName} = import ./home.nix;
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
         }
-      ];
+      ] ++ (if onWSL then [ ] else [
+        xremap.nixosModules.default
+        ./modules/nixos/system/xremap.nix
+      ]);
     in
     { } // (if requireStandalone then {
       homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {

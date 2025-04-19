@@ -4,8 +4,9 @@
   home.packages = lib.mkAfter (with pkgs; [
     hyprland
     wofi
-    kitty
   ]);
+
+  programs.kitty.enable = true;
 
   wayland.windowManager.hyprland = {
     enable = true;

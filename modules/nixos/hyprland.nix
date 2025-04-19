@@ -4,6 +4,7 @@
   home.packages = lib.mkAfter (with pkgs; [
     hyprland
     wofi
+    hypridle
   ]);
 
   programs.kitty.enable = true;

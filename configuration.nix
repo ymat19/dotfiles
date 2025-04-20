@@ -52,7 +52,7 @@
   environment.systemPackages = with pkgs; [
     python313
     nodejs_23
-    xsel
+    wl-clipboard
     neofetch
     hello
     google-chrome
@@ -86,11 +86,6 @@
     LC_PAPER = "ja_JP.UTF-8";
     LC_TELEPHONE = "ja_JP.UTF-8";
     LC_TIME = "ja_JP.UTF-8";
-  };
-
-  i18n.inputMethod = {
-    enabled = "fcitx5";
-    fcitx5.addons = [ pkgs.fcitx5-mozc ];
   };
 
   fonts = {
@@ -128,4 +123,6 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
   };
+
+  security.pam.services.hyprlock = { };
 })

@@ -7,10 +7,14 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    xremap.url = "github:xremap/nix-flake";
+    hyprpanel.url = "github:jas-singhfsu/hyprpanel";
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = inputs @ { nixpkgs, home-manager, xremap, hyprpanel, ... }:
     let
+      getNixFiles = import ./lib/get-nix-files.nix;
+
       requireStandalone = !builtins.pathExists "/etc/nixos";
 
       # for standalone home-manager
@@ -26,6 +30,7 @@
       # for NixOS
       nixOSUserName = "nixos";
       nixOSSpecialArgs = {
+        inherit inputs;
         username = nixOSUserName;
         homeDirectory = "/home/${nixOSUserName}";
         onWSL = onWSL;
@@ -39,8 +44,12 @@
           home-manager.useUserPackages = true;
           home-manager.users.${nixOSUserName} = import ./home.nix;
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
+          home-manager.backupFileExtension = "backup";
         }
-      ];
+      ] ++ (if onWSL then [ ] else ([
+        inputs.xremap.nixosModules.default
+        { nixpkgs.overlays = [ inputs.hyprpanel.overlay ]; }
+      ]) ++ getNixFiles ./modules/nixos/system);
     in
     { } // (if requireStandalone then {
       homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {

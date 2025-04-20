@@ -1,8 +1,13 @@
-{ pkgs, username, homeDirectory, onNixOS, ... }:
+{ pkgs, lib, username, homeDirectory, onNixOS, ... }:
 
 let
-  moduleDir = ./modules;
-  modules = builtins.map (fileName: moduleDir + "/${fileName}") (builtins.attrNames (builtins.readDir moduleDir));
+  getNixFiles = import ./lib/get-nix-files.nix;
+
+  modules = getNixFiles ./modules
+    ++
+    (if onNixOS then
+      getNixFiles ./modules/nixos
+    else [ ]);
 in
 {
   imports = modules;

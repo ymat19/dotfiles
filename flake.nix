@@ -12,6 +12,8 @@
 
   outputs = { nixpkgs, home-manager, xremap, ... }:
     let
+      getNixFiles = import ./lib/get-nix-files.nix;
+
       requireStandalone = !builtins.pathExists "/etc/nixos";
 
       # for standalone home-manager
@@ -41,11 +43,9 @@
           home-manager.users.${nixOSUserName} = import ./home.nix;
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
         }
-      ] ++ (if onWSL then [ ] else [
+      ] ++ (if onWSL then [ ] else ([
         xremap.nixosModules.default
-        ./modules/nixos/system/xremap.nix
-        ./modules/nixos/system/login.nix
-      ]);
+      ]) ++ getNixFiles ./modules/nixos/system);
     in
     { } // (if requireStandalone then {
       homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {

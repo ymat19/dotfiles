@@ -44,6 +44,7 @@
       ] ++ (if onWSL then [ ] else [
         xremap.nixosModules.default
         ./modules/nixos/system/xremap.nix
+        ./modules/nixos/system/login.nix
       ]);
     in
     { } // (if requireStandalone then {

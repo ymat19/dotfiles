@@ -44,6 +44,7 @@
           home-manager.useUserPackages = true;
           home-manager.users.${nixOSUserName} = import ./home.nix;
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
+          home-manager.backupFileExtension = "backup";
         }
       ] ++ (if onWSL then [ ] else ([
         inputs.xremap.nixosModules.default

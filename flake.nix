@@ -8,9 +8,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     xremap.url = "github:xremap/nix-flake";
+    hyprpanel.url = "github:jas-singhfsu/hyprpanel";
   };
 
-  outputs = { nixpkgs, home-manager, xremap, ... }:
+  outputs = inputs @ { nixpkgs, home-manager, xremap, hyprpanel, ... }:
     let
       getNixFiles = import ./lib/get-nix-files.nix;
 
@@ -29,6 +30,7 @@
       # for NixOS
       nixOSUserName = "nixos";
       nixOSSpecialArgs = {
+        inherit inputs;
         username = nixOSUserName;
         homeDirectory = "/home/${nixOSUserName}";
         onWSL = onWSL;
@@ -44,7 +46,8 @@
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
         }
       ] ++ (if onWSL then [ ] else ([
-        xremap.nixosModules.default
+        inputs.xremap.nixosModules.default
+        { nixpkgs.overlays = [ inputs.hyprpanel.overlay ]; }
       ]) ++ getNixFiles ./modules/nixos/system);
     in
     { } // (if requireStandalone then {

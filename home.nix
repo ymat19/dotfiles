@@ -24,6 +24,7 @@ in
     gcc
     stdenv
     gnumake
+    marp-cli
     #llvmPackages
   ];
 

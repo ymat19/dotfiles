@@ -56,6 +56,7 @@
     neofetch
     hello
     google-chrome
+    slack
   ];
 
   # Enable touchpad support (enabled default in most desktopManager).
@@ -125,4 +126,14 @@
   };
 
   security.pam.services.hyprlock = { };
+
+  xdg = {
+    portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-wlr
+        xdg-desktop-portal-gtk
+      ];
+    };
+  };
 })

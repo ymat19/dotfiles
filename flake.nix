@@ -46,10 +46,13 @@
           home-manager.extraSpecialArgs = nixOSSpecialArgs;
           home-manager.backupFileExtension = "backup";
         }
-      ] ++ (if onWSL then [ ] else ([
+      ] ++ (if onWSL then [ ] else
+      ([
         inputs.xremap.nixosModules.default
         { nixpkgs.overlays = [ inputs.hyprpanel.overlay ]; }
-      ]) ++ getNixFiles ./modules/nixos/system);
+        ./modules/nixos/system/login.nix
+        ./modules/nixos/system/xremap.nix
+      ]));
     in
     { } // (if requireStandalone then {
       homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {
@@ -80,7 +83,9 @@
         #};
         main = nixpkgs.lib.nixosSystem {
           inherit system;
-          modules = nixOSModules;
+          modules = nixOSModules ++ [
+            ./modules/nixos/system/nvidia.nix
+          ];
           specialArgs = nixOSSpecialArgs // {
             envName = "main";
           };

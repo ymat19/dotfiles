@@ -57,6 +57,7 @@
     hello
     google-chrome
     slack
+    vlc
   ];
 
   # Enable touchpad support (enabled default in most desktopManager).

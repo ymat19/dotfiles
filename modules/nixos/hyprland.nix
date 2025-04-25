@@ -28,12 +28,21 @@
     enable = true;
     settings = {
       general = {
-        after = 300;
-      }; # 300 秒アイドルで "lock" シグナル
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+        ignore_dbus_inhibit = false;
+        lock_cmd = "hyprlock";
+      };
+
       listener = [
-        { on = "lock"; exec = "hyprlock"; } # 画面ロック
-        { on = "after"; exec = "hyprctl dispatch dpms off"; } # さらに消灯
-        { on = "resume"; exec = "hyprctl dispatch dpms on"; } # 復帰で点灯
+        {
+          timeout = 300;
+          on-timeout = "hyprlock";
+        }
+        {
+          timeout = 300;
+          on-timeout = "hyprctl dispatch dpms off";
+          on-resume = "hyprctl dispatch dpms on";
+        }
       ];
     };
   };

@@ -23,12 +23,6 @@
           remap = {
             "C-h" = "Backspace";
           };
-          application = {
-            not = [
-              "Kitty"
-            ];
-          };
-
         }
 
         # Alt+HJKL → 矢印キー

@@ -137,6 +137,7 @@
       ];
     };
   };
+
   virtualisation = {
     docker = {
       enable = true;
@@ -145,5 +146,11 @@
         setSocketVariable = true; # $DOCKER_HOSTを設定
       };
     };
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "daily"; # 毎日GC
+    options = "--delete-older-than 7d"; # 7日以上前の世代を削除
   };
 })

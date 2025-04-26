@@ -85,6 +85,7 @@
           inherit system;
           modules = nixOSModules ++ [
             ./modules/nixos/system/nvidia.nix
+            ./modules/nixos/system/steam.nix
           ];
           specialArgs = nixOSSpecialArgs // {
             envName = "main";

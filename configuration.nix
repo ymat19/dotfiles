@@ -27,8 +27,13 @@
   wsl.defaultUser = username;
 } else {
   # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot = {
+    loader = {
+      efi.canTouchEfiVariables = true;
+      systemd-boot.enable = true;
+      timeout = 0;
+    };
+  };
 
   # Enable CUPS to print documents.
   services.printing.enable = true;

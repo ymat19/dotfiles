@@ -1,3 +1,9 @@
+if command -v tmux >/dev/null; then
+  if [ -n "$USE_TMUX" ] && [ -z "$TMUX" ]; then
+    tmux attach-session -t main || tmux new-session -s main
+  fi
+fi
+
 export PATH="${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
 bindkey -v
 bindkey 'jj' vi-cmd-mode

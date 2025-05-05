@@ -1,4 +1,3 @@
-
 { config, pkgs, lib, ... }:
 
 {
@@ -15,16 +14,18 @@
     enable = true;
   };
 
-  programs.lazygit = {
-    enable = true;
-  };
-
-  programs.bat = {
-    enable = true;
-  };
-
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
+  };
+
+  programs.bat.enable = true;
+  programs.lsd.enable = true;
+  home.shellAliases = lib.mkAfter {
+    cat = "bat";
+    ls = "lsd";
+    tree = "lsd --tree";
+    catcat = "cat";
+    lsls = "ls";
   };
 }

@@ -48,7 +48,9 @@ in
   home.file.${kvimHomeDir}.source = kvimTargetDir;
   home.file."${nvimHomeDir}/lua".source = nvimTargetDir;
 
-  programs.zsh.initExtra = lib.mkAfter ''
-    alias kvim='NVIM_APPNAME="kvim" nvim'
-  '';
+  home.shellAliases = lib.mkAfter {
+    kvim = ''
+      NVIM_APPNAME="kvim" nvim
+    '';
+  };
 }

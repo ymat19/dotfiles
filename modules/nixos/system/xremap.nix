@@ -57,5 +57,11 @@
       ];
     };
   };
+  systemd.services.xremap = {
+    serviceConfig = {
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
 }
 

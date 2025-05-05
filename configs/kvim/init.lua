@@ -485,10 +485,14 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
-        'prettierd',
         'nil',
         'nixpkgs-fmt',
         'lua-language-server',
+        -- read local eslint config
+        'eslint-lsp',
+        -- fallbacks
+        'typescript-language-server',
+        'prettierd',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -541,13 +545,15 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'prettierd' },
-        typescript = { 'prettierd' },
-        javascriptreact = { 'prettierd' },
-        typescriptreact = { 'prettierd' },
-        json = { 'prettierd' },
-        yaml = { 'prettierd' },
-        markdown = { 'prettierd' },
+        javascript = { 'prettier', 'prettierd' },
+        typescript = { 'prettier', 'prettierd' },
+        javascriptreact = { 'prettier', 'prettierd' },
+        typescriptreact = { 'prettier', 'prettierd' },
+        json = { 'prettier', 'prettierd' },
+        html = { 'prettier', 'prettierd' },
+        css = { 'prettier', 'prettierd' },
+        yaml = { 'prettier', 'prettierd' },
+        markdown = { 'prettier', 'prettierd' },
         nix = { 'nixpkgs-fmt' },
       },
       formatters = {

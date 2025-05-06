@@ -28,7 +28,7 @@
       onWSL = builtins.match ".*system32.*" path != null;
 
       # for NixOS
-      nixOSUserName = "nixos";
+      nixOSUserName = import ./username.nix;
       nixOSSpecialArgs = {
         inherit inputs;
         username = nixOSUserName;
@@ -73,14 +73,6 @@
             envName = nixOSUserName;
           };
         };
-        # not supported
-        #parallels = nixpkgs.lib.nixosSystem {
-        #  inherit system;
-        #  modules = nixOSModules;
-        #  specialArgs = nixOSSpecialArgs // {
-        #    envName = "parallels";
-        #  };
-        #};
         main = nixpkgs.lib.nixosSystem {
           inherit system;
           modules = nixOSModules ++ [
@@ -89,6 +81,15 @@
           ];
           specialArgs = nixOSSpecialArgs // {
             envName = "main";
+          };
+        };
+        mini = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = nixOSModules ++ [
+            ./modules/nixos/system/steam.nix
+          ];
+          specialArgs = nixOSSpecialArgs // {
+            envName = "mini";
           };
         };
       };

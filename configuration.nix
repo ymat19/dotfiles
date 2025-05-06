@@ -57,6 +57,7 @@
   environment.systemPackages = with pkgs; [
     python313
     nodejs_23
+    pnpm
     wl-clipboard
     neofetch
     hello

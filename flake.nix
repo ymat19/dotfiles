@@ -28,7 +28,7 @@
       onWSL = builtins.match ".*system32.*" path != null;
 
       # for NixOS
-      nixOSUserName = import ./username.nix;
+      nixOSUserName = "ymat19";
       nixOSSpecialArgs = {
         inherit inputs;
         username = nixOSUserName;

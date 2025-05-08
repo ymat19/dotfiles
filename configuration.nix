@@ -159,4 +159,7 @@
     dates = "daily"; # 毎日GC
     options = "--delete-older-than 7d"; # 7日以上前の世代を削除
   };
+
+  hardware.bluetooth.enable = true; # enables support for Bluetooth
+  hardware.bluetooth.powerOnBoot = true; # powers up the default Bluetooth controller on boot
 })

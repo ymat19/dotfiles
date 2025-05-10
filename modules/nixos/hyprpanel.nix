@@ -56,6 +56,7 @@
     settings = {
       bar.launcher.autoDetectIcon = true;
       bar.workspaces.show_icons = true;
+      bar.clock.format = "%Y/%m/%d  %H:%M:%S";
 
       menus.clock = {
         time = {

@@ -149,6 +149,7 @@ touch ~/.gitconfig
 
 - [Home Manager Options Search](https://home-manager-options.extranix.com/?query=&release=release-24.05)
 - [Nixpkgs Packages Search](https://search.nixos.org/packages?channel=24.11&from=0&size=50&sort=relevance&type=packages&query=vimPlugins)
+- [NixOS Options](https://search.nixos.org/options?channel=unstable&show=users.mutableUsers&size=30&sort=relevance)
 
 ## License
 

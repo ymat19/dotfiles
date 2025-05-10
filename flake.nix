@@ -52,6 +52,7 @@
         { nixpkgs.overlays = [ inputs.hyprpanel.overlay ]; }
         ./modules/nixos/system/login.nix
         ./modules/nixos/system/xremap.nix
+        ./modules/nixos/system/dolphin.nix
       ]));
     in
     { } // (if requireStandalone then {

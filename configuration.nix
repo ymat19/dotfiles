@@ -54,6 +54,11 @@
     #media-session.enable = true;
   };
 
+  services.avahi = {
+    enable = true;
+    nssmdns = true;
+  };
+
   environment.systemPackages = with pkgs; [
     python313
     nodejs_23

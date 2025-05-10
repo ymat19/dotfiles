@@ -92,6 +92,14 @@
             envName = "mini";
           };
         };
+        dyna = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = nixOSModules ++ [
+          ];
+          specialArgs = nixOSSpecialArgs // {
+            envName = "dyna";
+          };
+        };
       };
     });
 }

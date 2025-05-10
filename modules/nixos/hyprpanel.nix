@@ -136,7 +136,7 @@
       menus.dashboard.shortcuts.right.shortcut1.command = "${pkgs.gcolor3}/bin/gcolor3";
       menus.media.displayTime = true;
       menus.power.lowBatteryNotification = true;
-      bar.customModules.updates.updateCommand = "jq '[.[].cvssv3_basescore | to_entries | add | select(.value > 5)] | length' <<< $(vulnix -S --json)";
+      bar.customModules.updates.updateCommand = "jq '[.[].cvssv3_basescore | to_entries | add | select(.value > 7)] | length' <<< $(vulnix -S --json)";
       bar.customModules.updates.icon.updated = "󰋼";
       bar.customModules.updates.icon.pending = "󰋼";
       bar.volume.rightClick = "pactl set-sink-mute @DEFAULT_SINK@ toggle";

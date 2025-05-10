@@ -35,6 +35,7 @@
         homeDirectory = "/home/${nixOSUserName}";
         onWSL = onWSL;
         onNixOS = true;
+        hasBattery = false;
       };
       nixOSModules = [
         ./configuration.nix
@@ -95,8 +96,14 @@
         };
         dyna = nixpkgs.lib.nixosSystem {
           inherit system;
-          modules = nixOSModules ++ [
-          ];
+          modules =
+            nixOSModules ++ [
+              {
+                home-manager.extraSpecialArgs = nixOSSpecialArgs // {
+                  hasBattery = true;
+                };
+              }
+            ];
           specialArgs = nixOSSpecialArgs // {
             envName = "dyna";
           };

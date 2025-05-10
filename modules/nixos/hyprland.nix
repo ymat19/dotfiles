@@ -3,7 +3,6 @@
 {
   home.packages = lib.mkAfter (with pkgs; [
     hyprland
-    wofi
     hypridle
   ]);
 
@@ -42,9 +41,8 @@
           on-timeout = "hyprlock";
         }
         {
-          timeout = 2100;
-          on-timeout = "hyprctl dispatch dpms off";
-          on-resume = "hyprctl dispatch dpms on";
+          timeout = 2160;
+          on-timeout = "systemctl suspend";
         }
       ];
     };

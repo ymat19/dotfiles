@@ -9,9 +9,14 @@
     };
     xremap.url = "github:xremap/nix-flake";
     hyprpanel.url = "github:jas-singhfsu/hyprpanel";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # ...
+    };
   };
 
-  outputs = inputs @ { nixpkgs, home-manager, xremap, hyprpanel, ... }:
+  outputs = inputs @ { nixpkgs, home-manager, ... }:
     let
       getNixFiles = import ./lib/get-nix-files.nix;
 

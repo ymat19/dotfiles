@@ -25,4 +25,13 @@
   networking.hostName = envName; # Define your hostname.
 
   system.stateVersion = "24.11"; # Did you read the comment?
+
+  programs.nix-ld.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    python313
+    pnpm
+    wl-clipboard
+    neofetch
+  ];
 }

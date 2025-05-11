@@ -33,17 +33,11 @@
     nssmdns = true;
   };
 
-  environment.systemPackages = with pkgs; [
-    python313
-    nodejs
-    pnpm
-    wl-clipboard
-    neofetch
-    hello
+  environment.systemPackages = lib.mkAfter (with pkgs; [
     google-chrome
     slack
     vlc
-  ];
+  ]);
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

@@ -22,7 +22,6 @@
   programs.bat.enable = true;
   programs.lsd.enable = true;
   home.shellAliases = lib.mkAfter {
-    cat = "bat";
     tree = "lsd --tree";
   };
 }

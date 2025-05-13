@@ -553,7 +553,6 @@ require('lazy').setup({
         html = { 'prettier', 'prettierd' },
         css = { 'prettier', 'prettierd' },
         yaml = { 'prettier', 'prettierd' },
-        markdown = { 'prettier', 'prettierd' },
         nix = { 'nixpkgs-fmt' },
       },
       formatters = {
@@ -699,8 +698,8 @@ require('lazy').setup({
         transparent = true,
         styles = {
           comments = { italic = false }, -- Disable italics in comments
-          sidebars = "transparent",
-          floats = "transparent",
+          sidebars = 'transparent',
+          floats = 'transparent',
         },
       }
 

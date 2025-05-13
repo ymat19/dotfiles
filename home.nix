@@ -28,6 +28,7 @@ in
     python314
     nodejs_24
     pnpm
+    pre-commit
     #llvmPackages
   ];
 

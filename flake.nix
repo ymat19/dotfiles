@@ -101,14 +101,9 @@
         };
         dyna = nixpkgs.lib.nixosSystem {
           inherit system;
-          modules =
-            nixOSModules ++ [
-              {
-                home-manager.extraSpecialArgs = nixOSSpecialArgs // {
-                  hasBattery = true;
-                };
-              }
-            ];
+          modules = nixOSModules ++ [
+            ./modules/nixos/system/dotnet.nix
+          ];
           specialArgs = nixOSSpecialArgs // {
             envName = "dyna";
           };

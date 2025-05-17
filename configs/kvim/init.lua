@@ -483,15 +483,13 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
+        'stylua',
         'nil',
         'nixpkgs-fmt',
         'lua-language-server',
+        'typescript-language-server',
         -- read local eslint config
         'eslint-lsp',
-        -- fallbacks
-        'typescript-language-server',
-        'prettierd',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -544,14 +542,14 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
-        javascript = { 'prettier', 'prettierd' },
-        typescript = { 'prettier', 'prettierd' },
-        javascriptreact = { 'prettier', 'prettierd' },
-        typescriptreact = { 'prettier', 'prettierd' },
-        json = { 'prettier', 'prettierd' },
-        html = { 'prettier', 'prettierd' },
-        css = { 'prettier', 'prettierd' },
-        yaml = { 'prettier', 'prettierd' },
+        javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        javascriptreact = { 'prettier' },
+        typescriptreact = { 'prettier' },
+        json = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        yaml = { 'prettier' },
         nix = { 'nixpkgs-fmt' },
       },
       formatters = {

@@ -17,14 +17,6 @@
         }
       ];
       keymap = [
-        # 既存の Ctrl‑h → Backspace
-        {
-          name = "Ctrl+H should be enabled on all apps as BackSpace";
-          remap = {
-            "C-h" = "Backspace";
-          };
-        }
-
         # Alt+HJKL → 矢印キー
         {
           name = "Alt+HJKL to Arrow keys";
@@ -52,6 +44,17 @@
             "F24-0" = "F10";
             "F24-MINUS" = "F11"; # Alt+-
             "F24-EQUAL" = "F12"; # Alt+=
+          };
+        }
+
+        {
+          name = "UNIX-like bindings";
+          remap = {
+            "C-a" = "Home";
+            "C-e" = "End";
+            "C-h" = "Backspace";
+            "C-d" = "Delete";
+            "C-k" = [ "Shift-End" "C-x" ];
           };
         }
       ];

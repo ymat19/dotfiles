@@ -256,7 +256,7 @@ require('lazy').setup({
         { '<leader>b', group = 'Buffer' },
         { '<leader>f', group = 'Find' },
         { '<leader>s', group = 'Search', mode = { 'n', 'x' } },
-        { '<leader>l', group = 'Glance' },
+        { '<leader>l', group = 'Lsp' },
         { '<leader>a', group = 'Agent', mode = { 'n', 'x' } },
         { '<leader>c', group = 'Comment', mode = { 'n', 'x' } },
         { '<leader>g', group = 'Git', mode = { 'n', 'x' } },
@@ -348,7 +348,9 @@ require('lazy').setup({
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('<leader>pa', vim.lsp.buf.code_action, 'Code Action', { 'n', 'x' })
+          map('<leader>la', vim.lsp.buf.code_action, 'Code Action', { 'n', 'x' })
+          map('<leader>ln', vim.lsp.buf.rename, 'Rename Symbol', { 'n', 'x' })
+          map('<leader>lh', vim.lsp.buf.hover, 'Hover', { 'n', 'x' })
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client

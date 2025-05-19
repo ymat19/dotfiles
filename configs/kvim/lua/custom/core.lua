@@ -25,11 +25,6 @@ vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent
 vim.keymap.set('n', 'L', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'H', ':bprevious<CR>', { noremap = true, silent = true })
 
--- workaround for xremap
-vim.keymap.set('n', '<C-Home>', '<C-a>')
-vim.keymap.set('n', '<BS>', '<C-w><C-h>')
-vim.keymap.set('n', '<C-Del>', '<C-d>')
-
 -- Common Pugins
 require('substitute').setup {}
 

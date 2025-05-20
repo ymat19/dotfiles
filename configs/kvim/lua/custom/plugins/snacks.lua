@@ -523,6 +523,13 @@ return {
       desc = 'Grep Open Buffers',
     },
     {
+      'X',
+      function()
+        Snacks.bufdelete()
+      end,
+      desc = 'Delete Buffer',
+    },
+    {
       '<leader>bd',
       function()
         Snacks.bufdelete()

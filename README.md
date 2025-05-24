@@ -3,154 +3,72 @@
 [![CI/Test](https://github.com/ymat19/dotfiles/actions/workflows/test.yml/badge.svg)](https://github.com/ymat19/dotfiles/actions/workflows/test.yml)
 [![CI/Update](https://github.com/ymat19/dotfiles/actions/workflows/flake-update.yml/badge.svg)](https://github.com/ymat19/dotfiles/actions/workflows/flake-update.yml)
 
-This repository contains my personal dotfiles managed with [Nix](https://nixos.org/) and [home-manager](https://github.com/nix-community/home-manager). It supports both standalone home-manager and NixOS setups, with special consideration for WSL environments.
+このリポジトリは、[Nix](https://nixos.org/) と [home-manager](https://github.com/nix-community/home-manager) を使用して管理された個人用のドットファイル集です。スタンドアロンの home-manager と NixOS の両方に対応しており、特に WSL 環境にも配慮しています。
 
-## Features
+## 構成概要
 
-- 📦 Nix-based configuration management
-- 🔄 Automated setup with installation script
-- 🐧 Support for both standalone home-manager and NixOS
-- 🪟 WSL (Windows Subsystem for Linux) compatibility
-- 🛠️ Pre-configured development tools:
-  - Dual Neovim configurations (IDE-like and VSCode integration)
-  - tmux
-  - zsh
-  - Git configuration
-  - Various CLI utilities
+- **Nix ベースの構成管理**: `flake.nix` を中心に、以下のディレクトリで構成を管理。
+  - `modules/`: 各種モジュール (例: Git ツール、シェル、TUI ツール、AWS、Vim、Neovim、tmux など)
+  - `nixos-configurations/`: WSL やベアメタル環境用の NixOS 設定
+  - `lib/`: Nix 設定の補助スクリプト
+- **Home-manager**: `home.nix` を使用してユーザー環境を構築。
+- **ツール固有の設定**: `configs/` ディレクトリに各種ツールの設定を格納。
+  - `kvim/`: 機能豊富な Neovim 設定。
+  - `nvim/`: VSCode 統合用の最小限の Neovim 設定。
+  - その他: `tmux.conf`, `zshrc`, `hyprland.conf`, `rofi.rasl` など
 
-## Directory Structure
+## インストール手順
 
-- `configs/` - Tool-specific configurations
-  - `kvim/` - Full-featured Neovim configuration (IDE-like setup)
-  - `nvim/` - Minimal Neovim configuration (for VSCode integration)
-  - Various dotfiles (.vimrc, tmux.conf, zshrc)
-- `modules/` - Nix configuration modules
-- `flake.nix` - Main Nix flake configuration
-- `home.nix` - Home-manager configuration
-- `install.sh` - Automated installation script
+### クイックスタート
 
-## Neovim Setup
-
-This repository features two distinct Neovim configurations, managed through different `NVIM_APPNAME` environments:
-
-### 1. Full IDE-like Setup (kvim)
-
-Located in `configs/kvim/`, this is a feature-rich configuration based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim).
-
-- **Usage**: `kvim` (aliased command)
-- **Features**:
-  - LSP integration with `nvim-lspconfig`
-  - Syntax highlighting via `nvim-treesitter`
-  - Modern UI with `tokyonight-nvim` theme
-  - Enhanced movement with `quick-scope`, `clever-f-vim`, and `leap-nvim`
-  - Text manipulation tools: `substitute-nvim`, `nvim-surround`, `dial-nvim`
-  - GitHub Copilot integration with chat support
-  - Additional tools: Mermaid diagram support, Nix language server
-
-### 2. VSCode Integration Setup (nvim)
-
-Located in `configs/nvim/`, this is a minimal configuration designed specifically for use with the VSCode Neovim extension.
-
-- **Usage**: Regular `nvim` command when using VSCode
-- **Features**:
-  - Enhanced movement with `quick-scope`, `clever-f-vim`, and `leap-nvim`
-  - Text manipulation: `substitute-nvim`, `nvim-surround`, `dial-nvim`
-  - LSP and treesitter support (`nvim-lspconfig`, `nvim-treesitter`)
-  - Core settings: case-insensitive search, soft tabs, clipboard integration
-- **Purpose**: Enhances VSCode's Vim emulation while maintaining compatibility
-
-## Installation
-
-### Quick Start
-
-Run the automated installation script:
+以下のコマンドで自動インストールを実行:
 
 ```bash
 ./install.sh
 ```
 
-This script will:
+### 手動セットアップ
 
-1. Remove any existing Nix installation
-2. Install Nix using the Determinate Systems installer
-3. Set up home-manager
-4. Apply the configuration
-
-### Manual Setup
-
-#### Standalone Home-manager Setup
-
-1. Install Nix:
+1. Nix をインストール:
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm
+curl -L https://install.determinate.systems/nix | sh
 . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 ```
 
-2. Set up home-manager:
+2. 構成を適用:
 
 ```bash
-nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
-nix-channel --update
-nix-shell '<home-manager>' -A install
+home-manager switch --flake .
 ```
 
-3. Apply configuration:
+## WSL 環境での注意点
+
+- Neovim のシンボリックリンクを作成:
 
 ```bash
-home-manager switch --flake . --impure -b backup
-```
-
-#### NixOS Setup
-
-1. Back up and link configuration:
-
-```bash
-cp /etc/nixos/hardware-configuration.nix ./
-sudo mv /etc/nixos /etc/nixos.bak
-sudo ln -s $(realpath $(pwd)) /etc/nixos
-```
-
-2. Apply configuration:
-
-```bash
-sudo nixos-rebuild switch --impure
-```
-
-## Additional Setup Steps
-
-### WSL-specific Setup
-
-```bash
-# Make neovim symlink for WSL (required for VSCode Neovim)
 sudo ln -s $(which nvim) /usr/local/bin/nvim
 ```
 
-### General Utilities
+## その他セットアップでよく使うコマンド
+
 
 ```bash
-# Enable clipboard on Linux
-sudo apt-get install xsel
-
-# Fix lazygit error on Linux
-sudo chmod a+rw /dev/tty
-
-# Configure ghq base directory
+# ghq ベースディレクトリを設定
 git config --global --add ghq.root $(realpath ../)
 
-# Rebuild asdf shims if needed
-asdf reshims
-
-# create gitconfig
+# gitconfig を作成
 touch ~/.gitconfig
 ```
 
-## Useful Documentation
+## URL リファレンス
+
+以下は、Nix や Home Manager の設定に役立つリファレンスです:
 
 - [Home Manager Options Search](https://home-manager-options.extranix.com/?query=&release=release-24.05)
 - [Nixpkgs Packages Search](https://search.nixos.org/packages?channel=24.11&from=0&size=50&sort=relevance&type=packages&query=vimPlugins)
 - [NixOS Options](https://search.nixos.org/options?channel=unstable&show=users.mutableUsers&size=30&sort=relevance)
 
-## License
+## ライセンス
 
-See [LICENSE.md](LICENSE.md) for details.
+詳細は [LICENSE.md](LICENSE.md) を参照してください。

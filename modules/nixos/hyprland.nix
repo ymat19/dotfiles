@@ -24,6 +24,9 @@
   wayland.windowManager.hyprland = {
     enable = true;
     extraConfig = builtins.readFile ../../configs/hyprland.conf;
+    plugins = [
+      pkgs.hyprlandPlugins.hyprexpo
+    ];
   };
 
   services.hypridle = {
@@ -53,15 +56,16 @@
     fcitx5.addons = with pkgs; [ fcitx5-mozc fcitx5-configtool ];
   };
 
-  home.sessionVariables = lib.mkAfter ({
-    XMODIFIERS = "@im=fcitx";
-    GTK_IM_MODULE = "fcitx";
-    QT_IM_MODULE = "fcitx";
-    INPUT_METHOD = "fcitx";
-    WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
-    LIBVA_DRIVER_NAME = "nvidia";
-    XDG_SESSION_TYPE = "wayland";
-  });
+  home.sessionVariables = lib.mkAfter
+    ({
+      XMODIFIERS = "@im=fcitx";
+      GTK_IM_MODULE = "fcitx";
+      QT_IM_MODULE = "fcitx";
+      INPUT_METHOD = "fcitx";
+      WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
+      LIBVA_DRIVER_NAME = "nvidia";
+      XDG_SESSION_TYPE = "wayland";
+    });
 
   # https://zenn.dev/watagame/articles/hyprland-nix
   programs.hyprlock = {

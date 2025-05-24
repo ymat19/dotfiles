@@ -1,6 +1,14 @@
 { config, pkgs, lib, ... }:
 
 {
+  home.pointerCursor = {
+    gtk.enable = true;
+    x11.enable = true;
+    name = "Adwaita";
+    size = 24;
+    package = pkgs.adwaita-icon-theme;
+  };
+
   home.packages = lib.mkAfter (with pkgs; [
     hyprland
     hypridle

@@ -29,6 +29,7 @@ in
     nodejs_24
     pnpm
     pre-commit
+    parallel
     #llvmPackages
   ];
 

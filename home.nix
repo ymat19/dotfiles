@@ -25,10 +25,6 @@ in
     stdenv
     gnumake
     marp-cli
-    python314
-    nodejs_24
-    pnpm
-    pre-commit
     parallel
     #llvmPackages
   ];

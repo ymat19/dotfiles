@@ -6,6 +6,7 @@
     delta.enable = true;
     userName = "ymat19";
     userEmail = "ymat19@example.com";
+    ignores = [ ".direnv/" ];
   };
 
   home.packages = lib.mkAfter (with pkgs; [

@@ -24,9 +24,6 @@
       background_opacity = 0.8;
       confirm_os_window_close = "0";
     };
-    environment = {
-      "USE_TMUX" = "0";
-    };
   };
 
   wayland.windowManager.hyprland = {

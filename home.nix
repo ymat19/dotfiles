@@ -26,7 +26,8 @@ in
     gnumake
     marp-cli
     parallel
-    #llvmPackages
+    python314
+    nodejs_24
   ];
 
   home.file = { };

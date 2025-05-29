@@ -26,8 +26,6 @@
         {
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
-              python314
-              nodejs_24
             ];
             shellhook = ''
               $SHELL

@@ -28,6 +28,8 @@ in
     parallel
     python314
     nodejs_24
+    wl-clipboard
+    xsel
   ];
 
   home.file = { };

@@ -66,8 +66,6 @@ in
   home.file."${nvimHomeDir}/lua".source = nvimTargetDir;
 
   home.shellAliases = lib.mkAfter {
-    kvim = ''
-      NVIM_APPNAME="kvim" nvim
-    '';
+    kvim = "NVIM_APPNAME=kvim nvim";
   };
 }

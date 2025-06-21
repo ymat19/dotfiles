@@ -28,6 +28,7 @@ in
     parallel
     wl-clipboard
     xsel
+    claude-code
   ];
 
   home.file = { };

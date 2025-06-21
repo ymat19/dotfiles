@@ -17,6 +17,8 @@ in
 
   home.stateVersion = "24.11";
 
+  nixpkgs.config.allowUnfree = true;
+
   home.packages = with pkgs; [
     gh
     wget
@@ -28,6 +30,7 @@ in
     parallel
     wl-clipboard
     xsel
+    claude-code
   ];
 
   home.file = { };

@@ -9,7 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     xremap.url = "github:xremap/nix-flake";
-    hyprpanel.url = "github:jas-singhfsu/hyprpanel";
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -71,7 +70,6 @@
         ] ++ (if onWSL then [ ] else
         ([
           inputs.xremap.nixosModules.default
-          { nixpkgs.overlays = [ inputs.hyprpanel.overlay ]; }
           ./modules/nixos/system/login.nix
           ./modules/nixos/system/xremap.nix
           ./modules/nixos/system/dolphin.nix

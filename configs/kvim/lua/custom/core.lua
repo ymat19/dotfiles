@@ -24,6 +24,9 @@ vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'L', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'H', ':bprevious<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-e>', function()
+  vim.cmd 'edit!'
+end, { desc = 'Reload current file' })
 
 -- Common Pugins
 require('substitute').setup {}

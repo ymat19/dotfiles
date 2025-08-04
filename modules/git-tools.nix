@@ -32,7 +32,7 @@
       local worktree_data=$(git worktree list | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
       
       # パイプ以前だけをfzfに渡す
-      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
+      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'echo "Directory: {}"; git log --oneline -10 HEAD 2>/dev/null || echo "No git log available"')
       
       # 選択がキャンセルされた場合は終了
       if [ -z "$branch_name" ]; then
@@ -81,7 +81,7 @@
       local worktree_data=$(git worktree list | tail -n +2 | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
       
       # パイプ以前だけをfzfに渡す
-      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
+      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'echo "Directory: {}"; git log --oneline -10 HEAD 2>/dev/null || echo "No git log available"')
       
       # 選択がキャンセルされた場合は終了
       if [ -z "$branch_name" ]; then

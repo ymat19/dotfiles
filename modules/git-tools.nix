@@ -27,7 +27,7 @@
     zle -N ghq-fzf
     bindkey '^]' ghq-fzf
 
-    function fsw() {
+    function fuzzy_switch_worktree() {
       # パイプ区切りの文字列リストを変数に保存
       local worktree_data=$(git worktree list | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
       
@@ -46,7 +46,7 @@
       cd "$worktree_path"
     }
 
-    function fcw() {
+    function fuzzy_create_worktree() {
       # ローカル・リモート全ブランチを取得（ローカルに(local)プレフィックス）
       local branch=$(
         {
@@ -76,7 +76,7 @@
       git worktree add "$worktree_path" "$branch" && cd "$worktree_path"
     }
 
-    function frw() {
+    function fuzzy_remove_worktree() {
       # パイプ区切りの文字列リストを変数に保存（メインディレクトリを除外）
       local worktree_data=$(git worktree list | tail -n +2 | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
       
@@ -103,6 +103,23 @@
         echo "Cancelled"
       fi
     }
+
+    function git_worktree_menu() {
+      echo "Git Worktree Management"
+      echo "c: Create | s: Switch | r: Remove"
+      echo -n "Choose option (c/s/r): "
+      read -k1 choice
+      echo
+      
+      case $choice in
+        c) fuzzy_create_worktree ;;
+        s) fuzzy_switch_worktree ;;
+        r) fuzzy_remove_worktree ;;
+        *) echo "Invalid choice" ;;
+      esac
+    }
+    zle -N git_worktree_menu
+    bindkey '^G' git_worktree_menu
 
   '';
 }

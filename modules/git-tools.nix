@@ -28,16 +28,19 @@
     bindkey '^]' ghq-fzf
 
     function fsw() {
-      # worktree listから末端ディレクトリ名のみを抽出してリスト表示
-      local branch_name=$(git worktree list | awk '{print $1}' | xargs -I {} basename {} | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
+      # パイプ区切りの文字列リストを変数に保存
+      local worktree_data=$(git worktree list | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
+      
+      # パイプ以前だけをfzfに渡す
+      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
       
       # 選択がキャンセルされた場合は終了
       if [ -z "$branch_name" ]; then
         return 1
       fi
       
-      # git worktree listから選択されたブランチ名にマッチするパスを取得
-      local worktree_path=$(git worktree list | awk -v branch_name="$branch_name" '{if (system("[ \"$(basename \"" $1 "\")\" = \"" branch_name "\" ]") == 0) print $1}')
+      # 保存したリストから選択されたブランチ名にマッチする行を見つけてパスを抽出
+      local worktree_path=$(echo "$worktree_data" | grep "^$branch_name|" | cut -d'|' -f2)
       
       echo "Moving to worktree: $worktree_path"
       cd "$worktree_path"
@@ -74,16 +77,19 @@
     }
 
     function frw() {
-      # worktree listから末端ディレクトリ名のみを抽出してリスト表示（メインディレクトリを除外）
-      local branch_name=$(git worktree list | tail -n +2 | awk '{print $1}' | xargs -I {} basename {} | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
+      # パイプ区切りの文字列リストを変数に保存（メインディレクトリを除外）
+      local worktree_data=$(git worktree list | tail -n +2 | awk '{print $1}' | awk -F'/' '{print $NF"|"$0}')
+      
+      # パイプ以前だけをfzfに渡す
+      local branch_name=$(echo "$worktree_data" | cut -d'|' -f1 | fzf --preview 'branch_with_slash=$(echo {} | sed "s/-/\//g"); git log --oneline -10 "$branch_with_slash"')
       
       # 選択がキャンセルされた場合は終了
       if [ -z "$branch_name" ]; then
         return 1
       fi
       
-      # git worktree listから選択されたブランチ名にマッチするパスを取得
-      local worktree_path=$(git worktree list | awk -v branch_name="$branch_name" '{if (system("[ \"$(basename \"" $1 "\")\" = \"" branch_name "\" ]") == 0) print $1}')
+      # 保存したリストから選択されたブランチ名にマッチする行を見つけてパスを抽出
+      local worktree_path=$(echo "$worktree_data" | grep "^$branch_name|" | cut -d'|' -f2)
       
       # 確認メッセージ
       echo "Removing worktree: $worktree_path"

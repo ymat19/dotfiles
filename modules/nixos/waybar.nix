@@ -1,6 +1,9 @@
 # Waybar configuration for Hyprland
 { inputs, pkgs, lib, hasBattery, ... }:
 {
+  # Explicitly disable HyprPanel to prevent conflicts
+  programs.hyprpanel.enable = lib.mkForce false;
+  
   programs.waybar = {
     enable = true;
     package = pkgs.waybar;

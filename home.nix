@@ -28,8 +28,6 @@ in
     gnumake
     marp-cli
     parallel
-    wl-clipboard
-    xsel
     claude-code
   ];
 

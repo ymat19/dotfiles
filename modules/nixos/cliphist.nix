@@ -1,5 +1,10 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
+  home.packages = with pkgs; [
+    wl-clipboard
+    xsel
+  ];
+
   services.cliphist = {
     enable = true;
   };

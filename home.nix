@@ -29,6 +29,7 @@ in
     marp-cli
     parallel
     claude-code
+    pre-commit
   ];
 
   home.file = { };

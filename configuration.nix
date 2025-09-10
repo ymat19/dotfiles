@@ -15,6 +15,7 @@
     ])
     ++
     [
+      #./modules/nixos/system/apple-silicon-support
       ./nixos-configurations/baremetal.nix
     ];
 
@@ -24,7 +25,7 @@
 
   networking.hostName = envName; # Define your hostname.
 
-  system.stateVersion = "24.11"; # Did you read the comment?
+  system.stateVersion = "25.11"; # Did you read the comment?
 
   programs.nix-ld.enable = true;
 

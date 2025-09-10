@@ -1,13 +1,8 @@
 { config, lib, pkgs, username, homeDirectory, onWSL, envName, ... }:
 {
   # Bootloader.
-  boot = {
-    loader = {
-      efi.canTouchEfiVariables = true;
-      systemd-boot.enable = true;
-      timeout = 1;
-    };
-  };
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = false;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
@@ -34,8 +29,8 @@
   };
 
   environment.systemPackages = lib.mkAfter (with pkgs; [
-    google-chrome
-    slack
+    #google-chrome
+    #slack
     vlc
   ]);
 

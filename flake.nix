@@ -122,6 +122,15 @@
               envName = "dyna";
             };
           };
+          air = nixpkgs.lib.nixosSystem {
+            inherit system;
+            modules = nixOSModules ++ [
+              #./modules/nixos/system/apple-silicon-support
+            ];
+            specialArgs = nixOSSpecialArgs // {
+              envName = "air";
+            };
+          };
         };
       })
     );

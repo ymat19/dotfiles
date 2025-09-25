@@ -49,7 +49,7 @@
           on-timeout = "hyprlock";
         }
         {
-          timeout = 2160;
+          timeout = 5400;
           on-timeout = "systemctl suspend";
         }
       ];

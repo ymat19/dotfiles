@@ -35,7 +35,7 @@ in
       nvim-treesitter.withAllGrammars
       plenary-nvim
       # ui
-      tokyonight-nvim
+      #tokyonight-nvim
       # movement
       quick-scope
       clever-f-vim

@@ -29,9 +29,6 @@
   wayland.windowManager.hyprland = {
     enable = true;
     extraConfig = builtins.readFile ../../configs/hyprland.conf;
-    plugins = [
-      pkgs.hyprlandPlugins.hyprexpo
-    ];
   };
 
   services.hypridle = {

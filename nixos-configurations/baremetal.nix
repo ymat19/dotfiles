@@ -34,8 +34,6 @@
   };
 
   environment.systemPackages = lib.mkAfter (with pkgs; [
-    google-chrome
-    slack
     vlc
   ]);
 

@@ -8,7 +8,21 @@
     config = {
       virtual_modifiers = [ "F24" ];
       modmap = [
-        # F24 → Alt
+        # CapsLock → Ctrl
+        {
+          name = "CapsLock to Ctrl";
+          remap = {
+            "CapsLock" = "Ctrl_L";
+          };
+        }
+        # MetaLeft → F24
+        {
+          name = "MetaLeft to F24";
+          remap = {
+            "Super_L" = "F24";
+          };
+        }
+        # Alt_L → F24
         {
           name = "Alt_L to F24";
           remap = {

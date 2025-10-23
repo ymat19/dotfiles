@@ -12,6 +12,9 @@ vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.undofile = true
 vim.opt.termguicolors = true
+vim.opt.mouse = 'n'
+vim.keymap.set({ 'n', 'v' }, '<LeftMouse>', '<Nop>')
+vim.keymap.set({ 'n', 'v' }, '<LeftRelease>', '<Nop>')
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)

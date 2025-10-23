@@ -12,7 +12,10 @@
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-      # ...
+    };
+    apple-silicon = {
+      url = "github:nix-community/nixos-apple-silicon";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -120,6 +123,15 @@
             ];
             specialArgs = nixOSSpecialArgs // {
               envName = "dyna";
+            };
+          };
+          air = nixpkgs.lib.nixosSystem {
+            inherit system;
+            modules = nixOSModules ++ [
+              inputs.apple-silicon.nixosModules.default
+            ];
+            specialArgs = nixOSSpecialArgs // {
+              envName = "air";
             };
           };
         };

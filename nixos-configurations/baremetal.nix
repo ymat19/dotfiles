@@ -35,6 +35,9 @@
 
   environment.systemPackages = lib.mkAfter (with pkgs; [
     vlc
+  ] ++ lib.optionals (pkgs.stdenv.hostPlatform.isx86_64) [
+    google-chrome
+    slack
   ]);
 
   # Enable touchpad support (enabled default in most desktopManager).

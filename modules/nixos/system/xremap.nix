@@ -1,7 +1,8 @@
-{ pkgs, lib, username, homeDirectory, onNixOS, ... }:
+{ pkgs, lib, username, homeDirectory, onNixOS, envName, ... }:
 
 {
   services.xremap = {
+    enable = true;
     userName = username;
     serviceMode = "system";
     withHypr = true;
@@ -15,13 +16,15 @@
             "CapsLock" = "Ctrl_L";
           };
         }
-        # MetaLeft → F24
+      ] ++ lib.optionals (envName == "air") [
+        # MetaLeft → F24 (air only)
         {
           name = "MetaLeft to F24";
           remap = {
             "Super_L" = "F24";
           };
         }
+      ] ++ [
         # Alt_L → F24
         {
           name = "Alt_L to F24";
@@ -71,11 +74,9 @@
       ];
     };
   };
-  systemd.services.xremap = {
-    serviceConfig = {
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
+  systemd.services.xremap.serviceConfig = {
+    Restart = lib.mkForce "on-failure";
+    RestartSec = "5s";
   };
 }
 

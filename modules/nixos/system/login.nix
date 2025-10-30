@@ -9,7 +9,7 @@
         user = username;
       };
       default_session = {
-        command = "${pkgs.greetd.greetd}/bin/agreety --cmd ${pkgs.bash}/bin/bash";
+        command = "${pkgs.greetd}/bin/agreety --cmd ${pkgs.bash}/bin/bash";
       };
     };
   };

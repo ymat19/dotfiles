@@ -9,7 +9,7 @@
     lazydocker
   ]);
 
-  programs.zsh.initExtra = lib.mkAfter ''
+  programs.zsh.initContent = lib.mkAfter ''
     # https://github.com/jesseduffield/lazygit/issues/1330#issuecomment-983826789
     # checks to see if we are in a windows or linux dir
     function isWinDir {

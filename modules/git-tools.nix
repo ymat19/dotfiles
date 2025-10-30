@@ -3,10 +3,18 @@
 {
   programs.git = {
     enable = true;
-    delta.enable = true;
-    userName = "ymat19";
-    userEmail = "ymat19@example.com";
     ignores = [ ".direnv/" ];
+    settings = {
+      user = {
+        name = "ymat19";
+        email = "ymat19@example.com";
+      };
+    };
+  };
+
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
   };
 
   home.packages = lib.mkAfter (with pkgs; [
@@ -14,7 +22,7 @@
     git-lfs
   ]);
 
-  programs.zsh.initExtra = lib.mkAfter ''
+  programs.zsh.initContent = lib.mkAfter ''
     # https://qiita.com/tomoyamachi/items/e51d2906a5bb24cf1684
     function ghq-fzf() {
       local src=$(ghq list -p | fzf --preview "bat --color=always --style=header,grid --line-range :80 {}/README.*")

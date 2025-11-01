@@ -32,6 +32,16 @@
       + lib.optionalString (envName == "air") ''
       bind = $mainMod, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1.0666667
       bind = $mainMod SHIFT, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1
+
+      # Disable trackpad by default
+      device {
+          name = apple-mtp-multi-touch
+          enabled = false
+      }
+
+      # Toggle trackpad with keybind (Super + , / Super + Shift + ,)
+      bind = $mainMod, i, exec, hyprctl keyword 'device[apple-mtp-multi-touch]:enabled' true
+      bind = $mainMod SHIFT, i, exec, hyprctl keyword 'device[apple-mtp-multi-touch]:enabled' false
     ''
       + lib.optionalString (envName == "dyna") ''
       monitor=eDP-1,disable

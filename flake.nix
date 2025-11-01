@@ -76,6 +76,7 @@
           ./modules/nixos/system/login.nix
           ./modules/nixos/system/xremap.nix
           ./modules/nixos/system/dolphin.nix
+          ./modules/nixos/system/poiter-util.nix
         ]));
       in
       { } // (if requireStandalone then {

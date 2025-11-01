@@ -91,7 +91,7 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "nixos";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "input" "ydotool" ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     packages = with pkgs; [

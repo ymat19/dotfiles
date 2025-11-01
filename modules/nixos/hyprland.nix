@@ -29,9 +29,15 @@
   wayland.windowManager.hyprland = {
     enable = true;
     extraConfig = builtins.readFile ../../configs/hyprland.conf
+      + lib.optionalString (envName == "air") ''
+      bind = $mainMod, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1.0666667
+      bind = $mainMod SHIFT, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1
+    ''
       + lib.optionalString (envName == "dyna") ''
-        monitor=eDP-1,disable
-      '';
+      monitor=eDP-1,disable
+      bind = $mainMod, Z, exec, hyprctl keyword monitor DP-1,1920x1080@60,auto,1
+      bind = $mainMod SHIFT, Z, exec, hyprctl keyword monitor DP-1,preferred,auto,1
+    '';
   };
 
   services.hypridle = {

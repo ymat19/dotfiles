@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, envName, ... }:
 
 {
   home.pointerCursor = {
@@ -28,7 +28,10 @@
 
   wayland.windowManager.hyprland = {
     enable = true;
-    extraConfig = builtins.readFile ../../configs/hyprland.conf;
+    extraConfig = builtins.readFile ../../configs/hyprland.conf
+      + lib.optionalString (envName == "dyna") ''
+        monitor=eDP-1,disable
+      '';
   };
 
   services.hypridle = {
@@ -54,8 +57,9 @@
   };
 
   i18n.inputMethod = {
-    enabled = "fcitx5";
-    fcitx5.addons = with pkgs; [ fcitx5-mozc fcitx5-configtool ];
+    enable = true;
+    type = "fcitx5";
+    fcitx5.addons = with pkgs; [ fcitx5-mozc qt6Packages.fcitx5-configtool ];
   };
 
   home.sessionVariables = lib.mkAfter

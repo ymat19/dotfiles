@@ -60,14 +60,14 @@
           onNixOS = true;
           hasBattery = false;
         };
-        nixOSModules = [
+        mkNixOSModules = envName: [
           ./configuration.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${nixOSUserName} = import ./home.nix;
-            home-manager.extraSpecialArgs = nixOSSpecialArgs;
+            home-manager.extraSpecialArgs = nixOSSpecialArgs // { inherit envName; };
             home-manager.backupFileExtension = "backup";
           }
         ] ++ (if onWSL then [ ] else
@@ -86,20 +86,21 @@
             username = envUsername;
             homeDirectory = envHomeDir;
             onNixOS = false;
+            envName = "";
           };
         };
       } else {
         nixosConfigurations = {
           ${nixOSUserName} = nixpkgs.lib.nixosSystem {
             inherit system;
-            modules = nixOSModules;
+            modules = mkNixOSModules nixOSUserName;
             specialArgs = nixOSSpecialArgs // {
               envName = nixOSUserName;
             };
           };
           main = nixpkgs.lib.nixosSystem {
             inherit system;
-            modules = nixOSModules ++ [
+            modules = (mkNixOSModules "main") ++ [
               ./modules/nixos/system/nvidia.nix
               ./modules/nixos/system/steam.nix
             ];
@@ -109,7 +110,7 @@
           };
           mini = nixpkgs.lib.nixosSystem {
             inherit system;
-            modules = nixOSModules ++ [
+            modules = (mkNixOSModules "mini") ++ [
               ./modules/nixos/system/steam.nix
             ];
             specialArgs = nixOSSpecialArgs // {
@@ -118,7 +119,7 @@
           };
           dyna = nixpkgs.lib.nixosSystem {
             inherit system;
-            modules = nixOSModules ++ [
+            modules = (mkNixOSModules "dyna") ++ [
               ./modules/nixos/system/dotnet.nix
             ];
             specialArgs = nixOSSpecialArgs // {
@@ -127,7 +128,7 @@
           };
           air = nixpkgs.lib.nixosSystem {
             inherit system;
-            modules = nixOSModules ++ [
+            modules = (mkNixOSModules "air") ++ [
               inputs.apple-silicon.nixosModules.default
             ];
             specialArgs = nixOSSpecialArgs // {

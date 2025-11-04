@@ -222,16 +222,16 @@
       }
 
       #workspaces button.active {
-        background-color: #64727D;
+        background-color: rgba(100, 114, 125, 0.4);
         box-shadow: inset 0 -3px #ffffff;
       }
 
       #workspaces button.urgent {
-        background-color: #eb4d4b;
+        background-color: rgba(235, 77, 75, 0.4);
       }
 
       #mode {
-        background-color: #64727D;
+        background-color: rgba(100, 114, 125, 0.4);
         border-bottom: 3px solid #ffffff;
       }
 
@@ -278,19 +278,19 @@
       }
 
       #clock {
-        background-color: #64727D;
+        background-color: rgba(100, 114, 125, 0.4);
         border-radius: 10px;
       }
 
       #battery {
-        background-color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.4);
         color: #000000;
         border-radius: 10px;
       }
 
       #battery.charging, #battery.plugged {
         color: #ffffff;
-        background-color: #26A65B;
+        background-color: rgba(38, 166, 91, 0.4);
       }
 
       @keyframes blink {
@@ -301,7 +301,7 @@
       }
 
       #battery.critical:not(.charging) {
-        background-color: #f53c3c;
+        background-color: rgba(245, 60, 60, 0.4);
         color: #ffffff;
         animation-name: blink;
         animation-duration: 0.5s;
@@ -311,59 +311,59 @@
       }
 
       #cpu {
-        background-color: #2ecc71;
+        background-color: rgba(46, 204, 113, 0.4);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #memory {
-        background-color: #9b59b6;
+        background-color: rgba(155, 89, 182, 0.4);
         border-radius: 10px;
       }
 
       #disk {
-        background-color: #964B00;
+        background-color: rgba(150, 75, 0, 0.4);
         border-radius: 10px;
       }
 
       #network {
-        background-color: #2980b9;
+        background-color: rgba(41, 128, 185, 0.4);
         border-radius: 10px;
       }
 
       #network.disconnected {
-        background-color: #f53c3c;
+        background-color: rgba(245, 60, 60, 0.4);
       }
 
       #pulseaudio {
-        background-color: #f1c40f;
+        background-color: rgba(241, 196, 15, 0.4);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #pulseaudio.muted {
-        background-color: #90b1b1;
+        background-color: rgba(144, 177, 177, 0.4);
         color: #2a5c45;
       }
 
       #bluetooth {
-        background-color: #1abc9c;
+        background-color: rgba(26, 188, 156, 0.4);
         border-radius: 10px;
       }
 
       #bluetooth.disconnected {
-        background-color: #f53c3c;
+        background-color: rgba(245, 60, 60, 0.4);
       }
 
       #mpris {
-        background-color: #66cc99;
+        background-color: rgba(102, 204, 153, 0.4);
         color: #ffffff;
         min-width: 100px;
         border-radius: 10px;
       }
 
       #tray {
-        background-color: #2980b9;
+        background-color: rgba(41, 128, 185, 0.4);
         border-radius: 10px;
       }
 
@@ -373,17 +373,17 @@
 
       #tray > .needs-attention {
         -gtk-icon-effect: highlight;
-        background-color: #eb4d4b;
+        background-color: rgba(235, 77, 75, 0.4);
       }
 
       #custom-updates {
-        background-color: #e74c3c;
+        background-color: rgba(231, 76, 60, 0.4);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #custom-notification {
-        background-color: #3498db;
+        background-color: rgba(52, 152, 219, 0.4);
         border-radius: 10px;
       }
     '';

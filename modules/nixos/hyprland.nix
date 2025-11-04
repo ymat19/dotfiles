@@ -9,9 +9,35 @@
     package = pkgs.adwaita-icon-theme;
   };
 
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Adwaita-dark";
+      package = pkgs.gnome-themes-extra;
+    };
+    iconTheme = {
+      name = "Adwaita";
+      package = pkgs.adwaita-icon-theme;
+    };
+    gtk3.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+    };
+    gtk4.extraConfig = {
+      gtk-application-prefer-dark-theme = 1;
+    };
+  };
+
+  qt = {
+    enable = true;
+    platformTheme.name = "adwaita";
+    style.name = "adwaita-dark";
+  };
+
   home.packages = lib.mkAfter (with pkgs; [
     hyprland
     hypridle
+    adwaita-qt
+    adwaita-qt6
   ]);
 
   programs.kitty = {
@@ -87,6 +113,8 @@
       WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
       LIBVA_DRIVER_NAME = "nvidia";
       XDG_SESSION_TYPE = "wayland";
+      GTK_THEME = "Adwaita-dark";
+      QT_STYLE_OVERRIDE = "adwaita-dark";
     });
 
   # https://zenn.dev/watagame/articles/hyprland-nix

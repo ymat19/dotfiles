@@ -107,8 +107,7 @@
   };
 
   security.pam.services.hyprlock = { };
-
-  services.gnome.gnome-keyring.enable = lib.mkForce false;
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   xdg = {
     portal = {

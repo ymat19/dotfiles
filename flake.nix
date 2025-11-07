@@ -75,7 +75,7 @@
           inputs.xremap.nixosModules.default
           ./modules/nixos/system/login.nix
           ./modules/nixos/system/xremap.nix
-          ./modules/nixos/system/dolphin.nix
+          ./modules/nixos/system/thunar.nix
           ./modules/nixos/system/poiter-util.nix
         ]));
       in

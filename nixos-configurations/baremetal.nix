@@ -108,12 +108,13 @@
 
   security.pam.services.hyprlock = { };
 
+  services.gnome.gnome-keyring.enable = lib.mkForce false;
+
   xdg = {
     portal = {
       enable = true;
       extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-        xdg-desktop-portal-gtk
+        xdg-desktop-portal-hyprland
       ];
     };
   };

@@ -7,3 +7,4 @@ nvim
 spell/
 lazy-lock.json
 .direnv
+.claude

@@ -30,6 +30,7 @@ vim.keymap.set('n', 'H', ':bprevious<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-e>', function()
   vim.cmd 'edit!'
 end, { desc = 'Reload current file' })
+vim.keymap.set('t', '<C-q>', [[<C-\><C-n><C-w>w]], { noremap = true })
 
 -- Common Pugins
 require('substitute').setup {}

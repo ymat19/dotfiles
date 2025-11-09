@@ -17,6 +17,7 @@
       url = "github:nix-community/nixos-apple-silicon";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    try.url = "github:ymat19/try";
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:
@@ -84,6 +85,7 @@
           inherit pkgs;
           modules = [ ./home.nix ];
           extraSpecialArgs = {
+            inherit inputs;
             username = envUsername;
             homeDirectory = envHomeDir;
             onNixOS = false;

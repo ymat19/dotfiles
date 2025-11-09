@@ -30,6 +30,7 @@ in
     parallel
     claude-code
     pre-commit
+    tldr
   ];
 
   home.file = { };
@@ -40,5 +41,7 @@ in
 
   programs.home-manager.enable = true;
 
-  home.shellAliases = { };
+  home.shellAliases = {
+    tldr = "tldr --language ja";
+  };
 }

@@ -1,0 +1,12 @@
+[pyprland]
+plugins = ["expose", "scratchpads"]
+
+[scratchpads.nvim]
+animation = "fromTop"
+command = "kitty --class nvim-scratch -e nvim memo.txt"
+class = "nvim-scratch"
+size = "75% 60%"
+max_size = "1920px 100%"
+margin = "20%"
+unfocus = "hide"
+lazy = true

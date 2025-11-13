@@ -17,7 +17,6 @@
         
         # Left modules
         modules-left = [
-          "hyprland/workspaces"
           "hyprland/window"
           "custom/updates"
           "disk"
@@ -25,7 +24,8 @@
         
         # Center modules  
         modules-center = [
-          "mpris"
+          # "mpris"
+          "hyprland/workspaces"
         ];
         
         # Right modules
@@ -42,11 +42,11 @@
         
         # Module configurations
         "hyprland/workspaces" = {
-          disable-scroll = true;
+          disable-scroll = false;
           all-outputs = true;
           format = "{icon}";
           persistent-workspaces = {
-            "*" = 10; # Show workspaces 1-10 on all monitors
+            "*" = 5; # Show workspaces 1-10 on all monitors
           };
           format-icons = {
             "1" = "󰲠";
@@ -193,8 +193,8 @@
       }
 
       window#waybar {
-        background-color: rgba(43, 48, 59, 0.5);
-        border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+        background-color: rgba(43, 48, 59, 0.4);
+        border-bottom: 3px solid rgba(100, 114, 125, 0.4);
         color: #ffffff;
         transition-property: background-color;
         transition-duration: .5s;
@@ -222,16 +222,16 @@
       }
 
       #workspaces button.active {
-        background-color: rgba(100, 114, 125, 0.4);
+        background-color: rgba(100, 114, 125, 0.2);
         box-shadow: inset 0 -3px #ffffff;
       }
 
       #workspaces button.urgent {
-        background-color: rgba(235, 77, 75, 0.4);
+        background-color: rgba(235, 77, 75, 0.2);
       }
 
       #mode {
-        background-color: rgba(100, 114, 125, 0.4);
+        background-color: rgba(100, 114, 125, 0.2);
         border-bottom: 3px solid #ffffff;
       }
 
@@ -278,19 +278,19 @@
       }
 
       #clock {
-        background-color: rgba(100, 114, 125, 0.4);
+        background-color: rgba(100, 114, 125, 0.2);
         border-radius: 10px;
       }
 
       #battery {
-        background-color: rgba(255, 255, 255, 0.4);
+        background-color: rgba(255, 255, 255, 0.2);
         color: #000000;
         border-radius: 10px;
       }
 
       #battery.charging, #battery.plugged {
         color: #ffffff;
-        background-color: rgba(38, 166, 91, 0.4);
+        background-color: rgba(38, 166, 91, 0.2);
       }
 
       @keyframes blink {
@@ -301,7 +301,7 @@
       }
 
       #battery.critical:not(.charging) {
-        background-color: rgba(245, 60, 60, 0.4);
+        background-color: rgba(245, 60, 60, 0.2);
         color: #ffffff;
         animation-name: blink;
         animation-duration: 0.5s;
@@ -311,59 +311,59 @@
       }
 
       #cpu {
-        background-color: rgba(46, 204, 113, 0.4);
+        background-color: rgba(46, 204, 113, 0.2);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #memory {
-        background-color: rgba(155, 89, 182, 0.4);
+        background-color: rgba(155, 89, 182, 0.2);
         border-radius: 10px;
       }
 
       #disk {
-        background-color: rgba(150, 75, 0, 0.4);
+        background-color: rgba(150, 75, 0, 0.2);
         border-radius: 10px;
       }
 
       #network {
-        background-color: rgba(41, 128, 185, 0.4);
+        background-color: rgba(41, 128, 185, 0.2);
         border-radius: 10px;
       }
 
       #network.disconnected {
-        background-color: rgba(245, 60, 60, 0.4);
+        background-color: rgba(245, 60, 60, 0.2);
       }
 
       #pulseaudio {
-        background-color: rgba(241, 196, 15, 0.4);
+        background-color: rgba(241, 196, 15, 0.2);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #pulseaudio.muted {
-        background-color: rgba(144, 177, 177, 0.4);
+        background-color: rgba(144, 177, 177, 0.2);
         color: #2a5c45;
       }
 
       #bluetooth {
-        background-color: rgba(26, 188, 156, 0.4);
+        background-color: rgba(26, 188, 156, 0.2);
         border-radius: 10px;
       }
 
       #bluetooth.disconnected {
-        background-color: rgba(245, 60, 60, 0.4);
+        background-color: rgba(245, 60, 60, 0.2);
       }
 
       #mpris {
-        background-color: rgba(102, 204, 153, 0.4);
+        background-color: rgba(102, 204, 153, 0.2);
         color: #ffffff;
         min-width: 100px;
         border-radius: 10px;
       }
 
       #tray {
-        background-color: rgba(41, 128, 185, 0.4);
+        background-color: rgba(41, 128, 185, 0.2);
         border-radius: 10px;
       }
 
@@ -373,17 +373,17 @@
 
       #tray > .needs-attention {
         -gtk-icon-effect: highlight;
-        background-color: rgba(235, 77, 75, 0.4);
+        background-color: rgba(235, 77, 75, 0.2);
       }
 
       #custom-updates {
-        background-color: rgba(231, 76, 60, 0.4);
+        background-color: rgba(231, 76, 60, 0.2);
         color: #ffffff;
         border-radius: 10px;
       }
 
       #custom-notification {
-        background-color: rgba(52, 152, 219, 0.4);
+        background-color: rgba(52, 152, 219, 0.2);
         border-radius: 10px;
       }
     '';

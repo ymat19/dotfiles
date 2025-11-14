@@ -1,12 +1,19 @@
 [pyprland]
-plugins = ["expose", "scratchpads"]
+plugins = ["expose", "scratchpads", "shortcuts_menu"]
+
+[menu]
+command = "rofi -dmenu -i -p ''"
 
 [scratchpads.nvim]
 animation = "fromTop"
-command = "kitty --class nvim-scratch -e nvim memo.txt"
+command = "kitty --class nvim-scratch sh -c 'tmux new-session -A -s nvim-scratch \"nvim memo.txt\"'"
 class = "nvim-scratch"
 size = "75% 60%"
 max_size = "1920px 100%"
 margin = "20%"
 unfocus = "hide"
 lazy = true
+
+[shortcuts_menu.entries]
+"hoge" = 'echo hoge'
+"fuga" = 'echo fuga'

@@ -38,7 +38,10 @@
     hypridle
     adwaita-qt
     adwaita-qt6
+    pyprland
   ]);
+
+  xdg.configFile."hypr/pyprland.toml".source = ../../configs/pyprland.toml;
 
   programs.kitty = {
     enable = true;

@@ -5,7 +5,6 @@
   programs.tmux = {
     enable = true;
     keyMode = "vi";
-    prefix = "C-f";
     mouse = true;
     customPaneNavigationAndResize = true;
     shell = "${pkgs.zsh}/bin/zsh";
@@ -24,6 +23,8 @@
 ### Tokyo Night Theme configuration
 set -g @tokyo-night-tmux_show_hostname 1
 set -g @tokyo-night-tmux_transparent 1
+set -g @tokyo-night-tmux_show_path 1
+set -g @tokyo-night-tmux_path_format relative # 'relative' or 'full'
         '';
       }
     ];

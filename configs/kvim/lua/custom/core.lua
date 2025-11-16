@@ -88,3 +88,16 @@ end)
 vim.keymap.set('v', 'g<C-x>', function()
   require('dial.map').manipulate('decrement', 'gvisual')
 end)
+
+-- colorscheme settings
+require('tokyonight').setup {
+  transparent = true,
+  styles = {
+    comments = { italic = false }, -- Disable italics in comments
+    sidebars = 'transparent',
+    floats = 'transparent',
+    tabline = 'transparent',
+    statusline = 'transparent',
+  },
+}
+vim.cmd.colorscheme 'tokyonight-night'

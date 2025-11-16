@@ -15,5 +15,4 @@ unfocus = "hide"
 lazy = true
 
 [shortcuts_menu.entries]
-"hoge" = 'echo hoge'
-"fuga" = 'echo fuga'
+"Run Script" = 'run-hypr-script'

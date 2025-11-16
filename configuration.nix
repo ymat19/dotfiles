@@ -31,4 +31,19 @@
   environment.systemPackages = with pkgs; [
     neofetch
   ];
+
+  # Allow nixos-rebuild and systemctl restart xremap without password
+  security.sudo.extraRules = [{
+    users = [ username ];
+    commands = [
+      {
+        command = "/run/current-system/sw/bin/nixos-rebuild";
+        options = [ "NOPASSWD" ];
+      }
+      {
+        command = "/run/current-system/sw/bin/systemctl restart xremap";
+        options = [ "NOPASSWD" ];
+      }
+    ];
+  }];
 }

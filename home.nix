@@ -31,6 +31,7 @@ in
     claude-code
     pre-commit
     tldr
+    libnotify
   ];
 
   home.file = { };

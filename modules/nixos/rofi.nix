@@ -1,10 +1,8 @@
 { pkgs, ... }:
 {
   # https://zenn.dev/watagame/articles/hyprland-nix#launcher
-  programs.rofi = {
-    enable = true;
-    package = pkgs.rofi;
-    #	Refered: https://github.com/NeshHari/XMonad/blob/main/rofi/.config/rofi/config.rasi
-    theme = ../../configs/rofi.rasl;
-  };
+  home.packages = [ pkgs.rofi ];
+
+  home.file.".config/rofi/config.rasi".source = ../../configs/rofi/config.rasi;
+  home.file.".config/rofi/rofi.rasi".source = ../../configs/rofi/rofi.rasi;
 }

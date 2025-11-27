@@ -124,6 +124,7 @@
             inherit system;
             modules = (mkNixOSModules "dyna") ++ [
               ./modules/nixos/system/dotnet.nix
+              { home-manager.extraSpecialArgs = nixpkgs.lib.mkForce (nixOSSpecialArgs // { envName = "dyna"; hasBattery = true; }); }
             ];
             specialArgs = nixOSSpecialArgs // {
               envName = "dyna";
@@ -133,6 +134,7 @@
             inherit system;
             modules = (mkNixOSModules "air") ++ [
               inputs.apple-silicon.nixosModules.default
+              { home-manager.extraSpecialArgs = nixpkgs.lib.mkForce (nixOSSpecialArgs // { envName = "air"; hasBattery = true; }); }
             ];
             specialArgs = nixOSSpecialArgs // {
               envName = "air";

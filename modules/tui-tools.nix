@@ -5,6 +5,19 @@
     enable = true;
   };
 
+  programs.yazi = {
+    enable = true;
+    enableZshIntegration = true;
+    enableBashIntegration = true;
+  };
+
+  xdg.configFile."yazi/flavors/tokyo-night.yazi" = {
+    source = ../configs/yazi/flavors/tokyo-night.yazi;
+    recursive = true;
+  };
+
+  xdg.configFile."yazi/theme.toml".source = ../configs/yazi/theme.toml;
+
   home.packages = lib.mkAfter (with pkgs; [
     lazydocker
   ]);

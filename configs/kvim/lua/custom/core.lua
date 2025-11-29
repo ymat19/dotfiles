@@ -4,6 +4,9 @@ vim.opt.hlsearch = true
 vim.opt.ignorecase = true -- デフォルトで大文字・小文字を無視
 vim.opt.smartcase = true -- 大文字が含まれる場合は大文字・小文字を区別
 vim.opt.scrolloff = 5
+vim.opt.wrap = true
+vim.opt.cursorline = true
+vim.opt.cursorcolumn = true
 vim.o.expandtab = true
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
@@ -24,9 +27,10 @@ vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', 'jk', '<ESC>:w<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<CR>', ':nohlsearch<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'L', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'H', ':bprevious<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<Tab>', ':cnext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<S-Tab>', ':cprevious<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-e>', function()
   vim.cmd 'edit!'
 end, { desc = 'Reload current file' })

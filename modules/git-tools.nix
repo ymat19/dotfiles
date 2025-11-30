@@ -3,7 +3,7 @@
 {
   programs.git = {
     enable = true;
-    ignores = [ ".direnv/" ];
+    ignores = [ ".direnv/" ".playwright-mcp/" ".serena/" ];
     settings = {
       user = {
         name = "ymat19";

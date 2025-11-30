@@ -18,6 +18,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     try.url = "github:ymat19/try";
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

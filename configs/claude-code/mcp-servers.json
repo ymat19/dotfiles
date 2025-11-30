@@ -1,0 +1,49 @@
+{
+  "playwright": {
+    "command": "@PLAYWRIGHT_BIN@",
+    "args": ["--executable-path", "@CHROMIUM_BIN@"],
+    "env": {}
+  },
+  "fetch": {
+    "command": "@FETCH_BIN@",
+    "args": [],
+    "env": {}
+  },
+  "filesystem": {
+    "command": "@FILESYSTEM_BIN@",
+    "args": ["/home", "/tmp"],
+    "env": {}
+  },
+  "git": {
+    "command": "@GIT_BIN@",
+    "args": [],
+    "env": {}
+  },
+  "memory": {
+    "command": "@MEMORY_BIN@",
+    "args": [],
+    "env": {
+      "MEMORY_FILE_PATH": ".memory.json"
+    }
+  },
+  "sequential-thinking": {
+    "command": "@SEQUENTIAL_THINKING_BIN@",
+    "args": [],
+    "env": {}
+  },
+  "time": {
+    "command": "@TIME_BIN@",
+    "args": [],
+    "env": {}
+  },
+  "serena": {
+    "command": "@SERENA_BIN@",
+    "args": ["start-mcp-server"],
+    "env": {}
+  },
+  "context7": {
+    "command": "@CONTEXT7_BIN@",
+    "args": [],
+    "env": {}
+  }
+}

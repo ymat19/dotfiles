@@ -1,14 +1,27 @@
 # https://zenn.dev/watagame/articles/hyprland-nix#screenshot
-{ lib, pkgs, ... }:
+{ lib, pkgs, config, ... }:
 {
   home.packages = lib.mkAfter (with pkgs; [
     grimblast
     swappy
-    zenity
   ]);
 
+  # Ensure Pictures directory exists
+  xdg.userDirs = {
+    enable = true;
+    createDirectories = true;
+    pictures = "${config.home.homeDirectory}/Pictures";
+  };
+
+  # Swappy configuration
+  xdg.configFile."swappy/config".text = ''
+    [Default]
+    save_dir=$HOME/Pictures
+    save_filename_format=%Y-%m-%dT%H:%M:%S.png
+  '';
+
   wayland.windowManager.hyprland.extraConfig = lib.mkAfter ''
-    bind = $mainMod, S, exec, grimblast save active - | swappy -f - -o /tmp/screenshot.png && zenity --question --text="Save?" && cp /tmp/screenshot.png "$HOME/Pictures/$(date +%Y-%m-%dT%H:%M:%S).png"
-    bind = $mainMod SHIFT, S, exec, grimblast save area - | swappy -f - -o /tmp/screenshot.png && zenity --question --text="Save?" && cp /tmp/screenshot.png "$HOME/Pictures/$(date +%Y-%m-%dT%H:%M:%S).png"
+    bind = $mainMod, S, exec, grimblast save active - | swappy -f -
+    bind = $mainMod SHIFT, S, exec, grimblast save area - | swappy -f -
   '';
 }

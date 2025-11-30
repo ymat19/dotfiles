@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(less:*)",
+      "Bash(git:*)",
+      "Bash(journalctl:*)",
+      "Bash(socat - UNIX-CONNECT:/run/user/1000/colorshell.sock)",
+      "WebFetch(domain:benz.gitbook.io)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.pomerium.com)",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:dev.to)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": {
+      "Edit": {
+        "*.nix": "@NIXFMT@ {file_path}"
+      }
+    }
+  }
+}

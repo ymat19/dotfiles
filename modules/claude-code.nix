@@ -3,7 +3,7 @@ let
   servers = inputs.mcp-servers-nix.packages.${pkgs.system};
 
   mcpServersJson = pkgs.substitute {
-    src = ../../configs/claude-code/mcp-servers.json;
+    src = ../configs/claude-code/mcp-servers.json;
     substitutions = [
       "--replace" "@PLAYWRIGHT_BIN@" "${servers.playwright-mcp}/bin/mcp-server-playwright"
       "--replace" "@CHROMIUM_BIN@" "${pkgs.chromium}/bin/chromium"
@@ -19,7 +19,7 @@ let
   };
 
   settingsJson = pkgs.substitute {
-    src = ../../configs/claude-code/settings.json;
+    src = ../configs/claude-code/settings.json;
     substitutions = [
       "--replace" "@NIXFMT@" "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
     ];
@@ -28,8 +28,8 @@ in
 {
   home.packages = lib.mkAfter (with pkgs; [ claude-code ]);
 
-  home.file.".claude/CLAUDE.md".source = ../../configs/claude-code/CLAUDE.md;
-  home.file.".claude/skills/screenshot/SKILL.md".source = ../../configs/claude-code/skills/screenshot/SKILL.md;
+  home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;
+  home.file.".claude/skills/screenshot/SKILL.md".source = ../configs/claude-code/skills/screenshot/SKILL.md;
   home.file.".claude/settings.json".source = settingsJson;
 
   home.activation.mergeMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''

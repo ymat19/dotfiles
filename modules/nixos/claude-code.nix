@@ -14,6 +14,7 @@ let
       "--replace" "@SEQUENTIAL_THINKING_BIN@" "${servers.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking"
       "--replace" "@TIME_BIN@" "${servers.mcp-server-time}/bin/mcp-server-time"
       "--replace" "@SERENA_BIN@" "${servers.serena}/bin/serena"
+      "--replace" "@CONTEXT7_BIN@" "${servers.context7-mcp}/bin/context7-mcp"
     ];
   };
 

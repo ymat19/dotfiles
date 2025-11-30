@@ -22,7 +22,9 @@
   "memory": {
     "command": "@MEMORY_BIN@",
     "args": [],
-    "env": {}
+    "env": {
+      "MEMORY_FILE_PATH": ".memory.json"
+    }
   },
   "sequential-thinking": {
     "command": "@SEQUENTIAL_THINKING_BIN@",
@@ -37,6 +39,11 @@
   "serena": {
     "command": "@SERENA_BIN@",
     "args": ["start-mcp-server"],
+    "env": {}
+  },
+  "context7": {
+    "command": "@CONTEXT7_BIN@",
+    "args": [],
     "env": {}
   }
 }

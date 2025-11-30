@@ -3,7 +3,7 @@
 {
   programs.git = {
     enable = true;
-    ignores = [ ".direnv/" ".playwright-mcp/" ".serena/" ];
+    ignores = [ ".direnv/" ".playwright-mcp/" ".serena/" ".memory.json" ];
     settings = {
       user = {
         name = "ymat19";

@@ -29,7 +29,7 @@ in
   home.packages = lib.mkAfter (with pkgs; [ claude-code ]);
 
   home.file.".claude/CLAUDE.md".source = ../../configs/claude-code/CLAUDE.md;
-  home.file.".claude/skills/screenshot/SKILL.md".source = ../../configs/claude-code/skills/screenshot/SKILL.md;
+  home.file.".claude/skills".source = ../../configs/claude-code/skills;
   home.file.".claude/settings.json".source = settingsJson;
 
   home.activation.mergeMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''

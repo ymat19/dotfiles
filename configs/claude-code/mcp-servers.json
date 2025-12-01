@@ -21,10 +21,7 @@
   },
   "memory": {
     "command": "@MEMORY_BIN@",
-    "args": [],
-    "env": {
-      "MEMORY_FILE_PATH": ".memory.json"
-    }
+    "args": []
   },
   "sequential-thinking": {
     "command": "@SEQUENTIAL_THINKING_BIN@",

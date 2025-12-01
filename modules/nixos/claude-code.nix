@@ -2,6 +2,11 @@
 let
   servers = inputs.mcp-servers-nix.packages.${pkgs.system};
 
+  memoryWrapper = pkgs.writeShellScript "mcp-server-memory-wrapper" ''
+    export MEMORY_FILE_PATH="$PWD/.memory.json"
+    exec ${servers.mcp-server-memory}/bin/mcp-server-memory "$@"
+  '';
+
   mcpServersJson = pkgs.substitute {
     src = ../../configs/claude-code/mcp-servers.json;
     substitutions = [
@@ -10,7 +15,7 @@ let
       "--replace" "@FETCH_BIN@" "${servers.mcp-server-fetch}/bin/mcp-server-fetch"
       "--replace" "@FILESYSTEM_BIN@" "${servers.mcp-server-filesystem}/bin/mcp-server-filesystem"
       "--replace" "@GIT_BIN@" "${servers.mcp-server-git}/bin/mcp-server-git"
-      "--replace" "@MEMORY_BIN@" "${servers.mcp-server-memory}/bin/mcp-server-memory"
+      "--replace" "@MEMORY_BIN@" "${memoryWrapper}"
       "--replace" "@SEQUENTIAL_THINKING_BIN@" "${servers.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking"
       "--replace" "@TIME_BIN@" "${servers.mcp-server-time}/bin/mcp-server-time"
       "--replace" "@SERENA_BIN@" "${servers.serena}/bin/serena"

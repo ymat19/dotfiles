@@ -4,11 +4,6 @@
     "args": ["--executable-path", "@CHROMIUM_BIN@"],
     "env": {}
   },
-  "fetch": {
-    "command": "@FETCH_BIN@",
-    "args": [],
-    "env": {}
-  },
   "filesystem": {
     "command": "@FILESYSTEM_BIN@",
     "args": ["/home", "/tmp"],

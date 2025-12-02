@@ -12,7 +12,6 @@ let
     substitutions = [
       "--replace" "@PLAYWRIGHT_BIN@" "${servers.playwright-mcp}/bin/mcp-server-playwright"
       "--replace" "@CHROMIUM_BIN@" "${pkgs.chromium}/bin/chromium"
-      "--replace" "@FETCH_BIN@" "${servers.mcp-server-fetch}/bin/mcp-server-fetch"
       "--replace" "@FILESYSTEM_BIN@" "${servers.mcp-server-filesystem}/bin/mcp-server-filesystem"
       "--replace" "@GIT_BIN@" "${servers.mcp-server-git}/bin/mcp-server-git"
       "--replace" "@MEMORY_BIN@" "${memoryWrapper}"

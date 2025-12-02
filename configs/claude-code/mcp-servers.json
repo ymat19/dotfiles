@@ -4,11 +4,6 @@
     "args": ["--executable-path", "@CHROMIUM_BIN@"],
     "env": {}
   },
-  "fetch": {
-    "command": "@FETCH_BIN@",
-    "args": [],
-    "env": {}
-  },
   "filesystem": {
     "command": "@FILESYSTEM_BIN@",
     "args": ["/home", "/tmp"],
@@ -21,10 +16,7 @@
   },
   "memory": {
     "command": "@MEMORY_BIN@",
-    "args": [],
-    "env": {
-      "MEMORY_FILE_PATH": ".memory.json"
-    }
+    "args": []
   },
   "sequential-thinking": {
     "command": "@SEQUENTIAL_THINKING_BIN@",

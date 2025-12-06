@@ -1,7 +1,7 @@
 {
   "playwright": {
     "command": "@PLAYWRIGHT_BIN@",
-    "args": ["--executable-path", "@CHROMIUM_BIN@"],
+    "args": ["--executable-path", "@CHROMIUM_BIN@", "--isolated"],
     "env": {}
   },
   "filesystem": {
@@ -30,7 +30,7 @@
   },
   "serena": {
     "command": "@SERENA_BIN@",
-    "args": ["start-mcp-server"],
+    "args": ["start-mcp-server", "--enable-web-dashboard", "false"],
     "env": {}
   },
   "context7": {

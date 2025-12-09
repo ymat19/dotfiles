@@ -1,6 +1,7 @@
 { lib, pkgs, inputs, ... }:
 let
   servers = inputs.mcp-servers-nix.packages.${pkgs.system};
+  codexBaseConfig = ../configs/codex/config.toml;
 
   memoryWrapper = pkgs.writeShellScript "mcp-server-memory-wrapper" ''
     export MEMORY_FILE_PATH="$PWD/.memory.json"
@@ -36,6 +37,7 @@ in
   home.file.".claude/skills".source = ../configs/claude-code/skills;
   home.file.".claude/settings.json".source = settingsJson;
   home.file.".codex/AGENTS.md".source = ../configs/claude-code/CLAUDE.md;
+  home.file.".codex/skills".source = ../configs/claude-code/skills;
 
   home.activation.mergeMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''
     CLAUDE_JSON="$HOME/.claude.json"
@@ -54,10 +56,12 @@ in
   home.activation.mergeCodexMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''
     export CODEX_HOME="''${CODEX_HOME:-$HOME/.codex}"
     export MCP_SERVERS_JSON="${mcpServersJson}"
+    export BASE_CODEX_CONFIG="${codexBaseConfig}"
 
     mkdir -p "$CODEX_HOME"
 
     ${pkgs.python3}/bin/python - <<'PY'
+import copy
 import json
 import os
 import re
@@ -117,9 +121,20 @@ def to_toml(data: dict) -> str:
         result.pop()
     return "\n".join(result) + ("\n" if result else "")
 
-config: dict = {}
+def deep_merge(base: dict, override: dict) -> dict:
+    for key, val in override.items():
+        if isinstance(val, dict) and isinstance(base.get(key), dict):
+            base[key] = deep_merge(base[key], val)
+        else:
+            base[key] = val
+    return base
+
+base_config = tomllib.loads(Path(os.environ["BASE_CODEX_CONFIG"]).read_text())
+config: dict = copy.deepcopy(base_config)
+
 if config_path.exists():
-    config = tomllib.loads(config_path.read_text())
+    existing = tomllib.loads(config_path.read_text())
+    config = deep_merge(config, existing)
 
 with open(os.environ["MCP_SERVERS_JSON"], "r", encoding="utf-8") as f:
     mcp_servers = json.load(f)

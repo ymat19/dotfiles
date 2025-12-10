@@ -11,9 +11,9 @@ A skill for referencing and analyzing screenshots taken by the user.
 
 When the user asks about a screenshot:
 
-1. **Ask for the screenshot path**
-   - Screenshots are saved in `~/Pictures/` with timestamp format
-   - Example: `~/Pictures/2025-11-27T14:30:45.png`
+1. **Determine the screenshot path**
+   - If the user provides a path or timestamp, use it.
+   - If not provided, automatically pick the most recently modified file in `~/Pictures/` (saved with timestamp-style filenames).
 
 2. **Read the image using the Read tool**
    - Carefully examine the image content

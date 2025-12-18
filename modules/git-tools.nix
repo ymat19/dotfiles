@@ -20,6 +20,7 @@
   home.packages = lib.mkAfter (with pkgs; [
     ghq
     git-lfs
+    act
   ]);
 
   programs.zsh.initContent = lib.mkAfter ''

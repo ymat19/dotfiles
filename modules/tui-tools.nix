@@ -20,6 +20,7 @@
 
   home.packages = lib.mkAfter (with pkgs; [
     lazydocker
+    posting
   ]);
 
   programs.zsh.initContent = lib.mkAfter ''

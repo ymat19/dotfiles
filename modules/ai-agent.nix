@@ -31,7 +31,10 @@ let
   };
 in
 {
-  home.packages = lib.mkAfter (with pkgs; [ claude-code codex ]);
+  home.packages = lib.mkAfter [
+    inputs.claude-code-nix.packages.${pkgs.system}.default
+    inputs.codex-cli-nix.packages.${pkgs.system}.default
+  ];
 
   home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;
   home.file.".claude/skills".source = ../configs/claude-code/skills;

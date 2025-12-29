@@ -21,12 +21,5 @@
       "Glob(*)",
       "Grep(*)"
     ]
-  },
-  "hooks": {
-    "PostToolUse": {
-      "Edit": {
-        "*.nix": "@NIXFMT@ {file_path}"
-      }
-    }
   }
 }

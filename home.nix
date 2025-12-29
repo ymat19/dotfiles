@@ -28,7 +28,6 @@ in
     gnumake
     marp-cli
     parallel
-    claude-code
     pre-commit
     tldr
     libnotify

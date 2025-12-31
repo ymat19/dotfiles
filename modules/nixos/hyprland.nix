@@ -39,6 +39,8 @@
     adwaita-qt
     adwaita-qt6
     pyprland
+    mpvpaper
+    waypaper
   ]);
 
   xdg.configFile."hypr/pyprland.toml".source = ../../configs/pyprland.toml;

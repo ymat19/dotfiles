@@ -54,6 +54,16 @@
         baseConfig
     else baseConfig;
 
+    # Air専用の出力設定を追加
+    airOutput = lib.optionalString (envName == "air") ''
+
+// Air specific: internal display config
+output "eDP-1" {
+    mode "2560x1600@60"
+    scale 1.0666667
+}
+'';
+
     # Dyna専用の出力設定を追加
     dynaOutput = lib.optionalString (envName == "dyna") ''
 
@@ -63,7 +73,7 @@ output "eDP-1" {
 }
 '';
   in {
-    text = configWithAirBinds + dynaOutput;
+    text = configWithAirBinds + airOutput + dynaOutput;
   };
 
   # GTK/Qt設定（hyprland.nixから継承）

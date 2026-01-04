@@ -144,11 +144,6 @@ spawn-at-startup "waypaper --random"
 
 
 // Monitor configuration
-output "eDP-1" {
-    mode "2560x1600@60"
-    scale 1.0666667
-}
-
 output "DP-1" {
     mode "1920x1080@60"
 }

@@ -137,6 +137,7 @@ output "eDP-1" {
       QT_STYLE_OVERRIDE = "adwaita-dark";
     });
 
+  # https://zenn.dev/watagame/articles/hyprland-nix
   programs.hyprlock = {
     enable = true;
     settings = {

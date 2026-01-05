@@ -149,9 +149,6 @@ binds {
 }
 
 spawn-at-startup "fcitx5"
-spawn-at-startup "waybar"
-spawn-at-startup "waypaper --random"
-
 
 // Monitor configuration
 output "DP-3" {

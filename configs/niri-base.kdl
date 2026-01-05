@@ -66,6 +66,9 @@ binds {
     // Launcher (DMS Spotlight - Hyprland準拠)
     Mod+R { spawn-sh "dms ipc call spotlight toggle"; }
 
+    // Clipboard History (DMS)
+    Mod+V { spawn-sh "dms ipc call clipboard toggle"; }
+
     // Window management
     Mod+C { close-window; }
     Mod+E { spawn "thunar"; }

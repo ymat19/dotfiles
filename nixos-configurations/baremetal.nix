@@ -110,15 +110,6 @@
   security.pam.services.hyprlock = { };
   security.pam.services.greetd.enableGnomeKeyring = true;
 
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-wlr
-      ];
-    };
-  };
-
   virtualisation = {
     docker = {
       enable = true;

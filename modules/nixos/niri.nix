@@ -2,7 +2,6 @@
 
 {
   home.packages = with pkgs; [
-    niri
     waypaper
     mpvpaper
     adwaita-qt
@@ -46,11 +45,22 @@
     Mod+Shift+I { spawn "niri" "msg" "input" "device" "apple-mtp-multi-touch" "enabled" "false"; }
 '';
 
-    # bindsブロックの終わり（}の前）にair専用キーバインドを挿入
-    configWithAirBinds = if envName == "air" then
+    # Dyna専用キーバインドを既存のbindsブロック内に追加
+    dynaKeybinds = lib.optionalString (envName == "dyna") ''
+    // Dyna specific keybinds
+    Mod+Z { spawn "niri" "msg" "output" "DP-1" "mode" "1920x1080@60"; }
+    Mod+Shift+Z { spawn "niri" "msg" "output" "DP-1" "mode" "3440x1440@59.999"; }
+'';
+
+    # bindsブロック内の「Media keys」直前に環境別キーバインドを挿入
+    envKeybinds = if envName == "air" then airKeybinds
+      else if envName == "dyna" then dynaKeybinds
+      else "";
+
+    configWithEnvBinds = if envKeybinds != "" then
       builtins.replaceStrings
-        ["    // Quit\n    Mod+Shift+C { quit; }\n}"]
-        ["    // Quit\n    Mod+Shift+C { quit; }\n\n${airKeybinds}}\n"]
+        ["    // Quit\n    Mod+Shift+C { quit; }\n\n    // Media keys"]
+        ["    // Quit\n    Mod+Shift+C { quit; }\n\n${envKeybinds}    // Media keys"]
         baseConfig
     else baseConfig;
 
@@ -73,7 +83,7 @@ output "eDP-1" {
 }
 '';
   in {
-    text = configWithAirBinds + airOutput + dynaOutput;
+    text = configWithEnvBinds + airOutput + dynaOutput;
   };
 
   # GTK/Qt設定（hyprland.nixから継承）

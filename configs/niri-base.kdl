@@ -1,0 +1,161 @@
+// Niri configuration based on official default config
+// https://github.com/YaLTeR/niri/blob/main/resources/default-config.kdl
+
+prefer-no-csd
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+
+    touchpad {
+        tap
+        click-method "clickfinger"
+    }
+
+    mouse {
+        accel-speed 0.0
+    }
+}
+
+layout {
+    gaps 8
+
+    struts {
+        left 8
+        right 8
+        top 8
+        bottom 8
+    }
+
+    border {
+        width 1
+    }
+}
+
+animations {
+    slowdown 2.0
+    window-open {
+        duration-ms 150
+        curve "linear"
+    }
+
+    window-close {
+        duration-ms 50
+        curve "linear"
+    }
+
+    workspace-switch {
+        duration-ms 100
+        curve "linear"
+    }
+}
+
+window-rule {
+    match app-id="zen-alpha|zen-beta|zen"
+    opacity 0.9
+}
+
+binds {
+    // Terminal
+    Mod+Q { spawn-sh "USE_TMUX=1 kitty"; }
+    Mod+Shift+Q { spawn "kitty"; }
+
+    // Launcher (DMS Spotlight - Hyprland準拠)
+    Mod+R { spawn-sh "dms ipc call spotlight toggle"; }
+
+    // Window management
+    Mod+C { close-window; }
+    Mod+E { spawn "thunar"; }
+    Mod+F { toggle-window-floating; }
+    Mod+M { fullscreen-window; }
+    Mod+Shift+M { fullscreen-window; }
+    Mod+O { toggle-overview; }  // Niri固有機能
+
+    // Lock & Suspend (hyprlock - Hyprland準拠)
+    Mod+U { spawn "hyprlock"; }
+    Mod+Shift+U { spawn-sh "hyprlock & sleep 0.5 && systemctl suspend"; }
+
+    // Screenshot (Niri native - Hyprland準拠)
+    Mod+S { screenshot-window; }  // アクティブウィンドウ
+    Mod+Shift+S { screenshot; }  // インタラクティブ選択
+
+    // Focus movement (Vim-style)
+    Mod+H { focus-column-left; }
+    Mod+L { focus-column-right; }
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+J { focus-window-or-workspace-down; }
+
+    // Window movement
+    Mod+Ctrl+H { move-column-left; }
+    Mod+BackSpace { move-column-left; }
+    Mod+Ctrl+L { move-column-right; }
+    Mod+Ctrl+K { move-window-up-or-to-workspace-up; }
+    Mod+Ctrl+J { move-window-down-or-to-workspace-down; }
+
+    // Workspaces
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+
+    // Move to workspace
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+    Mod+Shift+0 { move-column-to-workspace 10; }
+
+    // Workspace navigation (scrolling style)
+    Mod+Page_Down { focus-workspace-down; }
+    Mod+Page_Up { focus-workspace-up; }
+
+    // Window resize
+    Mod+Ctrl+Shift+H { set-column-width "-10%"; }
+    Mod+Shift+BackSpace { set-column-width "-10%"; }
+    Mod+Ctrl+Shift+L { set-column-width "+10%"; }
+    Mod+Ctrl+Shift+K { set-window-height "-10%"; }
+    Mod+Ctrl+Shift+J { set-window-height "+10%"; }
+
+    // Workspace navigation (Hyprland-style)
+    Mod+Shift+H { focus-column-first; }
+    Mod+Shift+L { focus-column-last; }
+
+    // Quit
+    Mod+Shift+C { quit; }
+
+    // Media keys
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.05-"; }
+    XF86AudioMute allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+
+    // Brightness
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "s" "10%+"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
+}
+
+spawn-at-startup "fcitx5"
+
+// Monitor configuration
+output "DP-3" {
+    mode "1920x1080@60"
+    transform "90"
+}
+
+window-rule {
+    draw-border-with-background false
+}

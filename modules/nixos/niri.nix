@@ -1,6 +1,92 @@
 { config, pkgs, lib, envName, ... }:
 
 {
+  home.packages = with pkgs; [
+    waypaper
+    mpvpaper
+    adwaita-qt
+    adwaita-qt6
+    hypridle
+  ];
+
+  services.hypridle = {
+    enable = true;
+    settings = {
+      general = {
+        after_sleep_cmd = "hyprctl dispatch dpms on";
+        ignore_dbus_inhibit = false;
+        lock_cmd = "hyprlock";
+      };
+
+      listener = [
+        {
+          timeout = 2100;
+          on-timeout = "hyprlock";
+        }
+        {
+          timeout = 5400;
+          on-timeout = "systemctl suspend";
+        }
+      ];
+    };
+  };
+
+
+  # Niri KDL設定ファイル（envName別に動的生成）
+  xdg.configFile."niri/config.kdl" = let
+    baseConfig = builtins.readFile ../../configs/niri-base.kdl;
+
+    # Air専用キーバインドを既存のbindsブロック内に追加
+    airKeybinds = lib.optionalString (envName == "air") ''
+    // Air (Apple Silicon) specific keybinds
+    Mod+Z { spawn "niri" "msg" "output" "eDP-1" "scale" "1.0666667"; }
+    Mod+Shift+Z { spawn "niri" "msg" "output" "eDP-1" "scale" "1.0"; }
+    Mod+I { spawn "niri" "msg" "input" "device" "apple-mtp-multi-touch" "enabled" "true"; }
+    Mod+Shift+I { spawn "niri" "msg" "input" "device" "apple-mtp-multi-touch" "enabled" "false"; }
+'';
+
+    # Dyna専用キーバインドを既存のbindsブロック内に追加
+    dynaKeybinds = lib.optionalString (envName == "dyna") ''
+    // Dyna specific keybinds
+    Mod+Z { spawn "niri" "msg" "output" "DP-1" "mode" "1920x1080@60"; }
+    Mod+Shift+Z { spawn "niri" "msg" "output" "DP-1" "mode" "3440x1440@59.999"; }
+'';
+
+    # bindsブロック内の「Media keys」直前に環境別キーバインドを挿入
+    envKeybinds = if envName == "air" then airKeybinds
+      else if envName == "dyna" then dynaKeybinds
+      else "";
+
+    configWithEnvBinds = if envKeybinds != "" then
+      builtins.replaceStrings
+        ["    // Quit\n    Mod+Shift+C { quit; }\n\n    // Media keys"]
+        ["    // Quit\n    Mod+Shift+C { quit; }\n\n${envKeybinds}    // Media keys"]
+        baseConfig
+    else baseConfig;
+
+    # Air専用の出力設定を追加
+    airOutput = lib.optionalString (envName == "air") ''
+
+// Air specific: internal display config
+output "eDP-1" {
+    mode "2560x1600@60"
+    scale 1.0666667
+}
+'';
+
+    # Dyna専用の出力設定を追加
+    dynaOutput = lib.optionalString (envName == "dyna") ''
+
+// Dyna specific: disable internal display
+output "eDP-1" {
+    off
+}
+'';
+  in {
+    text = configWithEnvBinds + airOutput + dynaOutput;
+  };
+
+  # GTK/Qt設定（hyprland.nixから継承）
   home.pointerCursor = {
     gtk.enable = true;
     x11.enable = true;
@@ -33,58 +119,7 @@
     style.name = "adwaita-dark";
   };
 
-  home.packages = lib.mkAfter (with pkgs; [
-    hyprland
-    hypridle
-    adwaita-qt
-    adwaita-qt6
-    pyprland
-    mpvpaper
-    waypaper
-  ]);
-
-  xdg.configFile."hypr/pyprland.toml".source = ../../configs/pyprland.toml;
-
-  wayland.windowManager.hyprland = {
-    enable = true;
-    extraConfig = builtins.readFile ../../configs/hyprland.conf
-      + lib.optionalString (envName == "air") ''
-      bind = $mainMod, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1.0666667
-      bind = $mainMod SHIFT, Z, exec, hyprctl keyword monitor eDP-1,preferred,auto,1
-
-      # Toggle trackpad with keybind (Super + , / Super + Shift + ,)
-      bind = $mainMod, i, exec, hyprctl keyword 'device[apple-mtp-multi-touch]:enabled' true
-      bind = $mainMod SHIFT, i, exec, hyprctl keyword 'device[apple-mtp-multi-touch]:enabled' false
-    ''
-      + lib.optionalString (envName == "dyna") ''
-      monitor=eDP-1,disable
-      bind = $mainMod, Z, exec, hyprctl keyword monitor DP-1,1920x1080@60,auto,1
-      bind = $mainMod SHIFT, Z, exec, hyprctl keyword monitor DP-1,preferred,auto,1
-    '';
-  };
-
-  services.hypridle = {
-    enable = true;
-    settings = {
-      general = {
-        after_sleep_cmd = "hyprctl dispatch dpms on";
-        ignore_dbus_inhibit = false;
-        lock_cmd = "hyprlock";
-      };
-
-      listener = [
-        {
-          timeout = 2100;
-          on-timeout = "hyprlock";
-        }
-        {
-          timeout = 5400;
-          on-timeout = "systemctl suspend";
-        }
-      ];
-    };
-  };
-
+  # Fcitx5設定（hyprland.nixと同じ）
   i18n.inputMethod = {
     enable = true;
     type = "fcitx5";
@@ -94,8 +129,6 @@
   home.sessionVariables = lib.mkAfter
     ({
       XMODIFIERS = "@im=fcitx";
-      GTK_IM_MODULE = "fcitx";
-      QT_IM_MODULE = "fcitx";
       INPUT_METHOD = "fcitx";
       WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
       LIBVA_DRIVER_NAME = "nvidia";

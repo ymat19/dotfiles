@@ -5,7 +5,7 @@
     enable = true;
     userName = username;
     serviceMode = "system";
-    withHypr = true;
+    withNiri = true;
     config = {
       virtual_modifiers = [ "F24" ];
       modmap = [

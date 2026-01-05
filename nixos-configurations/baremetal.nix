@@ -56,7 +56,7 @@
 
   time.timeZone = "Asia/Tokyo";
 
-  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "ja_JP.UTF-8";
 
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "ja_JP.UTF-8";
@@ -101,7 +101,13 @@
 
   programs.firefox.enable = true;
 
-  programs.hyprland.enable = true;
+  programs.niri.enable = true;
+  programs.dms-shell.enable = true;
+  services.displayManager.dms-greeter = {
+    enable = true;
+    compositor.name = "niri";  # Or "hyprland" or "sway"
+    configHome = homeDirectory;
+  };
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -109,15 +115,6 @@
 
   security.pam.services.hyprlock = { };
   security.pam.services.greetd.enableGnomeKeyring = true;
-
-  xdg = {
-    portal = {
-      enable = true;
-      extraPortals = with pkgs; [
-        xdg-desktop-portal-hyprland
-      ];
-    };
-  };
 
   virtualisation = {
     docker = {

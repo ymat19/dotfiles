@@ -129,8 +129,6 @@ output "eDP-1" {
   home.sessionVariables = lib.mkAfter
     ({
       XMODIFIERS = "@im=fcitx";
-      GTK_IM_MODULE = "fcitx";
-      QT_IM_MODULE = "fcitx";
       INPUT_METHOD = "fcitx";
       WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
       LIBVA_DRIVER_NAME = "nvidia";

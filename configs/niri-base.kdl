@@ -19,12 +19,17 @@ input {
 }
 
 layout {
-    gaps 5
+    gaps 8
+
+    struts {
+        left 8
+        right 8
+        top 8
+        bottom 8
+    }
 
     border {
-        width 2
-        active-color "#33ccff"
-        inactive-color "#595959"
+        width 1
     }
 }
 
@@ -77,14 +82,15 @@ binds {
     // Focus movement (Vim-style)
     Mod+H { focus-column-left; }
     Mod+L { focus-column-right; }
-    Mod+K { focus-window-up; }
-    Mod+J { focus-window-down; }
+    Mod+K { focus-window-or-workspace-up; }
+    Mod+J { focus-window-or-workspace-down; }
 
     // Window movement
     Mod+Ctrl+H { move-column-left; }
+    Mod+BackSpace { move-column-left; }
     Mod+Ctrl+L { move-column-right; }
-    Mod+Ctrl+K { move-window-up; }
-    Mod+Ctrl+J { move-window-down; }
+    Mod+Ctrl+K { move-window-up-or-to-workspace-up; }
+    Mod+Ctrl+J { move-window-down-or-to-workspace-down; }
 
     // Workspaces
     Mod+1 { focus-workspace 1; }
@@ -116,13 +122,14 @@ binds {
 
     // Window resize
     Mod+Ctrl+Shift+H { set-column-width "-10%"; }
+    Mod+Shift+BackSpace { set-column-width "-10%"; }
     Mod+Ctrl+Shift+L { set-column-width "+10%"; }
     Mod+Ctrl+Shift+K { set-window-height "-10%"; }
     Mod+Ctrl+Shift+J { set-window-height "+10%"; }
 
     // Workspace navigation (Hyprland-style)
-    Mod+Shift+H { focus-workspace-down; }
-    Mod+Shift+L { focus-workspace-up; }
+    Mod+Shift+H { focus-column-first; }
+    Mod+Shift+L { focus-column-last; }
 
     // Quit
     Mod+Shift+C { quit; }

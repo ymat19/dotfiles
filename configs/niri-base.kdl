@@ -36,19 +36,20 @@ layout {
 }
 
 animations {
+    slowdown 2.0
     window-open {
         duration-ms 150
-        curve "ease-out-quad"
+        curve "linear"
     }
 
     window-close {
-        duration-ms 100
+        duration-ms 50
         curve "linear"
     }
 
     workspace-switch {
-        duration-ms 200
-        curve "ease-out-quad"
+        duration-ms 100
+        curve "linear"
     }
 }
 

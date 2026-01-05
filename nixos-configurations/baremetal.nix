@@ -102,6 +102,7 @@
   programs.firefox.enable = true;
 
   programs.niri.enable = true;
+  programs.dms-shell.enable = true;
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";

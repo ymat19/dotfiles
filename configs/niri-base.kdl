@@ -1,6 +1,8 @@
 // Niri configuration based on official default config
 // https://github.com/YaLTeR/niri/blob/main/resources/default-config.kdl
 
+prefer-no-csd
+
 input {
     keyboard {
         xkb {
@@ -60,8 +62,8 @@ binds {
     Mod+Q { spawn-sh "USE_TMUX=1 kitty"; }
     Mod+Shift+Q { spawn "kitty"; }
 
-    // Launcher (rofi - Hyprland準拠)
-    Mod+R { spawn "rofi" "-show" "drun"; }
+    // Launcher (DMS Spotlight - Hyprland準拠)
+    Mod+R { spawn-sh "dms ipc call spotlight toggle"; }
 
     // Window management
     Mod+C { close-window; }

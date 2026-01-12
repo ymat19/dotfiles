@@ -34,6 +34,7 @@
   };
 
   environment.systemPackages = lib.mkAfter (with pkgs; [
+    celluloid
     vlc
   ] ++ lib.optionals (pkgs.stdenv.hostPlatform.isx86_64) [
     google-chrome

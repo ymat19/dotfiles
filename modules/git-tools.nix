@@ -58,18 +58,5 @@ in
     }
     zle -N ghq-fzf
     bindkey '^]' ghq-fzf
-
-    # gwq worktree selection
-    function gwq-fzf() {
-      local wt=$(gwq list -g | fzf --preview "ls -la {2}")
-      if [ -n "$wt" ]; then
-        local path=$(echo "$wt" | awk '{print $2}')
-        BUFFER="cd $path"
-        zle accept-line
-      fi
-      zle -R -c
-    }
-    zle -N gwq-fzf
-    bindkey '^o' gwq-fzf
   '';
 }

@@ -21,6 +21,7 @@ in
 
   home.packages = with pkgs; [
     gh
+    jq
     wget
     unzip
     gcc

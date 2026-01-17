@@ -18,6 +18,7 @@ remote_branches=$(git branch -r --format='%(refname:short)' | sed 's|^origin/||'
 # 優先度順にマージ（重複除去）
 selected=$(
 {
+    echo "[+] Create new branch"
     echo "$worktree_branches" | while read -r b; do
         [[ -n "$b" ]] && echo "[WT] $b"
     done
@@ -35,7 +36,13 @@ selected=$(
 [[ -z "$selected" ]] && exit 0
 
 # マーカーを除去してブランチ名取得
-branch=$(echo "$selected" | sed 's/^\[[^]]*\] //')
+if [[ "$selected" == "[+] Create new branch" ]]; then
+    read -rp "New branch name: " branch
+    [[ -z "$branch" ]] && exit 0
+    git branch "$branch"
+else
+    branch=$(echo "$selected" | sed 's/^\[[^]]*\] //')
+fi
 
 # セッション名: リポジトリ名-ブランチ名（特殊文字を-に変換）
 sanitized=$(echo "$branch" | tr '/:.' '-')

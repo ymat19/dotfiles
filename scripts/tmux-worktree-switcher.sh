@@ -5,7 +5,7 @@ set -euo pipefail
 git rev-parse --is-inside-work-tree &>/dev/null || { echo "Error: Not in git repo"; exit 1; }
 
 # リポジトリ名取得
-REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+REPO_NAME=$(basename "$(dirname "$(realpath "$(git rev-parse --git-common-dir)")")")
 
 # リモート最新化
 git fetch --all --prune 2>/dev/null || true
@@ -30,7 +30,14 @@ selected=$(
     done
 } | fzf --height=80% --layout=reverse --border --ansi \
     --header="Select branch (Repo: $REPO_NAME)" \
-    --preview='b=$(echo {} | sed "s/^\[[^]]*\] //"); git log --oneline --graph --color=always -20 "$b" 2>/dev/null || git log --oneline --graph --color=always -20 "origin/$b"'
+    --preview='
+        if [[ {} == "[+] Create new branch" ]]; then
+            echo "Create a new branch from current HEAD"
+        else
+            b=$(echo {} | sed "s/^\[[^]]*\] //")
+            git log --oneline --graph --color=always -20 "$b" 2>/dev/null || git log --oneline --graph --color=always -20 "origin/$b"
+        fi
+    '
 ) || exit 0
 
 [[ -z "$selected" ]] && exit 0

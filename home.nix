@@ -23,7 +23,6 @@ in
   };
 
   home.packages = with pkgs; [
-    nb
     gh
     jq
     wget
@@ -45,8 +44,4 @@ in
   };
 
   programs.home-manager.enable = true;
-
-  home.shellAliases = {
-    tldr = "tldr --language ja";
-  };
 }

@@ -81,6 +81,7 @@
           ./configuration.nix
           home-manager.nixosModules.home-manager
           {
+            nixpkgs.hostPlatform = system;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${nixOSUserName} = import ./home.nix;
@@ -110,14 +111,12 @@
       } else {
         nixosConfigurations = {
           ${nixOSUserName} = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = mkNixOSModules nixOSUserName;
             specialArgs = nixOSSpecialArgs // {
               envName = nixOSUserName;
             };
           };
           main = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = (mkNixOSModules "main") ++ [
               ./modules/nixos/system/nvidia.nix
               ./modules/nixos/system/steam.nix
@@ -127,7 +126,6 @@
             };
           };
           mini = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = (mkNixOSModules "mini") ++ [
               ./modules/nixos/system/steam.nix
             ];
@@ -136,7 +134,6 @@
             };
           };
           dyna = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = (mkNixOSModules "dyna") ++ [
               ./modules/nixos/system/dotnet.nix
               { home-manager.extraSpecialArgs = nixpkgs.lib.mkForce (nixOSSpecialArgs // { envName = "dyna"; hasBattery = true; }); }
@@ -146,7 +143,6 @@
             };
           };
           air = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = (mkNixOSModules "air") ++ [
               inputs.apple-silicon.nixosModules.default
               { home-manager.extraSpecialArgs = nixpkgs.lib.mkForce (nixOSSpecialArgs // { envName = "air"; hasBattery = true; }); }

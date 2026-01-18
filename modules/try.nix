@@ -1,7 +1,7 @@
 { inputs, ... }:
 
 {
-  imports = [ inputs.try.homeManagerModules.default ];
+  imports = [ inputs.try.homeModules.default ];
 
   programs.try.enable = true;
 }

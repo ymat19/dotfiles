@@ -1,6 +1,6 @@
 { lib, pkgs, inputs, ... }:
 let
-  servers = inputs.mcp-servers-nix.packages.${pkgs.system};
+  servers = inputs.mcp-servers-nix.packages.${pkgs.stdenv.hostPlatform.system};
   codexBaseConfig = ../configs/codex/config.toml;
 
   memoryWrapper = pkgs.writeShellScript "mcp-server-memory-wrapper" ''
@@ -26,14 +26,14 @@ let
   settingsJson = pkgs.substitute {
     src = ../configs/claude-code/settings.json;
     substitutions = [
-      "--replace" "@NIXFMT@" "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
+      "--replace" "@NIXFMT@" "${pkgs.nixfmt}/bin/nixfmt"
     ];
   };
 in
 {
   home.packages = lib.mkAfter [
-    inputs.claude-code-nix.packages.${pkgs.system}.default
-    inputs.codex-cli-nix.packages.${pkgs.system}.default
+    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;

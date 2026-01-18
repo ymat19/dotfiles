@@ -7,7 +7,7 @@
     adwaita-qt
     adwaita-qt6
     hypridle
-    inputs.niri-scratchpad.packages.${pkgs.system}.default
+    inputs.niri-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   services.hypridle = {

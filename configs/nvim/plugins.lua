@@ -11,14 +11,18 @@ vim.api.nvim_create_autocmd('FileType', {
 	end,
 })
 
--- treesitter
-require("nvim-treesitter.configs").setup({
-	highlight = {
-		enable = true,
-	},
-	indent = {
-		enable = true,
-	},
+-- treesitter (Neovim 0.10+ built-in API)
+vim.api.nvim_create_autocmd('FileType', {
+	callback = function()
+		pcall(vim.treesitter.start)
+	end,
+})
+vim.api.nvim_create_autocmd('FileType', {
+	callback = function()
+		if pcall(vim.treesitter.language.get_lang, vim.bo.filetype) then
+			vim.bo.indentexpr = "v:lua.vim.treesitter.indentexpr()"
+		end
+	end,
 })
 
 vim.cmd([[colorscheme tokyonight]])

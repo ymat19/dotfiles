@@ -17,10 +17,12 @@ in
 
   home.stateVersion = "24.11";
 
-  nixpkgs.config.allowUnfree = true;
+  # NixOS環境ではuseGlobalPkgsを使うため、nixpkgs.configは設定しない
+  nixpkgs.config = lib.mkIf (!onNixOS) {
+    allowUnfree = true;
+  };
 
   home.packages = with pkgs; [
-    nb
     gh
     jq
     wget
@@ -42,8 +44,4 @@ in
   };
 
   programs.home-manager.enable = true;
-
-  home.shellAliases = {
-    tldr = "tldr --language ja";
-  };
 }

@@ -3,9 +3,9 @@
 {
   environment.systemPackages = lib.mkAfter
     (with pkgs; [
-      xfce.thunar
-      xfce.thunar-volman  # removable media management
-      xfce.tumbler        # thumbnail generation
+      thunar
+      thunar-volman  # removable media management
+      tumbler        # thumbnail generation
       gvfs                # virtual filesystem (SMB, FTP, etc.)
       samba               # SMB/CIFS support
       libsecret           # secret storage library for password persistence

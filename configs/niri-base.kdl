@@ -85,7 +85,7 @@ binds {
     Mod+C { close-window; }
     Mod+E { spawn "thunar"; }
     Mod+F { toggle-window-floating; }
-    Mod+M { fullscreen-window; }
+    Mod+M { maximize-column; }
     Mod+Shift+M { fullscreen-window; }
     Mod+O { toggle-overview; }  // Niri固有機能
 
@@ -93,9 +93,9 @@ binds {
     Mod+U { spawn "hyprlock"; }
     Mod+Shift+U { spawn-sh "hyprlock & sleep 0.5 && systemctl suspend"; }
 
-    // Screenshot (Niri native - Hyprland準拠)
-    Mod+S { screenshot-window; }  // アクティブウィンドウ
-    Mod+Shift+S { screenshot; }  // インタラクティブ選択
+    // Screenshot (Niri native)
+    Mod+S { screenshot-screen; }  // 画面全体
+    Mod+Shift+S { screenshot; }   // インタラクティブ選択
 
     // Focus movement (Vim-style)
     Mod+H { focus-column-left; }
@@ -137,6 +137,10 @@ binds {
     // Workspace navigation (scrolling style)
     Mod+Page_Down { focus-workspace-down; }
     Mod+Page_Up { focus-workspace-up; }
+
+    // Preset column width
+    Mod+Shift+J { switch-preset-column-width; }
+    Mod+Shift+K { switch-preset-column-width-back; }
 
     // Window resize
     Mod+Ctrl+Shift+H { set-column-width "-10%"; }

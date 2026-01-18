@@ -1,4 +1,4 @@
-{ config, pkgs, lib, envName, ... }:
+{ config, pkgs, lib, envName, inputs, ... }:
 
 {
   home.packages = with pkgs; [
@@ -7,6 +7,7 @@
     adwaita-qt
     adwaita-qt6
     hypridle
+    inputs.niri-scratchpad.packages.${pkgs.system}.default
   ];
 
   services.hypridle = {

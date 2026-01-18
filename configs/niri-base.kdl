@@ -58,10 +58,22 @@ window-rule {
     opacity 0.9
 }
 
+// Scratchpad terminal
+window-rule {
+    match app-id="kitty-scratch"
+    open-on-workspace "scratch"
+    open-floating true
+    default-column-width { proportion 0.75; }
+    default-window-height { proportion 0.6; }
+}
+
 binds {
     // Terminal
     Mod+Q { spawn-sh "USE_TMUX=1 kitty"; }
     Mod+Shift+Q { spawn "kitty"; }
+
+    // Scratchpad terminal (kitty + tmux)
+    Mod+Space { spawn-sh "nscratch -id kitty-scratch -a -s 'kitty --class kitty-scratch -e tmux new-session -A -s scratch'"; }
 
     // Launcher (DMS Spotlight - Hyprland準拠)
     Mod+R { spawn-sh "dms ipc call spotlight toggle"; }
@@ -152,6 +164,7 @@ binds {
 }
 
 spawn-at-startup "fcitx5"
+spawn-at-startup "kitty" "--class" "kitty-scratch" "-e" "tmux" "new-session" "-A" "-s" "scratch"
 
 // Monitor configuration
 output "DP-3" {
@@ -162,3 +175,16 @@ output "DP-3" {
 window-rule {
     draw-border-with-background false
 }
+
+// Workspaces (must be declared explicitly for scratchpad to work correctly)
+workspace "1"
+workspace "2"
+workspace "3"
+workspace "4"
+workspace "5"
+workspace "6"
+workspace "7"
+workspace "8"
+workspace "9"
+workspace "10"
+workspace "scratch"

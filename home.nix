@@ -20,6 +20,7 @@ in
   nixpkgs.config.allowUnfree = true;
 
   home.packages = with pkgs; [
+    nb
     gh
     jq
     wget

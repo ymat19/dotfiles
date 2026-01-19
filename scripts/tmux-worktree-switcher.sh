@@ -16,7 +16,7 @@ local_branches=$(git branch --format='%(refname:short)' | sort -u)
 remote_branches=$(git branch -r --format='%(refname:short)' | sed 's|^origin/||' | { grep -v '^HEAD$' || true; } | sort -u)
 
 # 優先度順にマージ（重複除去）
-selected=$(
+branch_list=$(
 {
     echo "[+] Create new branch"
     echo "$worktree_branches" | while read -r b; do
@@ -28,7 +28,10 @@ selected=$(
     echo "$remote_branches" | while read -r b; do
         [[ -n "$b" ]] && ! echo "$local_branches" | grep -qx "$b" && ! echo "$worktree_branches" | grep -qx "$b" && echo "[remote] $b"
     done
-} | fzf --height=80% --layout=reverse --border --ansi \
+}
+)
+
+selected=$(echo "$branch_list" | fzf --height=80% --layout=reverse --border --ansi \
     --header="Select branch (Repo: $REPO_NAME)" \
     --preview='
         if [[ {} == "[+] Create new branch" ]]; then

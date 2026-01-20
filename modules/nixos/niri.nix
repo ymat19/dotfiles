@@ -36,12 +36,13 @@
   # Niri KDL設定ファイル（envName別に動的生成）
   xdg.configFile."niri/config.kdl" = let
     baseConfig = builtins.readFile ../../configs/niri-base.kdl;
+    resizeScript = "${config.xdg.configHome}/niri/niri-resize-scratch.sh";
 
     # Air専用キーバインドを既存のbindsブロック内に追加
     airKeybinds = lib.optionalString (envName == "air") ''
     // Air (Apple Silicon) specific keybinds
-    Mod+Z { spawn "niri" "msg" "output" "eDP-1" "scale" "1.0666667"; }
-    Mod+Shift+Z { spawn "niri" "msg" "output" "eDP-1" "scale" "1.0"; }
+    Mod+Z { spawn-sh "niri msg output eDP-1 scale 1.0666667 && ${resizeScript}"; }
+    Mod+Shift+Z { spawn-sh "niri msg output eDP-1 scale 1.0 && ${resizeScript}"; }
     Mod+I { spawn "niri" "msg" "input" "device" "apple-mtp-multi-touch" "enabled" "true"; }
     Mod+Shift+I { spawn "niri" "msg" "input" "device" "apple-mtp-multi-touch" "enabled" "false"; }
 '';
@@ -49,8 +50,8 @@
     # Dyna専用キーバインドを既存のbindsブロック内に追加
     dynaKeybinds = lib.optionalString (envName == "dyna") ''
     // Dyna specific keybinds
-    Mod+Z { spawn "niri" "msg" "output" "DP-1" "mode" "1920x1080@60"; }
-    Mod+Shift+Z { spawn "niri" "msg" "output" "DP-1" "mode" "3440x1440@59.999"; }
+    Mod+Z { spawn-sh "niri msg output DP-1 mode 1920x1080@60 && ${resizeScript}"; }
+    Mod+Shift+Z { spawn-sh "niri msg output DP-1 mode 3440x1440@59.999 && ${resizeScript}"; }
 '';
 
     # bindsブロック内の「Media keys」直前に環境別キーバインドを挿入
@@ -85,6 +86,12 @@ output "eDP-1" {
 '';
   in {
     text = configWithEnvBinds + airOutput + dynaOutput;
+  };
+
+  # Scratchpad resize script
+  xdg.configFile."niri/niri-resize-scratch.sh" = {
+    source = ../../configs/niri-resize-scratch.sh;
+    executable = true;
   };
 
   # GTK/Qt設定（hyprland.nixから継承）

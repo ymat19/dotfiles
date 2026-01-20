@@ -20,13 +20,13 @@ branch_list=$(
 {
     echo "[+] Create new branch"
     echo "$worktree_branches" | while read -r b; do
-        [[ -n "$b" ]] && echo "[WT] $b"
+        [[ -n "$b" ]] && echo "[WT] $b" || true
     done
     echo "$local_branches" | while read -r b; do
-        [[ -n "$b" ]] && ! echo "$worktree_branches" | grep -qx "$b" && echo "[local] $b"
+        { [[ -n "$b" ]] && ! echo "$worktree_branches" | grep -qx "$b" && echo "[local] $b"; } || true
     done
     echo "$remote_branches" | while read -r b; do
-        [[ -n "$b" ]] && ! echo "$local_branches" | grep -qx "$b" && ! echo "$worktree_branches" | grep -qx "$b" && echo "[remote] $b"
+        { [[ -n "$b" ]] && ! echo "$local_branches" | grep -qx "$b" && ! echo "$worktree_branches" | grep -qx "$b" && echo "[remote] $b"; } || true
     done
 }
 )

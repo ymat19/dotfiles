@@ -38,6 +38,10 @@
       url = "github:Kyure-A/agent-skills-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    anthropic-skills = {
+      url = "github:anthropics/skills";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

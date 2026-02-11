@@ -47,6 +47,10 @@ in
   programs.agent-skills = {
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
+    sources.anthropic = {
+      path = inputs.anthropic-skills;
+      subdir = "skills";
+    };
     skills.enableAll = true;
     targets.claude.enable = true;
     targets.codex = {

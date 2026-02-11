@@ -1,21 +1,22 @@
 ---
 name: screenshot
-description: Analyze screenshots taken by the user. Use when the user asks about a screenshot or wants to analyze an image from ~/Pictures/.
+description: Analyze screenshots from the clipboard. Use when the user asks about a screenshot or wants to analyze a copied image.
 ---
 
 # Screenshot Analysis Skill
 
-A skill for referencing and analyzing screenshots taken by the user.
+A skill for analyzing screenshots from the clipboard.
 
 ## Instructions
 
 When the user asks about a screenshot:
 
-1. **Determine the screenshot path**
-   - If the user provides a path or timestamp, use it.
-   - If not provided, automatically pick the most recently modified file in `~/Pictures/` (saved with timestamp-style filenames).
+1. **Get the image from clipboard**
+   - Run `wl-paste > /tmp/clipboard-screenshot.png` to save the clipboard image to a temp file.
+   - If the user provides a specific file path, use that instead.
 
 2. **Read the image using the Read tool**
+   - Read `/tmp/clipboard-screenshot.png` (or the provided path)
    - Carefully examine the image content
    - Check UI elements, error messages, text, and visual indicators
 

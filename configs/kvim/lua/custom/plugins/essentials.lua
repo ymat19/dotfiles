@@ -3,6 +3,6 @@ return {
   { 'rhysd/clever-f.vim' },
   { 'kylechui/nvim-surround' },
   { 'gbprod/substitute.nvim' },
-  { 'ggandor/leap.nvim' },
+  { 'https://codeberg.org/andyg/leap.nvim' },
   { 'monaqa/dial.nvim' },
 }

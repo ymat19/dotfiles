@@ -95,7 +95,7 @@ binds {
 
     // Screenshot (Niri native)
     Mod+S { screenshot-screen; }  // 画面全体
-    Mod+Shift+S { screenshot; }   // インタラクティブ選択
+    Mod+Shift+S { spawn-sh "grim -g \"$(slurp)\" - | satty -f -"; }   // インタラクティブ選択 → sattyで編集
 
     // Focus movement (Vim-style)
     Mod+H { focus-column-left; }

@@ -7,6 +7,9 @@
     adwaita-qt
     adwaita-qt6
     hypridle
+    grim
+    slurp
+    satty
     inputs.niri-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 

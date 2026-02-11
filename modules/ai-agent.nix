@@ -31,16 +31,34 @@ let
   };
 in
 {
+  imports = [
+    inputs.agent-skills-nix.homeManagerModules.default
+  ];
+
   home.packages = lib.mkAfter [
     inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
     inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;
-  home.file.".claude/skills".source = ../configs/claude-code/skills;
   home.file.".claude/settings.json".source = settingsJson;
   home.file.".codex/AGENTS.md".source = ../configs/claude-code/CLAUDE.md;
-  home.file.".codex/skills".source = ../configs/claude-code/skills;
+
+  programs.agent-skills = {
+    enable = true;
+    sources.local.path = ../configs/claude-code/skills;
+    sources.anthropic = {
+      path = inputs.anthropic-skills;
+      subdir = "skills";
+    };
+    skills.enableAll = true;
+    targets.claude.enable = true;
+    targets.codex = {
+      enable = true;
+      dest = "$HOME/.codex/skills";
+      structure = "symlink-tree";
+    };
+  };
 
   home.activation.mergeMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''
     CLAUDE_JSON="$HOME/.claude.json"

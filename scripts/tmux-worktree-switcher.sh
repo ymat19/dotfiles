@@ -49,7 +49,7 @@ selected=$(echo "$branch_list" | fzf --height=80% --layout=reverse --border --an
 if [[ "$selected" == "[+] Create new branch" ]]; then
     read -rp "New branch name: " branch
     [[ -z "$branch" ]] && exit 0
-    git branch "$branch"
+    git branch "$branch" main
 else
     branch=$(echo "$selected" | sed 's/^\[[^]]*\] //')
 fi

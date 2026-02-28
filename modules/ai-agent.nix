@@ -36,8 +36,8 @@ in
   ];
 
   home.packages = lib.mkAfter [
-    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
+    inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code
+    inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex
   ];
 
   home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;

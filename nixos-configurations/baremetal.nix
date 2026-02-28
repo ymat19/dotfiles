@@ -103,7 +103,10 @@
   programs.firefox.enable = true;
 
   programs.niri.enable = true;
-  programs.dms-shell.enable = true;
+  programs.dms-shell = {
+    enable = true;
+    enableCalendarEvents = false; # khal build is broken with sphinx 9.1.0
+  };
   services.displayManager.dms-greeter = {
     enable = true;
     compositor.name = "niri";  # Or "hyprland" or "sway"

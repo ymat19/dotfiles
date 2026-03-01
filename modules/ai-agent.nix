@@ -47,6 +47,19 @@
       日本語で応答してください。
     '';
     settings = {
+      hooks = {
+        PreToolUse = [
+          {
+            matcher = "Bash";
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/rtk-rewrite.sh";
+              }
+            ];
+          }
+        ];
+      };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
       };

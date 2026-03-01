@@ -47,6 +47,7 @@
       日本語で応答してください。
     '';
     settings = {
+      skipDangerousModePermissionPrompt = true;
       hooks = {
         PreToolUse = [
           {

@@ -13,6 +13,7 @@
       (llmPkg "agent-browser")
       (llmPkg "ccusage")
       (llmPkg "rtk")
+      (llmPkg "workmux")
     ];
 
   home.file.".claude/statusline.sh" = {
@@ -124,6 +125,10 @@
     };
     sources.agent-browser = {
       path = inputs.agent-browser;
+      subdir = "skills";
+    };
+    sources.workmux = {
+      path = inputs.workmux-skills;
       subdir = "skills";
     };
     skills.enableAll = true;

@@ -50,6 +50,10 @@
       url = "github:vercel-labs/agent-browser";
       flake = false;
     };
+    workmux-skills = {
+      url = "github:raine/workmux";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

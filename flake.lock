@@ -432,6 +432,7 @@
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",
         "try": "try",
+        "workmux-skills": "workmux-skills",
         "xremap": "xremap",
         "zen-browser": "zen-browser"
       }
@@ -518,6 +519,22 @@
       "original": {
         "owner": "ymat19",
         "repo": "try",
+        "type": "github"
+      }
+    },
+    "workmux-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772290067,
+        "narHash": "sha256-Ti8zrgNgEYMgdoVkf6pzwsGygXgV5NKpwAPb+RKEnhM=",
+        "owner": "raine",
+        "repo": "workmux",
+        "rev": "69290124f9590b50d2515aeab6927b58bc0ec4f3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raine",
+        "repo": "workmux",
         "type": "github"
       }
     },

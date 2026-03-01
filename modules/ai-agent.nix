@@ -1,4 +1,9 @@
-{ lib, pkgs, inputs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 {
   imports = [
     inputs.agent-skills-nix.homeManagerModules.default
@@ -21,10 +26,25 @@
     executable = true;
   };
 
+  # workmux global config
+  xdg.configFile."workmux/config.yaml".text = ''
+    nerdfont: true
+    agent: claude
+    merge_strategy: rebase
+    mode: session
+    panes:
+      - command: <agent>
+        focus: true
+      - split: horizontal
+  '';
+
   mcp-servers.programs = {
     filesystem = {
       enable = true;
-      args = [ "/home" "/tmp" ];
+      args = [
+        "/home"
+        "/tmp"
+      ];
     };
     git.enable = true;
     sequential-thinking.enable = true;
@@ -57,6 +77,47 @@
               {
                 type = "command";
                 command = "~/.claude/hooks/rtk-rewrite.sh";
+              }
+            ];
+          }
+        ];
+        UserPromptSubmit = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
+              }
+            ];
+          }
+        ];
+        Notification = [
+          {
+            matcher = "permission_prompt|elicitation_dialog";
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status waiting";
+              }
+            ];
+          }
+        ];
+        PostToolUse = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
+              }
+            ];
+          }
+        ];
+        Stop = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status done";
               }
             ];
           }

@@ -1,4 +1,9 @@
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   programs.lazygit = {
@@ -18,10 +23,13 @@
 
   xdg.configFile."yazi/theme.toml".source = ../configs/yazi/theme.toml;
 
-  home.packages = lib.mkAfter (with pkgs; [
-    lazydocker
-    posting
-  ]);
+  home.packages = lib.mkAfter (
+    with pkgs;
+    [
+      lazydocker
+      posting
+    ]
+  );
 
   programs.zsh.initContent = lib.mkAfter ''
     # https://github.com/jesseduffield/lazygit/issues/1330#issuecomment-983826789
@@ -57,7 +65,7 @@
     bind g popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && lazygit"
     bind q popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && lazydocker"
 
-    # Worktree switcher
-    bind w popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && ${../scripts/tmux-worktree-switcher.sh}"
+    # Workmux dashboard
+    bind W display-popup -w 90% -h 80% -E "workmux dashboard"
   '';
 }

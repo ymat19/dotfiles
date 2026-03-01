@@ -286,6 +286,98 @@ touch ~/.gitconfig
   - Zsh: `configs/zshrc`
   - Neovim: `configs/kvim/` (機能豊富)、`configs/nvim/` (VSCode 統合用)
 
+## Claude Code 統合
+
+`modules/ai-agent.nix` が Claude Code・Codex・MCP サーバー・スキルを統合管理している。Nix Flake の入力として以下を使用:
+
+- **[llm-agents-nix](https://github.com/numtide/llm-agents.nix)**: Claude Code 本体および CLI ツール群のパッケージ提供
+- **[mcp-servers-nix](https://github.com/natsukium/mcp-servers-nix)**: MCP サーバーの宣言的管理
+- **[agent-skills-nix](https://github.com/Kyure-A/agent-skills-nix)**: スキルの宣言的管理・デプロイ
+
+### MCP サーバー
+
+| サーバー名 | 用途 |
+|------------|------|
+| **filesystem** | ファイルシステムへの読み書きアクセス（`/home`, `/tmp`） |
+| **git** | Git リポジトリ操作（status, diff, commit, branch 等） |
+| **sequential-thinking** | 段階的な思考プロセスによる問題分解・分析 |
+| **time** | タイムゾーン間の時刻取得・変換 |
+| **serena** | セマンティックなコード解析・シンボル操作（LSP ベース） |
+| **context7** | ライブラリの最新ドキュメント取得 |
+
+### スキル（SKILL）
+
+4 つのソースからスキルがデプロイされる:
+
+| ソース | スキル名 | 用途 |
+|--------|----------|------|
+| **local** | screenshot | クリップボードからスクリーンショットを取得・分析 |
+| **anthropic** | algorithmic-art | p5.js を使ったアルゴリズミックアート生成 |
+| | brand-guidelines | Anthropic ブランドガイドラインの適用 |
+| | canvas-design | コードによるビジュアルアート・デザイン作成 |
+| | doc-coauthoring | ドキュメント共同執筆ワークフロー |
+| | docx | Word ドキュメント (.docx) の作成・編集 |
+| | dogfood | Web アプリの探索的テスト・バグ発見 |
+| | frontend-design | プロダクション品質のフロントエンド UI 作成 |
+| | internal-comms | 社内コミュニケーション文書の作成 |
+| | mcp-builder | MCP サーバーの構築ガイド |
+| | pdf | PDF ファイルの操作全般 |
+| | pptx | PowerPoint プレゼンテーションの操作 |
+| | skill-creator | スキルの作成・改善・評価 |
+| | slack | Slack ワークスペースのブラウザ自動操作 |
+| | slack-gif-creator | Slack 向けアニメーション GIF 作成 |
+| | theme-factory | アーティファクトへのテーマ適用 |
+| | web-artifacts-builder | React/Tailwind/shadcn を使った複雑な Web アーティファクト構築 |
+| | webapp-testing | Playwright を使った Web アプリテスト |
+| | xlsx | スプレッドシート (.xlsx) の操作 |
+| **agent-browser** | agent-browser | ブラウザ自動操作 CLI |
+| **workmux** | coordinator | 複数 worktree エージェントのオーケストレーション |
+| | merge | ブランチのコミット・リベース・マージ |
+| | open-pr | PR 説明文の作成とブラウザでの PR オープン |
+| | rebase | スマートなコンフリクト解決付きリベース |
+| | worktree | git worktree でのタスク並列実行 |
+
+### フック（Hooks）
+
+| イベント | マッチャー | 処理内容 |
+|----------|-----------|----------|
+| **PreToolUse** | `Bash` | **rtk-rewrite**: Bash コマンドを自動的に [rtk](https://github.com/numtide/rtk) 経由に書き換え。git, cargo, npm, docker, kubectl, curl 等の主要コマンドをラップし、出力のトークン節約・レート制限を実現 |
+
+### サードパーティ CLI ツール
+
+`llm-agents-nix` からインストールされるツール:
+
+| ツール名 | 用途 |
+|----------|------|
+| **claude-code** | Anthropic 公式の CLI エージェント |
+| **codex** | OpenAI Codex CLI エージェント |
+| **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
+| **ccusage** | Claude Code の使用量トラッキング |
+| **rtk** | コマンド出力のトークン節約ラッパー（フックと連携） |
+| **workmux** | git worktree ベースの並列タスク実行 |
+
+### Neovim 連携
+
+**sidekick.nvim** (`configs/kvim/lua/custom/plugins/agent.lua`): Neovim から Claude Code / Codex を tmux スプリットで操作。
+
+| キーバインド | 機能 |
+|-------------|------|
+| `<leader>aa` | Sidekick トグル |
+| `<leader>ac` | Claude Code トグル |
+| `<leader>ao` | Codex トグル |
+| `<leader>as` | ツール選択 |
+| `<leader>ad` | セッション切断 |
+| `<leader>at` | カーソル下の単語/選択範囲を送信 |
+| `<leader>af` | 現在のファイルを送信 |
+| `<leader>ap` | プロンプトピッカー |
+| `<Tab>` | NES (Next Edit Suggestions) の適用/ジャンプ |
+
+### その他の設定
+
+- **ステータスライン**: モデル名、コンテキスト使用率バー、コスト、API 時間を表示（`configs/claude-code/statusline.sh`）
+- **パーミッション**: `bypassPermissions` モード（読み取り系コマンド、git、WebSearch 等は自動許可）
+- **環境変数**: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（チーム機能の有効化）
+
 ## 参考リンク
 
 - [Home Manager Options Search](https://home-manager-options.extranix.com/?query=&release=release-24.05)

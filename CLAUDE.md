@@ -12,10 +12,16 @@ sudo nixos-rebuild switch --flake .#<host> --impure
 # スタンドアロン（非NixOS）環境
 home-manager switch --flake . --impure
 
-# 初回rebuild（キャッシュ未設定マシン）
+# 初回rebuild（キャッシュ未設定 NixOS マシン）
 sudo nixos-rebuild switch --flake .#<host> --impure \
   --option extra-substituters "https://cache.numtide.com https://nixos-apple-silicon.cachix.org" \
   --option extra-trusted-public-keys "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g= nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
+
+# 初回ビルド（スタンドアロン home-manager、キャッシュ未設定）
+# flake.nix の nixConfig を有効にするため、先に trusted-users を設定する
+echo "trusted-users = root $(whoami)" | sudo tee -a /etc/nix/nix.conf
+sudo systemctl restart nix-daemon
+home-manager switch --flake . --impure
 
 # Nix flake の構文チェック
 nix flake check --no-build

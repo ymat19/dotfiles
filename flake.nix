@@ -46,6 +46,10 @@
       url = "github:anthropics/skills";
       flake = false;
     };
+    agent-browser = {
+      url = "github:vercel-labs/agent-browser";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

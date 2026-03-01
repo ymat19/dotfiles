@@ -5,11 +5,22 @@
     inputs.mcp-servers-nix.homeManagerModules.default
   ];
 
+  home.packages =
+    let
+      llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
+    in
+    [
+      (llmPkg "agent-browser")
+      (llmPkg "ccusage")
+      (llmPkg "rtk")
+    ];
+
+  home.file.".claude/statusline.sh" = {
+    source = ../configs/claude-code/statusline.sh;
+    executable = true;
+  };
+
   mcp-servers.programs = {
-    playwright = {
-      enable = true;
-      args = [ "--isolated" ];
-    };
     filesystem = {
       enable = true;
       args = [ "/home" "/tmp" ];
@@ -38,6 +49,10 @@
     settings = {
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      };
+      statusLine = {
+        type = "command";
+        command = "~/.claude/statusline.sh";
       };
       permissions = {
         defaultMode = "bypassPermissions";
@@ -91,6 +106,10 @@
     sources.local.path = ../configs/claude-code/skills;
     sources.anthropic = {
       path = inputs.anthropic-skills;
+      subdir = "skills";
+    };
+    sources.agent-browser = {
+      path = inputs.agent-browser;
       subdir = "skills";
     };
     skills.enableAll = true;

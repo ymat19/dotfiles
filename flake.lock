@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "agent-browser": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772301830,
+        "narHash": "sha256-tfWSZi+wJinVOtVOMQ7NDJd/5oTKXq/AyKeapcGEqhk=",
+        "owner": "vercel-labs",
+        "repo": "agent-browser",
+        "rev": "14ec5b5ffa1a8ea596c6799b3c6d06418140d621",
+        "type": "github"
+      },
+      "original": {
+        "owner": "vercel-labs",
+        "repo": "agent-browser",
+        "type": "github"
+      }
+    },
     "agent-skills-nix": {
       "inputs": {
         "home-manager": "home-manager",
@@ -405,6 +421,7 @@
     },
     "root": {
       "inputs": {
+        "agent-browser": "agent-browser",
         "agent-skills-nix": "agent-skills-nix",
         "anthropic-skills": "anthropic-skills",
         "apple-silicon": "apple-silicon",

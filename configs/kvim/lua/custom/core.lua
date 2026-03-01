@@ -35,6 +35,11 @@ vim.keymap.set('n', '<C-e>', function()
   vim.cmd 'edit!'
 end, { desc = 'Reload current file' })
 vim.keymap.set('t', '<C-q>', [[<C-\><C-n><C-w>w]], { noremap = true })
+vim.keymap.set('n', '<C-p>', function()
+  local path = vim.fn.expand '%:p'
+  vim.fn.setreg('+', path)
+  vim.notify(path, vim.log.levels.INFO, { title = 'Copied path' })
+end, { desc = 'Copy current file path to clipboard' })
 
 -- Common Pugins
 require('substitute').setup {}

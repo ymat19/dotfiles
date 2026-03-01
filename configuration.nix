@@ -19,6 +19,14 @@
     ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.extra-substituters = [
+    "https://cache.numtide.com"
+    "https://nixos-apple-silicon.cachix.org"
+  ];
+  nix.settings.extra-trusted-public-keys = [
+    "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    "nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
+  ];
 
   nixpkgs.config.allowUnfree = true;
 

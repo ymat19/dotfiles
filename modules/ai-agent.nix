@@ -1,54 +1,134 @@
 { lib, pkgs, inputs, ... }:
-let
-  servers = inputs.mcp-servers-nix.packages.${pkgs.stdenv.hostPlatform.system};
-  codexBaseConfig = ../configs/codex/config.toml;
-
-  memoryWrapper = pkgs.writeShellScript "mcp-server-memory-wrapper" ''
-    export MEMORY_FILE_PATH="$PWD/.memory.json"
-    exec ${servers.mcp-server-memory}/bin/mcp-server-memory "$@"
-  '';
-
-  mcpServersJson = pkgs.substitute {
-    src = ../configs/claude-code/mcp-servers.json;
-    substitutions = [
-      "--replace" "@PLAYWRIGHT_BIN@" "${servers.playwright-mcp}/bin/mcp-server-playwright"
-      "--replace" "@CHROMIUM_BIN@" "${pkgs.chromium}/bin/chromium"
-      "--replace" "@FILESYSTEM_BIN@" "${servers.mcp-server-filesystem}/bin/mcp-server-filesystem"
-      "--replace" "@GIT_BIN@" "${servers.mcp-server-git}/bin/mcp-server-git"
-      "--replace" "@MEMORY_BIN@" "${memoryWrapper}"
-      "--replace" "@SEQUENTIAL_THINKING_BIN@" "${servers.mcp-server-sequential-thinking}/bin/mcp-server-sequential-thinking"
-      "--replace" "@TIME_BIN@" "${servers.mcp-server-time}/bin/mcp-server-time"
-      "--replace" "@SERENA_BIN@" "${servers.serena}/bin/serena"
-      "--replace" "@CONTEXT7_BIN@" "${servers.context7-mcp}/bin/context7-mcp"
-    ];
-  };
-
-  settingsJson = pkgs.substitute {
-    src = ../configs/claude-code/settings.json;
-    substitutions = [
-      "--replace" "@NIXFMT@" "${pkgs.nixfmt}/bin/nixfmt"
-    ];
-  };
-in
 {
   imports = [
     inputs.agent-skills-nix.homeManagerModules.default
+    inputs.mcp-servers-nix.homeManagerModules.default
   ];
 
-  home.packages = lib.mkAfter [
-    inputs.claude-code-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-    inputs.codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  home.packages =
+    let
+      llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
+    in
+    [
+      (llmPkg "agent-browser")
+      (llmPkg "ccusage")
+      (llmPkg "rtk")
+      (llmPkg "workmux")
+    ];
 
-  home.file.".claude/CLAUDE.md".source = ../configs/claude-code/CLAUDE.md;
-  home.file.".claude/settings.json".source = settingsJson;
-  home.file.".codex/AGENTS.md".source = ../configs/claude-code/CLAUDE.md;
+  home.file.".claude/statusline.sh" = {
+    source = ../configs/claude-code/statusline.sh;
+    executable = true;
+  };
+
+  mcp-servers.programs = {
+    filesystem = {
+      enable = true;
+      args = [ "/home" "/tmp" ];
+    };
+    git.enable = true;
+    sequential-thinking.enable = true;
+    time.enable = true;
+    serena = {
+      enable = true;
+      enableWebDashboard = false;
+    };
+    context7.enable = true;
+  };
+
+  programs.mcp.enable = true;
+
+  programs.claude-code = {
+    enable = true;
+    package = inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.claude-code;
+    enableMcpIntegration = true;
+    memory.text = ''
+      # ユーザー設定
+
+      日本語で応答してください。
+    '';
+    settings = {
+      skipDangerousModePermissionPrompt = true;
+      hooks = {
+        PreToolUse = [
+          {
+            matcher = "Bash";
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/rtk-rewrite.sh";
+              }
+            ];
+          }
+        ];
+      };
+      env = {
+        CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      };
+      statusLine = {
+        type = "command";
+        command = "~/.claude/statusline.sh";
+      };
+      permissions = {
+        defaultMode = "bypassPermissions";
+        allow = [
+          "Bash(cat:*)"
+          "Bash(ls:*)"
+          "Bash(grep:*)"
+          "Bash(find:*)"
+          "Bash(head:*)"
+          "Bash(tail:*)"
+          "Bash(less:*)"
+          "Bash(git:*)"
+          "Bash(journalctl:*)"
+          "Bash(socat - UNIX-CONNECT:/run/user/1000/colorshell.sock)"
+          "WebFetch(domain:benz.gitbook.io)"
+          "WebSearch"
+          "WebFetch(domain:github.com)"
+          "WebFetch(domain:www.pomerium.com)"
+          "WebFetch(domain:code.claude.com)"
+          "WebFetch(domain:dev.to)"
+          "Read(*)"
+          "Glob(*)"
+          "Grep(*)"
+        ];
+      };
+    };
+  };
+
+  programs.codex = {
+    enable = true;
+    package = inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex;
+    enableMcpIntegration = true;
+    custom-instructions = ''
+      # ユーザー設定
+
+      日本語で応答してください。
+    '';
+    settings = {
+      model_reasoning_effort = "high";
+      tools = {
+        web_search = true;
+      };
+      features = {
+        skills = true;
+      };
+    };
+  };
 
   programs.agent-skills = {
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
     sources.anthropic = {
       path = inputs.anthropic-skills;
+      subdir = "skills";
+    };
+    sources.agent-browser = {
+      path = inputs.agent-browser;
+      subdir = "skills";
+    };
+    sources.workmux = {
+      path = inputs.workmux-skills;
       subdir = "skills";
     };
     skills.enableAll = true;
@@ -59,111 +139,4 @@ in
       structure = "symlink-tree";
     };
   };
-
-  home.activation.mergeMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    CLAUDE_JSON="$HOME/.claude.json"
-    MCP_SERVERS="${mcpServersJson}"
-
-    if [ -f "$CLAUDE_JSON" ]; then
-      # 既存のファイルがある場合、mcpServersだけを上書き
-      ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_SERVERS" '. + {"mcpServers": $mcp[0]}' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp"
-      mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
-    else
-      # 既存のファイルがない場合、mcpServersだけを含むJSONを作成
-      ${pkgs.jq}/bin/jq -n --slurpfile mcp "$MCP_SERVERS" '{"mcpServers": $mcp[0]}' > "$CLAUDE_JSON"
-    fi
-  '';
-
-  home.activation.mergeCodexMcpServers = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    export CODEX_HOME="''${CODEX_HOME:-$HOME/.codex}"
-    export MCP_SERVERS_JSON="${mcpServersJson}"
-    export BASE_CODEX_CONFIG="${codexBaseConfig}"
-
-    mkdir -p "$CODEX_HOME"
-
-    ${pkgs.python3}/bin/python - <<'PY'
-import copy
-import json
-import os
-import re
-import tomllib
-from pathlib import Path
-
-codex_home = Path(os.environ["CODEX_HOME"])
-config_path = codex_home / "config.toml"
-
-def format_key(key: str) -> str:
-    if re.fullmatch(r"[A-Za-z0-9_-]+", key):
-        return key
-    return json.dumps(key)
-
-def format_value(value):
-    if isinstance(value, str):
-        return json.dumps(value)
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    if isinstance(value, (int, float)):
-        return str(value)
-    if isinstance(value, list):
-        return "[" + ", ".join(format_value(v) for v in value) + "]"
-    if isinstance(value, dict):
-        return None
-    raise TypeError(f"Unsupported type for TOML serialization: {type(value)}")
-
-def dump_table(prefix: str, table: dict, lines: list[str]) -> None:
-    simple = {}
-    subtables = {}
-    for key, val in table.items():
-        if isinstance(val, dict):
-            subtables[key] = val
-        else:
-            simple[key] = val
-
-    if prefix:
-        lines.append(f"[{prefix}]")
-
-    for key, val in simple.items():
-        rendered = format_value(val)
-        if rendered is None:
-            continue
-        lines.append(f"{format_key(key)} = {rendered}")
-
-    if prefix and (simple or subtables):
-        lines.append("")
-
-    for key, val in subtables.items():
-        child_prefix = f"{prefix}.{format_key(key)}" if prefix else format_key(key)
-        dump_table(child_prefix, val, lines)
-
-def to_toml(data: dict) -> str:
-    result: list[str] = []
-    dump_table("", data, result)
-    while result and result[-1] == "":
-        result.pop()
-    return "\n".join(result) + ("\n" if result else "")
-
-def deep_merge(base: dict, override: dict) -> dict:
-    for key, val in override.items():
-        if isinstance(val, dict) and isinstance(base.get(key), dict):
-            base[key] = deep_merge(base[key], val)
-        else:
-            base[key] = val
-    return base
-
-base_config = tomllib.loads(Path(os.environ["BASE_CODEX_CONFIG"]).read_text())
-config: dict = copy.deepcopy(base_config)
-
-if config_path.exists():
-    existing = tomllib.loads(config_path.read_text())
-    config = deep_merge(config, existing)
-
-with open(os.environ["MCP_SERVERS_JSON"], "r", encoding="utf-8") as f:
-    mcp_servers = json.load(f)
-
-config["mcp_servers"] = config.get("mcp_servers", {})
-config["mcp_servers"].update(mcp_servers)
-
-config_path.write_text(to_toml(config))
-PY
-  '';
 }

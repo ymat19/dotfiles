@@ -1,6 +1,6 @@
 ---
 name: coordinator-pr
-description: Orchestrate multiple worktree agents with PR workflow. Like /coordinator but opens PRs instead of merging to main.
+description: Orchestrate multiple worktree agents with topic-branch PR workflow. Merges all work into a single topic branch, then opens one unified PR.
 allowed-tools: Bash, Write, Read, Task
 disable-model-invocation: true
 ---
@@ -9,10 +9,19 @@ disable-model-invocation: true
 
 You are a coordinator agent. You orchestrate multiple worktree agents using
 `workmux` CLI commands. You do NOT implement tasks yourself. You spawn agents,
-monitor them, send instructions, and open PRs.
+monitor them, send instructions, and trigger merges.
 
-**This is the PR workflow variant.** Completed branches are pushed and opened as
-pull requests — never merged directly into main.
+**You MUST NOT run any shell commands other than `workmux`, `git`, and `gh`.**
+Do not run tests, linters, build commands, or any analysis tools directly.
+All investigation and implementation work — including test execution and
+debugging — must be delegated to worktree agents. The coordinator's context
+window must be preserved for orchestration state (agent statuses, capture
+outputs, workflow progress). Context compaction must never occur — if it does,
+you lose track of agent states and the entire coordination breaks down.
+
+**This is the PR workflow variant.** All agent branches are merged into a shared
+topic branch (not main). After all work is integrated, you open a single unified
+PR from the topic branch to main.
 
 ## Core Concepts
 
@@ -20,12 +29,26 @@ pull requests — never merged directly into main.
   worktree/branch
 - **Handle**: the worktree directory name, used to address agents in all
   commands
+- **Topic branch**: a single integration branch created at the start. All agent
+  branches are based on and merged back into this branch. The final PR is opened
+  from this branch to main.
 - **Statuses**: `working` (processing), `waiting` (needs user input), `done`
   (finished). Set automatically by agent hooks. Agents typically go `working` ->
   `done`; `waiting` only occurs if the agent prompts for input
 - Agents run in background tmux windows; you interact via CLI only
 
 ## Command Reference
+
+### Create Topic Branch
+
+Before spawning agents, create a topic branch from main:
+
+```bash
+git switch -c topic/my-feature main
+git push -u origin topic/my-feature
+```
+
+All agents will branch from this topic branch.
 
 ### Spawn Agents
 
@@ -57,9 +80,9 @@ cat > "$tmpfile_b" << 'EOF'
 Write API tests...
 EOF
 
-# Step 2: Spawn all agents (in parallel, after ALL files exist)
-workmux add auth-module -b -P "$tmpfile_a"
-workmux add api-tests -b -P "$tmpfile_b"
+# Step 2: Spawn all agents from topic branch (in parallel, after ALL files exist)
+workmux add auth-module -b --base topic/my-feature -P "$tmpfile_a"
+workmux add api-tests -b --base topic/my-feature -P "$tmpfile_b"
 ```
 
 Flags:
@@ -68,7 +91,7 @@ Flags:
 - `-P <file>`: prompt file (contents sent to agent on launch)
 - `-p <text>`: inline prompt (short tasks only)
 - `--name <handle>`: explicit handle name (otherwise derived from branch)
-- `--base <branch>`: base branch to branch from (default: current)
+- `--base <branch>`: base branch to branch from (**always specify the topic branch**)
 
 ### Monitor Status
 
@@ -145,22 +168,39 @@ workmux run agent-a --keep -- ./scripts/deploy.sh
 
 The command runs in a new split pane. Exit code is propagated (exits 124 on timeout).
 
-### Open PR & Cleanup
+### Merge to Topic Branch & Cleanup
 
-Tell the agent to open a PR via `/open-pr`. **Do NOT use `/merge`.**
+Tell the agent to merge its branch into the topic branch via `/merge`. This lets
+the agent handle rebasing and conflict resolution.
 
 ```bash
-# Tell agent to commit, push, and open a PR
-workmux send agent-a "/open-pr"
+# Tell agent to commit, rebase onto topic branch, and merge
+workmux send agent-a "/merge"
 
 # Remove a worktree without merging
 workmux remove agent-a
 ```
 
-After PRs are merged on GitHub, clean up with:
+### Open Unified PR
+
+After all agents are merged into the topic branch, open a single PR:
 
 ```bash
-# Remove worktrees whose remote branch was deleted (after PR merge)
+# Push topic branch and open PR to main
+git switch topic/my-feature
+git push origin topic/my-feature
+gh pr create --base main --head topic/my-feature \
+  --title "feat: my feature" --body "Description of changes"
+```
+
+After the PR is merged on GitHub, clean up with:
+
+```bash
+# Delete the topic branch locally and remotely
+git branch -d topic/my-feature
+git push origin --delete topic/my-feature
+
+# Remove worktrees whose remote branch was deleted
 workmux remove --gone
 ```
 
@@ -168,14 +208,18 @@ workmux remove --gone
 
 ### Fan-out / Fan-in
 
-Spawn multiple agents, wait for all, review, open PRs:
+Spawn multiple agents, wait for all, review, merge into topic branch, open PR:
 
 ```bash
+# 0. Create topic branch
+git switch -c topic/my-feature main
+git push -u origin topic/my-feature
+
 # 1. Write ALL prompt files first (see "Spawn Agents" above)
-# 2. Spawn agents in background
-workmux add auth-module -b -P "$tmpfile_auth"
-workmux add api-tests -b -P "$tmpfile_tests"
-workmux add docs-update -b -P "$tmpfile_docs"
+# 2. Spawn agents in background (all based on topic branch)
+workmux add auth-module -b --base topic/my-feature -P "$tmpfile_auth"
+workmux add api-tests -b --base topic/my-feature -P "$tmpfile_tests"
+workmux add docs-update -b --base topic/my-feature -P "$tmpfile_docs"
 
 # 3. Confirm they started
 workmux wait auth-module api-tests docs-update --status working --timeout 120
@@ -188,33 +232,42 @@ workmux status
 workmux capture auth-module -n 50
 workmux capture api-tests -n 50
 
-# 6. Open PRs for successful agents (one at a time, wait between each)
-workmux send auth-module "/open-pr"
+# 6. Merge into topic branch (one at a time, wait between each)
+workmux send auth-module "/merge"
 workmux wait auth-module --timeout 120
-workmux send api-tests "/open-pr"
+workmux send api-tests "/merge"
 workmux wait api-tests --timeout 120
 
 # 7. Send follow-up if needed
 workmux send docs-update "also add the API reference section"
 workmux wait docs-update
-workmux send docs-update "/open-pr"
+workmux send docs-update "/merge"
+workmux wait docs-update --timeout 120
+
+# 8. Open unified PR from topic branch
+git switch topic/my-feature
+git push origin topic/my-feature
+gh pr create --base main --head topic/my-feature \
+  --title "feat: my feature" --body "Description of changes"
 ```
 
 ## Rules
 
-1. **Write ALL prompt files before spawning any agents.** Prompts should be
+1. **Create a topic branch before spawning agents.** All agents branch from and
+   merge back into this topic branch — never into main directly.
+2. **Write ALL prompt files before spawning any agents.** Prompts should be
    self-contained with full context. Agents cannot see your conversation.
-2. **Use `-b` (background) for all `workmux add` calls** so you stay in your own
+3. **Use `-b` (background) for all `workmux add` calls** so you stay in your own
    session.
-3. **Always confirm agents started** with `workmux wait --status working` before
+4. **Always specify `--base <topic-branch>`** when spawning agents.
+5. **Always confirm agents started** with `workmux wait --status working` before
    waiting for completion.
-4. **Capture and review output** before opening PRs. Do not blindly open PRs.
-5. **Open PRs one at a time** by sending `/open-pr` to each agent sequentially.
-   Wait for each to complete before starting the next.
-6. **NEVER use `/merge`.** This workflow always goes through pull requests.
-7. **Use `--timeout`** to avoid waiting forever. Handle timeout exits
+6. **Capture and review output** before merging. Do not blindly merge.
+7. **Merge one at a time** by sending `/merge` to each agent sequentially. Wait
+   for each merge to complete before starting the next to avoid conflicts.
+8. **Use `--timeout`** to avoid waiting forever. Handle timeout exits
    gracefully.
-8. **Prompt files should use relative paths** (each worktree has its own root).
-9. You are a coordinator, not an implementer. Never edit source files directly.
-10. **Cleanup after PR merge:** Use `workmux remove --gone` to clean up
-    worktrees whose remote branches have been deleted.
+9. **Prompt files should use relative paths** (each worktree has its own root).
+10. You are a coordinator, not an implementer. Never edit source files directly.
+11. **Open one unified PR** from the topic branch to main after all agents are
+    merged. Do not open per-agent PRs.

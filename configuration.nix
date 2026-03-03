@@ -28,6 +28,11 @@
     "nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
   ];
 
+  zramSwap = {
+    enable = true;
+    memoryPercent = 50;
+  };
+
   nixpkgs.config.allowUnfree = true;
 
   networking.hostName = envName; # Define your hostname.

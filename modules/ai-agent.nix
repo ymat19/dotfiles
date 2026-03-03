@@ -4,6 +4,24 @@
   inputs,
   ...
 }:
+let
+  promptEditHook = pkgs.writeShellScript "prompt-edit-hook" ''
+    INPUT=$(cat)
+    FILE_PATH=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
+    if [ -z "$FILE_PATH" ]; then
+      exit 0
+    fi
+    case "$FILE_PATH" in
+      *SKILL.md*|*CLAUDE.md*|*AGENT.md*)
+        cat <<'HOOK_JSON'
+    {"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"⚠️ プロンプトファイルの編集を検出。以下の基準で記述内容を自己レビューすること:\n1. Altitude: 具体的すぎず曖昧すぎない適切な抽象度か\n2. Signal Density: 削除しても効果が変わらないトークンがないか\n3. Structure: ヘッダー分割・論理順序・スキャン容易性\n4. Context Budget: インライン展開を避け、参照ベースの設計か\n5. Compaction Resilience: 各セクションが独立して意味を成すか\n6. Actionability: 具体例・コマンド・完了条件があるか\n根拠: \"Effective Context Engineering for AI Agents\" (Anthropic)\nあなた自身の判断ではなく、上記の原則のみに基づいて記述すること。"}}
+    HOOK_JSON
+        ;;
+    esac
+    exit 0
+  '';
+
+in
 {
   imports = [
     inputs.agent-skills-nix.homeManagerModules.default
@@ -108,6 +126,15 @@
               {
                 type = "command";
                 command = "workmux set-window-status working";
+              }
+            ];
+          }
+          {
+            matcher = "Write|Edit";
+            hooks = [
+              {
+                type = "command";
+                command = "${promptEditHook}";
               }
             ];
           }

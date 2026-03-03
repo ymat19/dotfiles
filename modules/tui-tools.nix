@@ -66,6 +66,6 @@
     bind q popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && lazydocker"
 
     # Workmux dashboard
-    bind W display-popup -w 90% -h 80% -E "workmux dashboard"
+    bind W display-popup -w 90% -h 80% -E zsh -c "source ~/.zshrc && workmux dashboard"
   '';
 }

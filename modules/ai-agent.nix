@@ -21,35 +21,6 @@ let
     exit 0
   '';
 
-  stopSessionHook = pkgs.writeShellScript "stop-session-hook" ''
-    cat > /dev/null
-    COMMITS=$(git log --oneline --since="1 hour ago" 2>/dev/null || true)
-    if [ -n "$COMMITS" ]; then
-      mkdir -p "$HOME/.claude"
-      echo "$COMMITS" > "$HOME/.claude/.last-session"
-    fi
-    exit 0
-  '';
-
-  userPromptReflectHook = pkgs.writeShellScript "user-prompt-reflect-hook" ''
-    cat > /dev/null
-    SESSION_FILE="$HOME/.claude/.last-session"
-    if [ -f "$SESSION_FILE" ] && [ -s "$SESSION_FILE" ]; then
-      COMMITS=$(cat "$SESSION_FILE")
-      rm -f "$SESSION_FILE"
-      cat <<EOF
-    [振り返り] 前回セッションの作業:
-    ''${COMMITS}
-
-    SKILL化の検討基準（該当がなければ何も言わないこと）:
-    - 同一パターンの作業を2回以上実施 → SKILL候補
-    - 複雑な多段階プロセスの標準化 → SKILL候補
-    - 暗黙知の発見 → 文書化候補
-    確実な効果が見込まれる場合のみ、タスク完了時に1-2文で提案すること。
-    EOF
-    fi
-    exit 0
-  '';
 in
 {
   imports = [
@@ -137,15 +108,6 @@ in
               }
             ];
           }
-          {
-            matcher = ".*";
-            hooks = [
-              {
-                type = "command";
-                command = "${userPromptReflectHook}";
-              }
-            ];
-          }
         ];
         Notification = [
           {
@@ -183,15 +145,6 @@ in
               {
                 type = "command";
                 command = "workmux set-window-status done";
-              }
-            ];
-          }
-          {
-            matcher = ".*";
-            hooks = [
-              {
-                type = "command";
-                command = "${stopSessionHook}";
               }
             ];
           }

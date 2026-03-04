@@ -34,19 +34,21 @@ Gather PR state and classify each PR.
 # 1. List open PRs
 gh pr list --state open --json number,title,headRefName,baseRefName,author,reviewDecision,url,mergeable,isDraft
 
-# 2. For each PR, fetch reviews
+# 2. For each PR, fetch formal reviews AND issue comments
 gh api repos/{owner}/{repo}/pulls/{number}/reviews
+gh api repos/{owner}/{repo}/issues/{number}/comments
 
-# 3. Discard PRs where isDraft is true
-# 4. Identify Claude reviews (username contains "claude": claude[bot], claude-code, claude-ai, etc.)
-# 5. Classify:
+# 3. Discard drafts. Identify Claude activity (user.login contains "claude") from both sources.
+#    Issue comments: match "### Verdict: <VERDICT>" in body to extract verdict.
+#    Formal reviews take precedence over issue comments.
+# 4. Classify:
 ```
 
-| Classification      | Condition                                 | Action         |
-| ------------------- | ----------------------------------------- | -------------- |
-| **approved**        | Claude-authored review with state APPROVED | → Phase 3      |
-| **changes-requested** | Any review with CHANGES_REQUESTED        | → Skip         |
-| **needs-review**    | No Claude review found                    | → Phase 2      |
+| Classification        | Condition                                            | Action         |
+| --------------------- | ---------------------------------------------------- | -------------- |
+| **approved**          | Formal review APPROVED, OR comment verdict PASS or PASS_REVIEW_REQUIRED | → Phase 3      |
+| **changes-requested** | Formal review CHANGES_REQUESTED, OR verdict FAIL     | → Skip         |
+| **needs-review**      | No Claude review in either source                    | → Phase 2      |
 
 If `--pr` is specified, filter to only those PR numbers. Print a summary table
 of all PRs with their classification before proceeding.

@@ -76,6 +76,7 @@ in
       日本語で応答してください。
     '';
     settings = {
+      editorMode = "vim";
       skipDangerousModePermissionPrompt = true;
       hooks = {
         PreToolUse = [
@@ -142,6 +143,7 @@ in
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+        CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "100";
       };
       statusLine = {
         type = "command";

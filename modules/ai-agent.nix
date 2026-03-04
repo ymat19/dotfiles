@@ -57,16 +57,6 @@ in
   '';
 
   mcp-servers.programs = {
-    filesystem = {
-      enable = true;
-      args = [
-        "/home"
-        "/tmp"
-      ];
-    };
-    git.enable = true;
-    sequential-thinking.enable = true;
-    time.enable = true;
     serena = {
       enable = true;
       enableWebDashboard = false;

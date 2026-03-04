@@ -44,12 +44,13 @@ backlog task list -s "To Do" --plain
 
 If To Do tasks exist, proceed to step 2 immediately.
 
-If none exist, use Bash `run_in_background` to start the file watcher:
+If none exist, call the Bash tool with `run_in_background: true` to start the
+file watcher. It blocks indefinitely (no timeout) until a task file changes:
 ```bash
 ~/.claude/backlog-watch.sh
 ```
-This blocks with zero token cost until a task file changes in `backlog/tasks/`.
-When it returns, it outputs the current To Do list. Proceed to step 2.
+The background task completes when `backlog/tasks/` changes. You will receive
+a completion notification with the current To Do list. Proceed to step 2.
 
 ### 2. Triage
 

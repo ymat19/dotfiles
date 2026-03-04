@@ -39,7 +39,15 @@ in
       # movement
       quick-scope
       clever-f-vim
-      leap-nvim
+      # codeberg.org にアクセスできない環境向けに GitHub ミラーから取得
+      (leap-nvim.overrideAttrs (_: {
+        src = pkgs.fetchFromGitHub {
+          owner = "ggandor";
+          repo = "leap.nvim";
+          rev = "0033bcaefc3cd7cf5a70b28cd356fe4860e5c074";
+          hash = "sha256-ibZH0AOm9LGqyjn7VLYQu19FfWnvHQdMzQbS0lsLaRo=";
+        };
+      }))
       # util
       substitute-nvim
       nvim-surround

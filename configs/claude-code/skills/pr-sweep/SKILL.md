@@ -32,13 +32,14 @@ Gather PR state and classify each PR.
 
 ```bash
 # 1. List open PRs
-gh pr list --state open --json number,title,headRefName,baseRefName,author,reviewDecision,url,mergeable
+gh pr list --state open --json number,title,headRefName,baseRefName,author,reviewDecision,url,mergeable,isDraft
 
 # 2. For each PR, fetch reviews
 gh api repos/{owner}/{repo}/pulls/{number}/reviews
 
-# 3. Identify Claude reviews (username contains "claude": claude[bot], claude-code, claude-ai, etc.)
-# 4. Classify:
+# 3. Discard PRs where isDraft is true
+# 4. Identify Claude reviews (username contains "claude": claude[bot], claude-code, claude-ai, etc.)
+# 5. Classify:
 ```
 
 | Classification      | Condition                                 | Action         |

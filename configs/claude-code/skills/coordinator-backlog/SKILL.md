@@ -35,14 +35,21 @@ Run once at the beginning of the session:
 
 Repeat until the user says stop:
 
-### 1. Poll
+### 1. Watch
 
+First check for existing To Do tasks:
 ```bash
 backlog task list -s "To Do" --plain
 ```
 
-If no `To Do` tasks exist, wait 30 seconds and poll again. When new tasks
-appear, proceed to step 2.
+If To Do tasks exist, proceed to step 2 immediately.
+
+If none exist, use Bash `run_in_background` to start the file watcher:
+```bash
+~/.claude/backlog-watch.sh
+```
+This blocks with zero token cost until a task file changes in `backlog/tasks/`.
+When it returns, it outputs the current To Do list. Proceed to step 2.
 
 ### 2. Triage
 
@@ -109,7 +116,7 @@ Update completed tasks: `backlog task edit <id> -s Done`
 
 After all dispatched PR units are resolved:
 - Output summary (completed, failed, remaining, PR URLs)
-- **Return to step 1 (Poll)**
+- **Return to step 1 (Watch)**
 
 ## backlog CLI Quick Reference
 

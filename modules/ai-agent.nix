@@ -38,10 +38,16 @@ in
       (llmPkg "rtk")
       (llmPkg "workmux")
       (llmPkg "backlog-md")
+      pkgs.inotify-tools
     ];
 
   home.file.".claude/statusline.sh" = {
     source = ../configs/claude-code/statusline.sh;
+    executable = true;
+  };
+
+  home.file.".claude/backlog-watch.sh" = {
+    source = ../configs/claude-code/backlog-watch.sh;
     executable = true;
   };
 

@@ -24,11 +24,11 @@ Run once at the beginning of the session:
 1. If `backlog/config.yml` does not exist, read
    `~/.config/backlog-md/default-config.yml` and use the Write tool to create
    `backlog/config.yml` with its contents.
-2. Start Web UI if not already running:
+2. Start Web UI if port 6420 is not in use:
    ```bash
-   backlog web --no-open &
+   ss -tln sport = :6420 | grep -q 6420 || backlog browser --no-open &
    ```
-   Print the URL so the user can open it.
+   Print `http://localhost:6420` so the user can open it.
 
 ## Main Loop
 
@@ -119,7 +119,7 @@ backlog task edit <id> -s "In Progress" # change status
 backlog task edit <id> --append-notes $'note'
 backlog task edit <id> --final-summary "summary"
 backlog board --plain                   # board snapshot
-backlog web --no-open                   # start web UI
+backlog browser --no-open               # start web UI (port 6420)
 ```
 
 Statuses: `To Do`, `In Progress`, `Done` (case-sensitive).

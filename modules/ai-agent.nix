@@ -37,12 +37,28 @@ in
       (llmPkg "ccusage")
       (llmPkg "rtk")
       (llmPkg "workmux")
+      (llmPkg "backlog-md")
     ];
 
   home.file.".claude/statusline.sh" = {
     source = ../configs/claude-code/statusline.sh;
     executable = true;
   };
+
+  # backlog-md default project config (avoids `backlog init`)
+  xdg.configFile."backlog-md/default-config.yml".text = ''
+    project_name: "default"
+    default_status: "To Do"
+    statuses: ["To Do", "In Progress", "Done"]
+    labels: []
+    date_format: yyyy-mm-dd
+    max_column_width: 20
+    remote_operations: false
+    auto_commit: false
+    bypass_git_hooks: false
+    check_active_branches: false
+    task_prefix: "task"
+  '';
 
   # workmux global config
   xdg.configFile."workmux/config.yaml".text = ''
@@ -61,8 +77,14 @@ in
     CLAUDE_JSON="$HOME/.claude.json"
     MCP_JSON="$HOME/.config/mcp/mcp.json"
     if [ -f "$CLAUDE_JSON" ] && [ -f "$MCP_JSON" ]; then
-      ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_JSON" '.mcpServers = $mcp[0].mcpServers' \
-        "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
+      ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_JSON" '
+        .mcpServers = ($mcp[0].mcpServers + {
+          "backlog-md": {
+            "command": "backlog",
+            "args": ["mcp", "start"]
+          }
+        })
+      ' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
         && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
     fi
   '';

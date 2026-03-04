@@ -12,6 +12,7 @@
       ".playwright-mcp/"
       ".serena/"
       ".memory.json"
+      "backlog/"
     ];
     settings = {
       user = {

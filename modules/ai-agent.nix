@@ -101,6 +101,7 @@ in
       テストすること。確認なしにオプションをファイルに書き込んではならない。
     '';
     settings = {
+      autoCompactEnabled = false;
       editorMode = "vim";
       skipDangerousModePermissionPrompt = true;
       hooks = {
@@ -168,7 +169,6 @@ in
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
-        CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "100";
       };
       statusLine = {
         type = "command";

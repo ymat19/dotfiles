@@ -419,6 +419,22 @@
         "type": "github"
       }
     },
+    "openai-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772817803,
+        "narHash": "sha256-Dq3RuFb0hjFmxsnN9v3LctnoIN0DmfAe434puOSbLr0=",
+        "owner": "openai",
+        "repo": "skills",
+        "rev": "ce2535c009ef92f4065be9626ae695c9ecd77e61",
+        "type": "github"
+      },
+      "original": {
+        "owner": "openai",
+        "repo": "skills",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agent-browser": "agent-browser",
@@ -431,6 +447,7 @@
         "mcp-servers-nix": "mcp-servers-nix",
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",
+        "openai-skills": "openai-skills",
         "try": "try",
         "workmux-skills": "workmux-skills",
         "xremap": "xremap",

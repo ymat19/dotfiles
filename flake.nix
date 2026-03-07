@@ -54,6 +54,10 @@
       url = "github:raine/workmux";
       flake = false;
     };
+    openai-skills = {
+      url = "github:openai/skills";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

@@ -101,7 +101,7 @@ in
       テストすること。確認なしにオプションをファイルに書き込んではならない。
     '';
     settings = {
-      editorMode = "vim";
+      autoCompactEnabled = false;
       skipDangerousModePermissionPrompt = true;
       hooks = {
         PreToolUse = [
@@ -168,7 +168,6 @@ in
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
-        CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = "100";
       };
       statusLine = {
         type = "command";
@@ -235,6 +234,13 @@ in
     sources.workmux = {
       path = inputs.workmux-skills;
       subdir = "skills";
+    };
+    sources.openai = {
+      path = pkgs.runCommand "openai-skills-filtered" { } ''
+        cp -r ${inputs.openai-skills}/skills/.curated $out
+        chmod -R u+w $out
+        rm -rf $out/pdf $out/screenshot
+      '';
     };
     skills.enableAll = true;
     targets.claude.enable = true;

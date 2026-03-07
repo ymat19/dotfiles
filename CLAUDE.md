@@ -19,7 +19,8 @@ sudo nixos-rebuild switch --flake .#<host> --impure \
 
 # 初回ビルド（スタンドアロン home-manager、キャッシュ未設定）
 # flake.nix の nixConfig を有効にするため、先に trusted-users を設定する
-echo "trusted-users = root $(whoami)" | sudo tee -a /etc/nix/nix.conf
+# Determinate Nix の場合は nix.custom.conf に追加（nix.conf は自動生成で上書きされる）
+echo "trusted-users = root $(whoami)" | sudo tee -a /etc/nix/nix.custom.conf
 sudo systemctl restart nix-daemon
 home-manager switch --flake . --impure
 

@@ -224,8 +224,11 @@ in
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
     sources.anthropic = {
-      path = inputs.anthropic-skills;
-      subdir = "skills";
+      path = pkgs.runCommand "anthropic-skills-filtered" { } ''
+        cp -r ${inputs.anthropic-skills}/skills $out
+        chmod -R u+w $out
+        rm -rf $out/playwright $out/playwright-interactive
+      '';
     };
     sources.agent-browser = {
       path = inputs.agent-browser;

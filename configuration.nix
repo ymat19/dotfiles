@@ -42,7 +42,7 @@
   programs.nix-ld.enable = true;
 
   environment.systemPackages = with pkgs; [
-    neofetch
+    fastfetch
   ];
 
   # Allow nixos-rebuild and systemctl restart xremap without password

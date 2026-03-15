@@ -56,13 +56,15 @@ in
       - split: horizontal
   '';
 
-  # rebuild 時に ~/.claude.json の mcpServers を Nix 管理の設定で同期
+  # rebuild 時に ~/.claude.json の mcpServers と autoCompactEnabled を Nix 管理の設定で同期
   home.activation.syncClaudeMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     CLAUDE_JSON="$HOME/.claude.json"
     MCP_JSON="$HOME/.config/mcp/mcp.json"
     if [ -f "$CLAUDE_JSON" ] && [ -f "$MCP_JSON" ]; then
-      ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_JSON" '.mcpServers = $mcp[0].mcpServers' \
-        "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
+      ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_JSON" '
+        .mcpServers = $mcp[0].mcpServers |
+        .autoCompactEnabled = false
+      ' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
         && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
     fi
   '';
@@ -101,7 +103,6 @@ in
       テストすること。確認なしにオプションをファイルに書き込んではならない。
     '';
     settings = {
-      autoCompactEnabled = false;
       skipDangerousModePermissionPrompt = true;
       hooks = {
         PreToolUse = [

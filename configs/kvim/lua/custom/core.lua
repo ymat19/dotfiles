@@ -46,7 +46,7 @@ require('substitute').setup {}
 
 -- avoid confilict: surround, leap
 require('nvim-surround').setup {}
-vim.api.nvim_del_keymap('v', 'S')
+pcall(vim.api.nvim_del_keymap, 'v', 'S')
 vim.keymap.set({ 'n', 'x', 'o' }, 's', '<Plug>(leap-forward)')
 vim.keymap.set({ 'n', 'x', 'o' }, 'S', '<Plug>(leap-backward)')
 

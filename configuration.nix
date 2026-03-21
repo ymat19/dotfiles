@@ -18,6 +18,10 @@
       ./nixos-configurations/baremetal.nix
     ];
 
+  nix.settings.trusted-users = [
+    "root"
+    "@wheel"
+  ];
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.settings.extra-substituters = [
     "https://cache.numtide.com"

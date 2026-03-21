@@ -39,13 +39,13 @@ in
       # movement
       quick-scope
       clever-f-vim
-      # codeberg.org にアクセスできない環境向けに GitHub ミラーから取得
       (leap-nvim.overrideAttrs (_: {
-        src = pkgs.fetchFromGitHub {
-          owner = "ggandor";
+        src = pkgs.fetchFromGitea {
+          domain = "codeberg.org";
+          owner = "andyg";
           repo = "leap.nvim";
-          rev = "0033bcaefc3cd7cf5a70b28cd356fe4860e5c074";
-          hash = "sha256-ibZH0AOm9LGqyjn7VLYQu19FfWnvHQdMzQbS0lsLaRo=";
+          rev = "774c452da3521d4434f912b6ca6dd97318aca4b0";
+          hash = "sha256-HkLmYb0+Vu65JalaE2JuMJM74/fWAS3QJRQb4BW5esw=";
         };
       }))
       # util

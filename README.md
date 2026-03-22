@@ -331,7 +331,8 @@ touch ~/.gitconfig
 | | webapp-testing | Playwright を使った Web アプリテスト |
 | | xlsx | スプレッドシート (.xlsx) の操作 |
 | **agent-browser** | agent-browser | ブラウザ自動操作 CLI |
-| **local** | pr-sweep | Agent Teams による一括 PR レビュー＆マージ |
+| **local** | agent-team | Agent Teams のベスプラに基づくチーム編成・並列作業開始 |
+| | pr-sweep | subagents による一括 PR レビュー＆マージ |
 
 ### フック（Hooks）
 

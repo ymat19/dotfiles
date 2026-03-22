@@ -331,17 +331,16 @@ touch ~/.gitconfig
 | | webapp-testing | Playwright を使った Web アプリテスト |
 | | xlsx | スプレッドシート (.xlsx) の操作 |
 | **agent-browser** | agent-browser | ブラウザ自動操作 CLI |
-| **workmux** | coordinator | 複数 worktree エージェントのオーケストレーション |
-| | merge | ブランチのコミット・リベース・マージ |
-| | open-pr | PR 説明文の作成とブラウザでの PR オープン |
-| | rebase | スマートなコンフリクト解決付きリベース |
-| | worktree | git worktree でのタスク並列実行 |
+| **local** | agent-team | Agent Teams のベスプラに基づくチーム編成・並列作業開始 |
+| | pr-sweep | subagents による一括 PR レビュー＆マージ |
 
 ### フック（Hooks）
 
 | イベント | マッチャー | 処理内容 |
 |----------|-----------|----------|
 | **PreToolUse** | `Bash` | **rtk-rewrite**: Bash コマンドを自動的に [rtk](https://github.com/numtide/rtk) 経由に書き換え。git, cargo, npm, docker, kubectl, curl 等の主要コマンドをラップし、出力のトークン節約・レート制限を実現 |
+| **TeammateIdle** | — | 未コミットの変更があるチームメイトのアイドル遷移をブロック |
+| **TaskCompleted** | — | 未コミットの変更がある場合タスク完了を拒否 |
 
 ### サードパーティ CLI ツール
 
@@ -354,7 +353,7 @@ touch ~/.gitconfig
 | **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
 | **ccusage** | Claude Code の使用量トラッキング |
 | **rtk** | コマンド出力のトークン節約ラッパー（フックと連携） |
-| **workmux** | git worktree ベースの並列タスク実行 |
+| **workmux** | git worktree ラッパー（手動利用のみ、AI エージェントからは使用しない） |
 
 ### Neovim 連携
 

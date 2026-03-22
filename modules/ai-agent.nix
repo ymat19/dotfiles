@@ -44,6 +44,16 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/teammate-idle-gate.sh" = {
+    source = ../configs/claude-code/hooks/teammate-idle-gate.sh;
+    executable = true;
+  };
+
+  home.file.".claude/hooks/task-completed-gate.sh" = {
+    source = ../configs/claude-code/hooks/task-completed-gate.sh;
+    executable = true;
+  };
+
   # workmux global config
   xdg.configFile."workmux/config.yaml".text = ''
     nerdfont: true
@@ -91,10 +101,10 @@ in
       # コンテキスト管理
 
       Auto compact は無効化されている。コンテキストウィンドウの溢れはセッションの
-      死を意味する。大きなタスクや調査は必ず Agent ツール（サブエージェント）や
-      workmux に委譲し、メインコンテキストを温存すること。diff の直接読み込み、
-      大量のファイル読み込み、長いコマンド出力の取得は避け、サブエージェントに
-      任せる。
+      死を意味する。大きなタスクや調査は必ず Agent ツール（サブエージェント）に
+      委譲し、メインコンテキストを温存すること。並列作業が必要な場合は
+      agent-team スキルを使うこと。diff の直接読み込み、大量のファイル読み込み、
+      長いコマンド出力の取得は避け、サブエージェントに任せる。
 
       # CLI コマンド検証
 
@@ -116,36 +126,7 @@ in
             ];
           }
         ];
-        UserPromptSubmit = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status working";
-              }
-            ];
-          }
-        ];
-        Notification = [
-          {
-            matcher = "permission_prompt|elicitation_dialog";
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status waiting";
-              }
-            ];
-          }
-        ];
         PostToolUse = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status working";
-              }
-            ];
-          }
           {
             matcher = "Write|Edit";
             hooks = [
@@ -156,12 +137,22 @@ in
             ];
           }
         ];
-        Stop = [
+        TeammateIdle = [
           {
             hooks = [
               {
                 type = "command";
-                command = "workmux set-window-status done";
+                command = "~/.claude/hooks/teammate-idle-gate.sh";
+              }
+            ];
+          }
+        ];
+        TaskCompleted = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/task-completed-gate.sh";
               }
             ];
           }
@@ -233,10 +224,6 @@ in
     };
     sources.agent-browser = {
       path = inputs.agent-browser;
-      subdir = "skills";
-    };
-    sources.workmux = {
-      path = inputs.workmux-skills;
       subdir = "skills";
     };
     sources.openai = {

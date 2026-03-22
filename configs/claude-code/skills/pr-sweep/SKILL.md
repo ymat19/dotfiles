@@ -2,28 +2,36 @@
 name: pr-sweep
 description: >-
   Review all open PRs and merge approved ones. Checks for existing Claude review
-  comments, spawns parallel Agent Team members for unreviewed PRs, then
-  sequentially rebases and merges passing PRs.
+  comments, spawns parallel subagents for unreviewed PRs, then sequentially
+  rebases and merges passing PRs.
 allowed-tools: Bash, Write, Read, Task
 disable-model-invocation: true
 ---
 
 # PR Sweep — Bulk Review & Merge Coordinator
 
-You are a coordinator (team leader) that reviews and merges open PRs in bulk.
-You orchestrate review teammates via **Claude Code Agent Teams**, check existing
-Claude review comments, and sequentially rebase-merge approved PRs.
+You are a coordinator that reviews and merges open PRs in bulk. You orchestrate
+review workers via **subagents** (Task tool), check existing Claude review
+comments, and sequentially rebase-merge approved PRs.
 
 **You MUST NOT run any shell commands other than `git` and `gh`.**
 Do not read diffs, run tests, or implement fixes yourself. All review and rebase
-work must be delegated to teammates. The coordinator's context window must be
+work must be delegated to subagents. The coordinator's context window must be
 preserved for orchestration state. Context compaction must never occur.
+
+## Why subagents (not Agent Teams)
+
+Each PR reviewer works independently and reports a result (approved / changes
+requested). No inter-reviewer communication is needed. This is the textbook
+subagent use case per Anthropic's guidance:
+
+> Use subagents when you need quick, focused workers that need to report results.
 
 ## Arguments
 
 - No arguments: target all open PRs
 - `--pr 42,43`: target specific PR numbers only
-- `--base <branch>`: override merge target (used when called from coordinator-pr)
+- `--base <branch>`: override merge target
 - `--dry-run`: review only, do not merge
 
 ## Phase 1: Discovery
@@ -53,37 +61,39 @@ gh api repos/{owner}/{repo}/issues/{number}/comments
 If `--pr` is specified, filter to only those PR numbers. Print a summary table
 of all PRs with their classification before proceeding.
 
-## Phase 2: Parallel Review (Agent Teams)
+## Phase 2: Parallel Review (subagents)
 
-For PRs classified as **needs-review**, spawn review teammates in parallel.
+For PRs classified as **needs-review**, spawn one subagent per PR using the
+**Task** tool. Subagents run in parallel automatically.
 
-### 2.1 Spawn review teammates
+### 2.1 Spawn review subagents
 
-Ask Claude to create an agent team with one reviewer per PR:
+For each PR, use the Task tool with a self-contained prompt:
 
-```text
-Create an agent team to review these PRs in parallel:
-- "review-pr-42": Review PR #42 "${title}". Run `gh pr diff 42` to read the
-  diff. Review for logic correctness, security issues, performance, and style.
-  If acceptable: `gh pr review 42 --approve --body "LGTM. <summary>"`.
-  If changes needed: `gh pr review 42 --request-changes --body "<issues>"`.
-  Be concise. Focus on substantive issues, not style nitpicks.
-- "review-pr-43": Review PR #43 "${title}". <same instructions>
+```
+Task: Review PR #${number}: "${title}"
+
+1. Run `gh pr diff ${number}` to read the full diff
+2. Review for:
+   - Logic correctness and edge cases
+   - Security issues (injection, auth bypass, secrets)
+   - Performance concerns
+   - Style consistency with the codebase
+3. If the PR is acceptable:
+   `gh pr review ${number} --approve --body "LGTM. <brief summary>"`
+4. If changes are needed:
+   `gh pr review ${number} --request-changes --body "<specific issues>"`
+
+Be concise. Focus on substantive issues, not style nitpicks.
+Report back with: PR number, decision (approved/changes-requested), and a
+one-line summary.
 ```
 
-### 2.2 Wait and collect results
+### 2.2 Collect results
 
-Monitor the shared task list. Teammates will notify the leader when they
-complete their reviews. Check each teammate's review decision:
-
-```bash
-# Verify review was posted
-gh api repos/{owner}/{repo}/pulls/${number}/reviews --jq '.[-1]'
-```
-
-### 2.3 Classify results and clean up
-
-Update PR classifications based on review outcomes. Then clean up the team.
+Each subagent returns its result to the coordinator. Parse the decision
+(approved / changes-requested) from the returned summary and update the PR
+classification.
 
 ## Phase 3: Sequential Merge
 
@@ -106,12 +116,18 @@ gh pr merge ${number} --rebase --delete-branch
 
 ### 3.3 Handle conflicts
 
-If the PR has conflicts, spawn a single teammate to rebase:
+If the PR has conflicts, spawn a subagent to rebase:
 
-```text
-Spawn a teammate "rebase-pr-${number}" to rebase PR #${number}.
-Instructions: fetch origin, rebase onto ${base}, resolve conflicts preserving
-intent of both sides, then force-push with lease. If impossible, explain why.
+```
+Task: Rebase PR #${number} onto ${base}.
+
+1. Run `git fetch origin`
+2. Check out the PR branch: `gh pr checkout ${number}`
+3. Run `git rebase origin/${base}`
+4. Resolve conflicts preserving the intent of both sides
+5. Run `git push --force-with-lease`
+
+If rebase is impossible (massive conflicts, contradictory changes), report why.
 ```
 
 After successful rebase:
@@ -153,16 +169,16 @@ Print a final report:
 | All PRs already reviewed | Skip Phase 2                                    |
 | All PRs rejected        | Skip Phase 3, print summary                     |
 | Rebase fails            | Skip PR, continue to next, report at end         |
-| Teammate timeout        | Check output → clean up → skip PR                |
+| Subagent error          | Skip PR, report at end                           |
 | `--dry-run`             | Run Phase 1-2 only, skip Phase 3, report results |
 
 ## Rules
 
 1. **You are a coordinator, not a reviewer.** Never read diffs or make review
-   judgments yourself. Delegate all review work to teammates.
+   judgments yourself. Delegate all review work to subagents.
 2. **Merge one PR at a time** in ascending number order. Wait for each merge to
    complete before starting the next.
 3. **Only run `git` and `gh` commands.** No tests, builds, linters, or direct
    code edits.
-4. **Provide self-contained prompts** with full context when spawning teammates.
+4. **Subagent prompts must be self-contained** with full context.
 5. **Report all skipped PRs** with reasons in the final summary.

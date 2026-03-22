@@ -2,22 +2,22 @@
 name: pr-sweep
 description: >-
   Review all open PRs and merge approved ones. Checks for existing Claude review
-  comments, spawns parallel workmux agents for unreviewed PRs, then sequentially
-  rebases and merges passing PRs.
+  comments, spawns parallel Agent Team members for unreviewed PRs, then
+  sequentially rebases and merges passing PRs.
 allowed-tools: Bash, Write, Read, Task
 disable-model-invocation: true
 ---
 
 # PR Sweep — Bulk Review & Merge Coordinator
 
-You are a coordinator agent that reviews and merges open PRs in bulk. You
-orchestrate review agents via `workmux`, check existing Claude review comments,
-and sequentially rebase-merge approved PRs.
+You are a coordinator (team leader) that reviews and merges open PRs in bulk.
+You orchestrate review teammates via **Claude Code Agent Teams**, check existing
+Claude review comments, and sequentially rebase-merge approved PRs.
 
-**You MUST NOT run any shell commands other than `workmux`, `git`, and `gh`.**
+**You MUST NOT run any shell commands other than `git` and `gh`.**
 Do not read diffs, run tests, or implement fixes yourself. All review and rebase
-work must be delegated to worktree agents. The coordinator's context window must
-be preserved for orchestration state. Context compaction must never occur.
+work must be delegated to teammates. The coordinator's context window must be
+preserved for orchestration state. Context compaction must never occur.
 
 ## Arguments
 
@@ -53,66 +53,37 @@ gh api repos/{owner}/{repo}/issues/{number}/comments
 If `--pr` is specified, filter to only those PR numbers. Print a summary table
 of all PRs with their classification before proceeding.
 
-## Phase 2: Parallel Review (workmux)
+## Phase 2: Parallel Review (Agent Teams)
 
-For PRs classified as **needs-review**, spawn review agents in parallel.
+For PRs classified as **needs-review**, spawn review teammates in parallel.
 
-### 2.1 Write prompt files
+### 2.1 Spawn review teammates
 
-For each PR, write a self-contained prompt file:
+Ask Claude to create an agent team with one reviewer per PR:
 
-```bash
-tmpfile=$(mktemp).md
-cat > "$tmpfile" << EOF
-You are reviewing PR #${number}: "${title}"
-Base branch: ${baseRefName}
-
-## Instructions
-
-1. Run \`gh pr diff ${number}\` to read the full diff
-2. Review for:
-   - Logic correctness and edge cases
-   - Security issues (injection, auth bypass, secrets)
-   - Performance concerns
-   - Style consistency with the codebase
-3. If the PR is acceptable:
-   \`gh pr review ${number} --approve --body "LGTM. <brief summary>"\`
-4. If changes are needed:
-   \`gh pr review ${number} --request-changes --body "<specific issues>"\`
-
-Be concise. Focus on substantive issues, not style nitpicks.
-EOF
+```text
+Create an agent team to review these PRs in parallel:
+- "review-pr-42": Review PR #42 "${title}". Run `gh pr diff 42` to read the
+  diff. Review for logic correctness, security issues, performance, and style.
+  If acceptable: `gh pr review 42 --approve --body "LGTM. <summary>"`.
+  If changes needed: `gh pr review 42 --request-changes --body "<issues>"`.
+  Be concise. Focus on substantive issues, not style nitpicks.
+- "review-pr-43": Review PR #43 "${title}". <same instructions>
 ```
 
-### 2.2 Spawn agents
+### 2.2 Wait and collect results
 
-Write ALL prompt files first, THEN spawn ALL agents.
-
-```bash
-workmux add --pr ${number} --name review-pr-${number} -b -P "$tmpfile"
-```
-
-### 2.3 Wait and collect results
+Monitor the shared task list. Teammates will notify the leader when they
+complete their reviews. Check each teammate's review decision:
 
 ```bash
-# Confirm agents started
-workmux wait review-pr-${number1} review-pr-${number2} --status working --timeout 120
-
-# Wait for all to finish
-workmux wait review-pr-${number1} review-pr-${number2} --timeout 3600
-
-# Capture results (minimal lines to prevent context bloat)
-workmux capture review-pr-${number} -n 80
+# Verify review was posted
+gh api repos/{owner}/{repo}/pulls/${number}/reviews --jq '.[-1]'
 ```
 
-### 2.4 Classify results and clean up
+### 2.3 Classify results and clean up
 
-Parse each capture output to determine if the agent approved or requested
-changes. Update the PR classification accordingly. Then remove agents:
-
-```bash
-workmux remove review-pr-${number}
-```
+Update PR classifications based on review outcomes. Then clean up the team.
 
 ## Phase 3: Sequential Merge
 
@@ -133,35 +104,20 @@ gh pr view ${number} --json mergeable,mergeStateStatus
 gh pr merge ${number} --rebase --delete-branch
 ```
 
-### 3.3 Handle conflicts via workmux
+### 3.3 Handle conflicts
 
-If the PR has conflicts, delegate rebase to a workmux agent:
+If the PR has conflicts, spawn a single teammate to rebase:
 
-```bash
-tmpfile=$(mktemp).md
-cat > "$tmpfile" << 'REBASE_EOF'
-Rebase this branch onto the target base branch and resolve any conflicts.
-
-1. Run `git fetch origin`
-2. Run `git rebase origin/${base}`
-3. Resolve conflicts preserving the intent of both sides
-4. Run `git push --force-with-lease`
-
-If rebase is impossible (massive conflicts, contradictory changes), exit with a
-message explaining why.
-REBASE_EOF
-
-workmux add --pr ${number} --name rebase-pr-${number} -b -P "$tmpfile"
-workmux wait rebase-pr-${number} --status working --timeout 120
-workmux wait rebase-pr-${number} --timeout 600
-workmux capture rebase-pr-${number} -n 50
+```text
+Spawn a teammate "rebase-pr-${number}" to rebase PR #${number}.
+Instructions: fetch origin, rebase onto ${base}, resolve conflicts preserving
+intent of both sides, then force-push with lease. If impossible, explain why.
 ```
 
 After successful rebase:
 
 ```bash
 gh pr merge ${number} --rebase --delete-branch
-workmux remove rebase-pr-${number}
 ```
 
 ### 3.4 Skip on failure
@@ -197,26 +153,16 @@ Print a final report:
 | All PRs already reviewed | Skip Phase 2                                    |
 | All PRs rejected        | Skip Phase 3, print summary                     |
 | Rebase fails            | Skip PR, continue to next, report at end         |
-| Agent timeout           | Capture output → remove agent → skip PR          |
+| Teammate timeout        | Check output → clean up → skip PR                |
 | `--dry-run`             | Run Phase 1-2 only, skip Phase 3, report results |
 
 ## Rules
 
 1. **You are a coordinator, not a reviewer.** Never read diffs or make review
-   judgments yourself. Delegate all review work to workmux agents.
+   judgments yourself. Delegate all review work to teammates.
 2. **Merge one PR at a time** in ascending number order. Wait for each merge to
    complete before starting the next.
-3. **Only run `workmux`, `git`, and `gh` commands.** No tests, builds, linters,
-   or direct code edits.
-4. **Prompt files must be self-contained** with full context. Agents cannot see
-   your conversation.
-5. **Use relative paths** in prompt files (each worktree has its own root).
-6. **Capture with minimal line count** (`-n 50` to `-n 80`) to prevent context
-   compaction.
-7. **Always confirm agent startup** with `workmux wait --status working` before
-   waiting for completion.
-8. **Use `--timeout`** on all wait commands. Handle timeouts gracefully by
-   capturing, removing, and skipping.
-9. **Never force-push from the coordinator.** Only agents in their own worktrees
-   may force-push their own branches.
-10. **Report all skipped PRs** with reasons in the final summary.
+3. **Only run `git` and `gh` commands.** No tests, builds, linters, or direct
+   code edits.
+4. **Provide self-contained prompts** with full context when spawning teammates.
+5. **Report all skipped PRs** with reasons in the final summary.

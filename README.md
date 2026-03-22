@@ -331,11 +331,8 @@ touch ~/.gitconfig
 | | webapp-testing | Playwright を使った Web アプリテスト |
 | | xlsx | スプレッドシート (.xlsx) の操作 |
 | **agent-browser** | agent-browser | ブラウザ自動操作 CLI |
-| **workmux** | coordinator | 複数 worktree エージェントのオーケストレーション |
-| | merge | ブランチのコミット・リベース・マージ |
-| | open-pr | PR 説明文の作成とブラウザでの PR オープン |
-| | rebase | スマートなコンフリクト解決付きリベース |
-| | worktree | git worktree でのタスク並列実行 |
+| **local** | coordinator-pr | Agent Teams による並列 PR 実装オーケストレーション |
+| | pr-sweep | Agent Teams による一括 PR レビュー＆マージ |
 
 ### フック（Hooks）
 
@@ -354,7 +351,7 @@ touch ~/.gitconfig
 | **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
 | **ccusage** | Claude Code の使用量トラッキング |
 | **rtk** | コマンド出力のトークン節約ラッパー（フックと連携） |
-| **workmux** | git worktree ベースの並列タスク実行 |
+| **workmux** | git worktree ラッパー（手動利用のみ、AI エージェントからは使用しない） |
 
 ### Neovim 連携
 

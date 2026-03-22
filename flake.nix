@@ -50,10 +50,6 @@
       url = "github:vercel-labs/agent-browser";
       flake = false;
     };
-    workmux-skills = {
-      url = "github:raine/workmux";
-      flake = false;
-    };
     openai-skills = {
       url = "github:openai/skills";
       flake = false;

@@ -90,7 +90,7 @@ in
 
       Auto compact は無効化されている。コンテキストウィンドウの溢れはセッションの
       死を意味する。大きなタスクや調査は必ず Agent ツール（サブエージェント）や
-      workmux に委譲し、メインコンテキストを温存すること。diff の直接読み込み、
+      Agent Teams に委譲し、メインコンテキストを温存すること。diff の直接読み込み、
       大量のファイル読み込み、長いコマンド出力の取得は避け、サブエージェントに
       任せる。
 
@@ -115,52 +115,13 @@ in
             ];
           }
         ];
-        UserPromptSubmit = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status working";
-              }
-            ];
-          }
-        ];
-        Notification = [
-          {
-            matcher = "permission_prompt|elicitation_dialog";
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status waiting";
-              }
-            ];
-          }
-        ];
         PostToolUse = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status working";
-              }
-            ];
-          }
           {
             matcher = "Write|Edit";
             hooks = [
               {
                 type = "command";
                 command = "${promptEditHook}";
-              }
-            ];
-          }
-        ];
-        Stop = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status done";
               }
             ];
           }
@@ -229,10 +190,6 @@ in
     };
     sources.agent-browser = {
       path = inputs.agent-browser;
-      subdir = "skills";
-    };
-    sources.workmux = {
-      path = inputs.workmux-skills;
       subdir = "skills";
     };
     sources.openai = {

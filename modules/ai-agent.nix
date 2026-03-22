@@ -44,6 +44,16 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/teammate-idle-gate.sh" = {
+    source = ../configs/claude-code/hooks/teammate-idle-gate.sh;
+    executable = true;
+  };
+
+  home.file.".claude/hooks/task-completed-gate.sh" = {
+    source = ../configs/claude-code/hooks/task-completed-gate.sh;
+    executable = true;
+  };
+
   # workmux global config
   xdg.configFile."workmux/config.yaml".text = ''
     nerdfont: true
@@ -122,6 +132,26 @@ in
               {
                 type = "command";
                 command = "${promptEditHook}";
+              }
+            ];
+          }
+        ];
+        TeammateIdle = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/teammate-idle-gate.sh";
+              }
+            ];
+          }
+        ];
+        TaskCompleted = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/task-completed-gate.sh";
               }
             ];
           }

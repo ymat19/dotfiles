@@ -525,7 +525,6 @@
         "nixpkgs": "nixpkgs_2",
         "openai-skills": "openai-skills",
         "try": "try",
-        "workmux-skills": "workmux-skills",
         "xremap": "xremap",
         "zen-browser": "zen-browser"
       }
@@ -612,22 +611,6 @@
       "original": {
         "owner": "ymat19",
         "repo": "try",
-        "type": "github"
-      }
-    },
-    "workmux-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1774015284,
-        "narHash": "sha256-gGf/XJMc333jDuDVOviSguWnvQtOv64zWEoJ4IgUlIs=",
-        "owner": "raine",
-        "repo": "workmux",
-        "rev": "aab092e5627724f849a71f33c4615f992b8a7811",
-        "type": "github"
-      },
-      "original": {
-        "owner": "raine",
-        "repo": "workmux",
         "type": "github"
       }
     },

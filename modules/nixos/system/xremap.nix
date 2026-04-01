@@ -34,6 +34,14 @@
         }
       ];
       keymap = [
+        # F24+A → Pause (voxtype toggle via niri)
+        {
+          name = "F24+A to Pause for voxtype";
+          remap = {
+            "F24-a" = "Pause";
+          };
+        }
+
         # 既存の Ctrl‑h → Backspace
         {
           name = "Ctrl+H should be enabled on all apps as BackSpace";

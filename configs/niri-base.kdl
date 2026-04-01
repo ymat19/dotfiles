@@ -153,6 +153,9 @@ binds {
     Mod+Shift+H { focus-column-first; }
     Mod+Shift+L { focus-column-last; }
 
+    // Voice input (voxtype toggle: F24+A → Pause via xremap)
+    Pause { spawn "voxtype" "record" "toggle"; }
+
     // Quit
     Mod+Shift+C { quit; }
 

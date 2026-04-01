@@ -114,6 +114,7 @@
           ./modules/nixos/system/xremap.nix
           ./modules/nixos/system/thunar.nix
           ./modules/nixos/system/poiter-util.nix
+          ./modules/nixos/system/ollama.nix
         ]));
       in
       { } // (if requireStandalone then {

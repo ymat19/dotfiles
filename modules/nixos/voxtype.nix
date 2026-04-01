@@ -12,10 +12,19 @@ let
     pkgs.wl-clipboard
     pkgs.xclip
     pkgs.xdotool
+    pkgs.ollama
   ];
+
+  # Whisper モデルを Nix store から配置
+  whisper-model-base = pkgs.fetchurl {
+    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin";
+    hash = "sha256-YO1bw90U7qhWST0zQ0m0BXgt3K8AKNS130CINF+6Lv4=";
+  };
 
   voxtype-launcher = pkgs.writeShellScript "voxtype-launcher" ''
     export PATH="${voxtypePath}"
+    mkdir -p "$HOME/.local/share/voxtype/models"
+    ln -sf ${whisper-model-base} "$HOME/.local/share/voxtype/models/ggml-base.bin"
     exec ${pkgs.voxtype}/bin/.voxtype-wrapped --no-hotkey daemon
   '';
 in
@@ -46,6 +55,10 @@ in
     fallback_to_clipboard = true
     restore_clipboard = true
     restore_clipboard_delay_ms = 300
+
+    [output.post_process]
+    command = "ollama run gemma3:4b '以下の口述テキストを整形してください。句読点を修正し、必要に応じて改行を入れてください。整形したテキストのみを出力し、それ以外は何も出力しないでください:'"
+    timeout_ms = 30000
 
     [output.notification]
     on_recording_start = true

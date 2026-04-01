@@ -4,6 +4,7 @@ let
   # Niri の zwp_virtual_keyboard_v1 バグ (niri#2314) により
   # wtype 使用後にキーボード入力が不能になるため
   voxtypePath = lib.makeBinPath [
+    pkgs.bash
     pkgs.coreutils
     pkgs.which
     pkgs.libnotify
@@ -16,15 +17,15 @@ let
   ];
 
   # Whisper モデルを Nix store から配置
-  whisper-model-base = pkgs.fetchurl {
-    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin";
-    hash = "sha256-YO1bw90U7qhWST0zQ0m0BXgt3K8AKNS130CINF+6Lv4=";
+  whisper-model = pkgs.fetchurl {
+    url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin";
+    hash = "sha256-G+OpsgY4Z7k35k4ux0gzZKeZF+FX+pjF2UtcH//qmHs=";
   };
 
   voxtype-launcher = pkgs.writeShellScript "voxtype-launcher" ''
-    export PATH="${voxtypePath}"
+    export PATH="$HOME/.local/bin:${voxtypePath}"
     mkdir -p "$HOME/.local/share/voxtype/models"
-    ln -sf ${whisper-model-base} "$HOME/.local/share/voxtype/models/ggml-base.bin"
+    ln -sf ${whisper-model} "$HOME/.local/share/voxtype/models/ggml-small.bin"
     exec ${pkgs.voxtype}/bin/.voxtype-wrapped --no-hotkey daemon
   '';
 in
@@ -45,7 +46,7 @@ in
     max_duration_secs = 60
 
     [whisper]
-    model = "base"
+    model = "small"
     language = "ja"
     translate = false
 
@@ -57,7 +58,7 @@ in
     restore_clipboard_delay_ms = 300
 
     [output.post_process]
-    command = "ollama run gemma3:4b '以下の口述テキストを整形してください。句読点を修正し、必要に応じて改行を入れてください。整形したテキストのみを出力し、それ以外は何も出力しないでください:'"
+    command = "claude -p '音声認識の出力を補正・整形してください。誤認識と思われる単語は文脈から正しい日本語に修正してください。句読点を適切に付け、意味の区切りで改行してください。補正後のテキストのみを出力してください。' --model opus --tools \"\" --strict-mcp-config"
     timeout_ms = 30000
 
     [output.notification]

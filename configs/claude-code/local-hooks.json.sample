@@ -1,0 +1,19 @@
+# ~/.config/claude-local-hooks.json のサンプル
+# このファイルを ~/.config/claude-local-hooks.json に配置すると、
+# nixos-rebuild / home-manager switch 時に既存の Claude Code hooks とリスト結合される
+#
+# 形式: イベント名をキー、hook 定義の配列を値とする JSON
+# 既存イベントに追加する場合はリスト結合、新規イベントはそのまま追加される
+{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "/path/to/company-hook.sh"
+        }
+      ]
+    }
+  ]
+}

@@ -94,10 +94,6 @@ in
   '';
 
   mcp-servers.programs = {
-    serena = {
-      enable = true;
-      enableWebDashboard = false;
-    };
     context7.enable = true;
   };
 
@@ -127,6 +123,7 @@ in
       テストすること。確認なしにオプションをファイルに書き込んではならない。
     '';
     settings = {
+      autoMemoryEnabled = false;
       skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [

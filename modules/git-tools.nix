@@ -10,7 +10,7 @@
     ignores = [
       ".direnv/"
       ".playwright-mcp/"
-      ".serena/"
+
       ".memory.json"
     ];
     settings = {

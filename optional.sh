@@ -13,18 +13,15 @@ else
     echo "The path was not added to ghq.root."
 fi
 
-# Linux only
-if [[ "$(uname)" == "Linux" ]]; then
-  # enable clipboard on linux
-  sudo apt-get install xsel
-
-  # fix lazygit error on linux
-  sudo chmod a+rw /dev/tty
-
-  read -p "Do you want to make neovim symlink for wsl.exe? (y/N):" RESPONSE
+# Set zsh as default shell
+ZSH_PATH=$(which zsh)
+if [ -n "$ZSH_PATH" ]; then
+  read -p "Do you want to set zsh as default shell? (y/N): " RESPONSE
   if [[ "$RESPONSE" == "y" ]]; then
-      sudo ln -s $(which nvim) /usr/local/bin/nvim
-      echo "Symlink was created"
+    if ! grep -qxF "$ZSH_PATH" /etc/shells; then
+      echo "$ZSH_PATH" | sudo tee -a /etc/shells
+    fi
+    chsh -s "$ZSH_PATH"
+    echo "Default shell changed to zsh. Re-login to apply."
   fi
 fi
-

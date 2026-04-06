@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 
 {
+  # SSH先でxterm-kittyのterminfoが見つからない問題を防ぐ
+  home.packages = [ pkgs.kitty.terminfo ];
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;

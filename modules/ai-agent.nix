@@ -5,6 +5,20 @@
   ...
 }:
 let
+  # ~/.config/claude-local-hooks.json が存在すれば読み込み、既存 hooks とリスト結合する
+  # ファイル形式: { "PreToolUse": [{ "matcher": "...", "hooks": [...] }], ... }
+  extraHooksFile = /home/ymat19/.config/claude-local-hooks.json;
+  extraHooks =
+    if builtins.pathExists extraHooksFile then
+      builtins.fromJSON (builtins.readFile extraHooksFile)
+    else
+      { };
+
+  mergeHooks =
+    base:
+    lib.mapAttrs (name: baseList: baseList ++ (extraHooks.${name} or [ ])) base
+    // lib.filterAttrs (name: _: !(base ? ${name})) extraHooks;
+
   promptEditHook = pkgs.writeShellScript "prompt-edit-hook" ''
     INPUT=$(cat)
     FILE_PATH=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
@@ -114,7 +128,7 @@ in
     '';
     settings = {
       skipDangerousModePermissionPrompt = true;
-      hooks = {
+      hooks = mergeHooks {
         PreToolUse = [
           {
             matcher = "Bash";

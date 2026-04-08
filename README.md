@@ -119,7 +119,7 @@ graph TD
 
 #### Universal Modules (全環境)
 - **shell.nix**: Zsh/Bash + Starship プロンプト + Oh-my-zsh
-- **neovim.nix**: Neovim (LSP/Treesitter/Copilot)
+- **neovim.nix**: Neovim (lazy.nvim でプラグイン管理)
 - **vim.nix**: 基本的な Vim 設定
 - **tmux.nix**: ターミナルマルチプレクサ (Vi モード)
 - **git-tools.nix**: Git + Delta + GHQ + Git LFS
@@ -157,8 +157,6 @@ graph TD
     A --> D["LSP Setup<br/>lspconfig"]
     A --> E["Treesitter<br/>Syntax"]
     A --> F["Colorscheme<br/>tokyonight"]
-
-    A --> G["lua/custom/core.lua<br/>Custom Settings"]
 
     B --> H["custom/plugins/"]
     B --> I["kickstart/plugins/"]
@@ -230,6 +228,7 @@ graph TD
 | **Git** | `<leader>g` | ブランチ、ログ、ステータス、差分、lazygit |
 | **トグル** | `<leader>u` | スペル、折り返し、行番号、診断など |
 | **差分** | `<leader>d` | 差分を開く、すべて開く、閉じる |
+| **quickfix** | `]q` / `[q` | 次/前の quickfix エントリ |
 
 リーダーキー: `<space>`
 

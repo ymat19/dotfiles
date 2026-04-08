@@ -26,6 +26,9 @@ home-manager switch --flake . --impure
 
 # Nix flake の構文チェック
 nix flake check --no-build
+
+# 旧 kvim 構成のデータを削除（kvim → nvim 統合後、各ホストで1回実行）
+rm -rf ~/.local/share/kvim ~/.local/state/kvim ~/.cache/kvim
 ```
 
 ## アーキテクチャ

@@ -2,7 +2,6 @@
 
 {
   # SSH先でxterm-kittyのterminfoが見つからない問題を防ぐ
-  # kitty.terminfo は lib/kitty/terminfo/ に配置されるため、TERMINFO_DIRS に明示的に追加
   home.packages = [ pkgs.kitty.terminfo ];
   programs.zsh = {
     enable = true;
@@ -10,7 +9,7 @@
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
     syntaxHighlighting.enable = true;
     initContent = ''
-      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/lib/kitty/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
+      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
     '' + builtins.readFile ../configs/zshrc;
     oh-my-zsh = {
       enable = true;
@@ -29,7 +28,7 @@
   programs.bash = {
     enable = true;
     initExtra = ''
-      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/lib/kitty/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
+      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
     '';
   };
 

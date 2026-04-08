@@ -123,6 +123,7 @@ in
       テストすること。確認なしにオプションをファイルに書き込んではならない。
     '';
     settings = {
+      effortLevel = "high";
       editorMode = "normal";
       autoMemoryEnabled = false;
       skipDangerousModePermissionPrompt = true;

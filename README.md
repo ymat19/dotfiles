@@ -119,7 +119,7 @@ graph TD
 
 #### Universal Modules (全環境)
 - **shell.nix**: Zsh/Bash + Starship プロンプト + Oh-my-zsh
-- **neovim.nix**: Neovim (LSP/Treesitter/Copilot)
+- **neovim.nix**: Neovim (lazy.nvim でプラグイン管理)
 - **vim.nix**: 基本的な Vim 設定
 - **tmux.nix**: ターミナルマルチプレクサ (Vi モード)
 - **git-tools.nix**: Git + Delta + GHQ + Git LFS
@@ -147,18 +147,16 @@ graph TD
 - **dotnet.nix**: .NET 8.0 SDK
 - **dolphin.nix**: KDE Dolphin ファイルマネージャ
 
-### Neovim (kvim) 構成
+### Neovim 構成
 
 ```mermaid
 graph TD
-    A["kvim/init.lua<br/>Main Entry"] --> B["lazy.nvim<br/>Plugin Manager"]
+    A["nvim/init.lua<br/>Main Entry"] --> B["lazy.nvim<br/>Plugin Manager"]
 
     A --> C["Core Settings<br/>Options/Keymaps"]
     A --> D["LSP Setup<br/>lspconfig"]
     A --> E["Treesitter<br/>Syntax"]
     A --> F["Colorscheme<br/>tokyonight"]
-
-    A --> G["lua/custom/core.lua<br/>Custom Settings"]
 
     B --> H["custom/plugins/"]
     B --> I["kickstart/plugins/"]
@@ -230,6 +228,7 @@ graph TD
 | **Git** | `<leader>g` | ブランチ、ログ、ステータス、差分、lazygit |
 | **トグル** | `<leader>u` | スペル、折り返し、行番号、診断など |
 | **差分** | `<leader>d` | 差分を開く、すべて開く、閉じる |
+| **quickfix** | `]q` / `[q` | 次/前の quickfix エントリ |
 
 リーダーキー: `<space>`
 
@@ -284,7 +283,7 @@ touch ~/.gitconfig
   - Rofi: `configs/rofi.rasl`
   - Tmux: `configs/tmux.conf`
   - Zsh: `configs/zshrc`
-  - Neovim: `configs/kvim/` (機能豊富)、`configs/nvim/` (VSCode 統合用)
+  - Neovim: `configs/nvim/`
 
 ## Claude Code 統合
 
@@ -357,7 +356,7 @@ touch ~/.gitconfig
 
 ### Neovim 連携
 
-**sidekick.nvim** (`configs/kvim/lua/custom/plugins/agent.lua`): Neovim から Claude Code / Codex を tmux スプリットで操作。
+**sidekick.nvim** (`configs/nvim/lua/custom/plugins/agent.lua`): Neovim から Claude Code / Codex を tmux スプリットで操作。
 
 | キーバインド | 機能 |
 |-------------|------|

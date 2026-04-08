@@ -732,7 +732,9 @@ require('lazy').setup({
     lazy = false,
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter').setup {}
+      require('nvim-treesitter').setup {
+        auto_install = true,
+      }
 
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
@@ -814,8 +816,8 @@ vim.api.nvim_set_keymap('n', 'j', 'gj', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', 'k', 'gk', { noremap = true, silent = true })
 vim.keymap.set('n', 'L', ':bnext<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', 'H', ':bprevious<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<Tab>', ':cnext<CR>', { noremap = true, silent = true })
-vim.keymap.set('n', '<S-Tab>', ':cprevious<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', ']q', ':cnext<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '[q', ':cprevious<CR>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-e>', function()
   vim.cmd 'edit!'
 end, { desc = 'Reload current file' })

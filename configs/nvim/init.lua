@@ -18,8 +18,8 @@ vim.opt.number = true
 --  Experiment for yourself to see if you like it!
 -- vim.opt.relativenumber = true
 
--- Enable mouse mode, can be useful for resizing splits for example!
-vim.opt.mouse = 'a'
+-- Enable mouse mode only in normal mode
+vim.opt.mouse = 'n'
 
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
@@ -68,7 +68,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 10
+vim.opt.scrolloff = 5
 
 -- if performing an operation that would fail due to unsaved changes in the buffer (like `:q`),
 -- instead raise a dialog asking if you wish to save the current file(s)
@@ -796,29 +796,16 @@ require('lazy').setup({
     },
   },
 })
--- general settings
-vim.opt.number = true
+-- additional settings
 vim.opt.hlsearch = true
-vim.opt.ignorecase = true -- デフォルトで大文字・小文字を無視
-vim.opt.smartcase = true -- 大文字が含まれる場合は大文字・小文字を区別
-vim.opt.scrolloff = 5
 vim.opt.wrap = true
-vim.opt.cursorline = true
 vim.opt.cursorcolumn = true
 vim.o.expandtab = true
 vim.o.tabstop = 2
 vim.o.shiftwidth = 2
-vim.o.expandtab = true
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-vim.opt.undofile = true
 vim.opt.termguicolors = true
-vim.opt.mouse = 'n'
 vim.keymap.set({ 'n', 'v' }, '<LeftMouse>', '<Nop>')
 vim.keymap.set({ 'n', 'v' }, '<LeftRelease>', '<Nop>')
-vim.schedule(function()
-  vim.opt.clipboard = 'unnamedplus'
-end)
 
 -- key bindings
 vim.api.nvim_set_keymap('i', 'jj', '<ESC>', { noremap = true, silent = true })
@@ -908,6 +895,23 @@ require('tokyonight').setup {
   },
 }
 vim.cmd.colorscheme 'tokyonight-night'
+
+-- quick-scope highlights
+vim.cmd [[highlight QuickScopePrimary guifg='#afff5f' gui=underline ctermfg=155 cterm=underline]]
+vim.cmd [[highlight QuickScopeSecondary guifg='#5fffff' gui=underline ctermfg=81 cterm=underline]]
+
+-- nixd LSP (installed via Nix, not Mason)
+vim.lsp.config.nixd = {
+  cmd = { 'nixd' },
+  filetypes = { 'nix' },
+  root_markers = { 'flake.nix', '.git' },
+}
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'nix',
+  callback = function(args)
+    vim.lsp.enable('nixd', args.buf)
+  end,
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

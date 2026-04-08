@@ -1,10 +1,10 @@
 return {
   'dnlhc/glance.nvim',
-  event = 'VeryLazy',
-  config = function()
-    vim.keymap.set('n', '<leader>ld', '<CMD>Glance definitions<CR>')
-    vim.keymap.set('n', '<leader>lr', '<CMD>Glance references<CR>')
-    vim.keymap.set('n', '<leader>ly', '<CMD>Glance type_definitions<CR>')
-    vim.keymap.set('n', '<leader>lm', '<CMD>Glance implementations<CR>')
-  end,
+  cmd = 'Glance',
+  keys = {
+    { '<leader>ld', '<CMD>Glance definitions<CR>', desc = 'Glance Definitions' },
+    { '<leader>lr', '<CMD>Glance references<CR>', desc = 'Glance References' },
+    { '<leader>ly', '<CMD>Glance type_definitions<CR>', desc = 'Glance Type Definitions' },
+    { '<leader>lm', '<CMD>Glance implementations<CR>', desc = 'Glance Implementations' },
+  },
 }

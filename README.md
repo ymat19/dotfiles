@@ -147,11 +147,11 @@ graph TD
 - **dotnet.nix**: .NET 8.0 SDK
 - **dolphin.nix**: KDE Dolphin ファイルマネージャ
 
-### Neovim (kvim) 構成
+### Neovim 構成
 
 ```mermaid
 graph TD
-    A["kvim/init.lua<br/>Main Entry"] --> B["lazy.nvim<br/>Plugin Manager"]
+    A["nvim/init.lua<br/>Main Entry"] --> B["lazy.nvim<br/>Plugin Manager"]
 
     A --> C["Core Settings<br/>Options/Keymaps"]
     A --> D["LSP Setup<br/>lspconfig"]
@@ -284,7 +284,7 @@ touch ~/.gitconfig
   - Rofi: `configs/rofi.rasl`
   - Tmux: `configs/tmux.conf`
   - Zsh: `configs/zshrc`
-  - Neovim: `configs/kvim/` (機能豊富)、`configs/nvim/` (VSCode 統合用)
+  - Neovim: `configs/nvim/`
 
 ## Claude Code 統合
 
@@ -357,7 +357,7 @@ touch ~/.gitconfig
 
 ### Neovim 連携
 
-**sidekick.nvim** (`configs/kvim/lua/custom/plugins/agent.lua`): Neovim から Claude Code / Codex を tmux スプリットで操作。
+**sidekick.nvim** (`configs/nvim/lua/custom/plugins/agent.lua`): Neovim から Claude Code / Codex を tmux スプリットで操作。
 
 | キーバインド | 機能 |
 |-------------|------|

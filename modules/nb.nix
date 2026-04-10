@@ -5,11 +5,6 @@
     nb
   ]);
 
-  home.shellAliases = lib.mkAfter {
-    ne = "nb e 1";
-    nl = "nb tasks";
-  };
-
   programs.zsh.initExtra = ''
     # タスクを追加
     na() {

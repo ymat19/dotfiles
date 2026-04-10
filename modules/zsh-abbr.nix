@@ -97,6 +97,7 @@
       NUL = "> /dev/null 2>&1";
       LL = "2>&1 | less";
       CP = "| wl-copy";
+      V = "| vim -";
     };
   };
 }

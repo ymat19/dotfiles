@@ -20,8 +20,8 @@
   };
 
   programs.bat.enable = true;
-  programs.lsd.enable = true;
-  home.shellAliases = lib.mkAfter {
-    tree = "lsd --tree";
+  programs.lsd = {
+    enable = true;
+    enableZshIntegration = false;
   };
 }

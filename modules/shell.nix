@@ -11,18 +11,6 @@
     initContent = ''
       export TERMINFO_DIRS="${pkgs.kitty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
     '' + builtins.readFile ../configs/zshrc;
-    oh-my-zsh = {
-      enable = true;
-      # 管理が面倒なのでモノがあるかどうかは保証せず、あったら嬉しいものをとりあえず並べておく
-      plugins = [
-        "git"
-        "vi-mode"
-        "fzf"
-        "docker"
-        "terraform"
-        "aws"
-      ];
-    };
   };
 
   programs.bash = {

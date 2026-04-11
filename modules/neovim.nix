@@ -18,16 +18,7 @@ in
   home.packages = lib.mkAfter (
     with pkgs;
     [
-      nixd
-
-      # for copilot chat nvim
-      lynx
-      luajitPackages.tiktoken_core
-      lua51Packages.luarocks
-      mermaid-cli
-      ghostscript_headless
-      # for nil
-      cargo
+      typescript-language-server
     ]
   );
 

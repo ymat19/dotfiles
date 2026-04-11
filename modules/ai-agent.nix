@@ -68,6 +68,15 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/notify-send.sh" = {
+    source = ../configs/claude-code/hooks/notify-send.sh;
+    executable = true;
+  };
+
+  home.file.".claude/assets/claude-icon.png" = {
+    source = ../configs/claude-code/assets/claude-icon.png;
+  };
+
   # workmux global config
   xdg.configFile."workmux/config.yaml".text = ''
     nerdfont: true
@@ -166,6 +175,26 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/task-completed-gate.sh";
+              }
+            ];
+          }
+        ];
+        Notification = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/notify-send.sh";
+              }
+            ];
+          }
+        ];
+        Stop = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/notify-send.sh";
               }
             ];
           }

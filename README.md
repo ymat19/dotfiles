@@ -171,11 +171,8 @@ graph TD
     I --> I1["autopairs.lua<br/>Auto Brackets"]
     I --> I2["neo-tree.lua<br/>File Explorer"]
     I --> I3["debug.lua<br/>DAP Debug"]
-    I --> I4["lint.lua<br/>Linting"]
 
-    D --> D1["mason<br/>LSP Installer"]
-    D --> D2["conform<br/>Formatter"]
-    D --> D3["nvim-cmp<br/>Completion"]
+    D --> D1["nvim-cmp<br/>Completion"]
 
     style A fill:#ff6b6b
     style B fill:#4ecdc4
@@ -186,9 +183,8 @@ graph TD
 ### 主要な Neovim プラグイン
 
 #### LSP & 補完
-- **nvim-lspconfig** + **mason**: LSP サーバー管理 (lua_ls, nil, typescript-language-server)
+- **nvim-lspconfig**: LSP サーバー管理 (ts_ls, omnisharp / LSP バイナリは nixpkgs で供給)
 - **nvim-cmp** + **LuaSnip**: 自動補完とスニペット
-- **conform.nvim**: コードフォーマッター (stylua, prettier, nixpkgs-fmt)
 
 #### UI & ナビゲーション
 - **snacks.nvim**: ダッシュボード、ファイルピッカー、ターミナル統合
@@ -209,8 +205,6 @@ graph TD
 
 #### 診断と品質
 - **tiny-inline-diagnostic.nvim**: インライン診断表示
-- **lsp_signature.nvim**: 関数シグネチャヒント
-- **nvim-lint**: リンティング (markdownlint)
 - **nvim-dap**: デバッグサポート (F5-F7)
 
 ### 主要なキーバインド

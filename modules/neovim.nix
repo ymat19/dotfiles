@@ -18,10 +18,7 @@ in
   home.packages = lib.mkAfter (
     with pkgs;
     [
-      nixd
-
-      # for nil
-      cargo
+      typescript-language-server
     ]
   );
 

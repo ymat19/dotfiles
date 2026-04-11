@@ -17,11 +17,23 @@ fi
 
 summary=""
 if [ "$event" = "Stop" ] && [ -n "$transcript" ] && [ -f "$transcript" ] && command -v jq >/dev/null 2>&1; then
-  summary="$(jq -r '
+  summary="$(jq -rc '
     select(.type == "assistant")
     | [.message.content[]? | select(.type == "text") | .text]
     | join(" ")
+    | gsub("\\s+"; " ")
   ' "$transcript" 2>/dev/null | awk 'NF' | tail -n 1)"
+fi
+
+if [ -n "${CLAUDE_NOTIFY_DEBUG:-}" ]; then
+  {
+    date -Iseconds
+    printf 'event=%s\n' "$event"
+    printf 'transcript=%s\n' "$transcript"
+    printf 'summary=%s\n' "$summary"
+    printf 'payload=%s\n' "$payload"
+    printf -- '---\n'
+  } >> /tmp/claude-notify-debug.log 2>/dev/null || true
 fi
 
 case "$event" in

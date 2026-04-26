@@ -87,6 +87,11 @@ in
       - command: <agent>
         focus: true
       - split: horizontal
+    files:
+      copy:
+        - .env
+    post_create:
+      - pnpm install || true
   '';
 
   # rebuild 時に ~/.claude.json の mcpServers と autoCompactEnabled を Nix 管理の設定で同期
@@ -134,6 +139,16 @@ in
             ];
           }
         ];
+        UserPromptSubmit = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
+              }
+            ];
+          }
+        ];
         PostToolUse = [
           {
             matcher = "Write|Edit";
@@ -141,6 +156,14 @@ in
               {
                 type = "command";
                 command = "${promptEditHook}";
+              }
+            ];
+          }
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
               }
             ];
           }
@@ -174,6 +197,15 @@ in
               }
             ];
           }
+          {
+            matcher = "permission_prompt|elicitation_dialog";
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status waiting";
+              }
+            ];
+          }
         ];
         Stop = [
           {
@@ -181,6 +213,14 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
+              }
+            ];
+          }
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status done";
               }
             ];
           }

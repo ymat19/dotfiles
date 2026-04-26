@@ -134,6 +134,16 @@ in
             ];
           }
         ];
+        UserPromptSubmit = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
+              }
+            ];
+          }
+        ];
         PostToolUse = [
           {
             matcher = "Write|Edit";
@@ -141,6 +151,14 @@ in
               {
                 type = "command";
                 command = "${promptEditHook}";
+              }
+            ];
+          }
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status working";
               }
             ];
           }
@@ -174,6 +192,15 @@ in
               }
             ];
           }
+          {
+            matcher = "permission_prompt|elicitation_dialog";
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status waiting";
+              }
+            ];
+          }
         ];
         Stop = [
           {
@@ -181,6 +208,14 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
+              }
+            ];
+          }
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "workmux set-window-status done";
               }
             ];
           }

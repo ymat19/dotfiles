@@ -86,7 +86,6 @@ in
     panes:
       - command: <agent>
         focus: true
-      - split: horizontal
     files:
       copy:
         - .env

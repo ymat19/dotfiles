@@ -1,10 +1,6 @@
 { ... }:
 
 {
-  programs.zsh.initExtra = ''
-    export ABBR_SET_EXPANSION_CURSOR=1
-  '';
-
   programs.zsh.zsh-abbr = {
     enable = true;
     abbreviations = {
@@ -47,10 +43,9 @@
       c = "clear";
       h = "history";
       q = "exit";
-      rs = "exec zsh";
+      reload = "exec zsh";
 
       # ===== editor =====
-      n = "nvim";
       v = "nvim";
       sv = "sudo -E nvim";
 
@@ -69,7 +64,7 @@
       gco = "git checkout";
       gcb = "git checkout -b";
       gsw = "git switch";
-      gcm = "git commit -m '%'";
+      gcm = "git commit -m";
       gp = "git push";
       gpl = "git pull";
       gf = "git fetch";

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Resize niri scratchpad window to match screen resolution
 
-# Get kitty-scratch window ID
-WINDOW_ID=$(niri msg windows -j 2>/dev/null | jq -r '.[] | select(.app_id == "kitty-scratch") | .id')
+# Get alacritty-scratch window ID
+WINDOW_ID=$(niri msg windows -j 2>/dev/null | jq -r '.[] | select(.app_id == "alacritty-scratch") | .id')
 
 if [ -z "$WINDOW_ID" ]; then
     exit 0

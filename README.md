@@ -130,7 +130,7 @@ graph TD
 - **aws.nix**: AWS CLI
 
 #### NixOS-only Modules
-- **hyprland.nix**: Hyprland WM + Hypridle + Hyprlock + FCitx5 + Kitty
+- **hyprland.nix**: Hyprland WM + Hypridle + Hyprlock + FCitx5 + Alacritty
 - **waybar.nix**: ステータスバー (システムトレイ、時計、ワークスペース)
 - **rofi.nix**: アプリケーションランチャー
 - **screenshot.nix**: Grimblast + Swappy

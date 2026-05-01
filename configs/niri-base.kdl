@@ -21,7 +21,7 @@ input {
 }
 
 layout {
-    gaps 8
+    gaps 12
 
     struts {
         left 8
@@ -30,8 +30,22 @@ layout {
         bottom 8
     }
 
+    focus-ring {
+        off
+    }
+
     border {
         width 1
+        active-color "#7aa2f7"
+        inactive-color "#414868"
+    }
+
+    shadow {
+        on
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "#00000070"
     }
 }
 
@@ -60,7 +74,7 @@ window-rule {
 
 // Scratchpad terminal
 window-rule {
-    match app-id="kitty-scratch"
+    match app-id="alacritty-scratch"
     open-on-workspace "scratch"
     open-floating true
     default-column-width { proportion 0.75; }
@@ -69,11 +83,11 @@ window-rule {
 
 binds {
     // Terminal
-    Mod+Q { spawn-sh "USE_TMUX=1 kitty"; }
-    Mod+Shift+Q { spawn "kitty"; }
+    Mod+Q { spawn-sh "USE_TMUX=1 alacritty"; }
+    Mod+Shift+Q { spawn "alacritty"; }
 
-    // Scratchpad terminal (kitty + tmux)
-    Mod+Space { spawn-sh "nscratch -id kitty-scratch -a -s 'kitty --class kitty-scratch -e tmux new-session -A -s scratch'"; }
+    // Scratchpad terminal (alacritty + tmux)
+    Mod+Space { spawn-sh "nscratch -id alacritty-scratch -a -s 'alacritty --class alacritty-scratch -e tmux new-session -A -s scratch'"; }
 
     // Launcher (DMS Spotlight - Hyprland準拠)
     Mod+R { spawn-sh "dms ipc call spotlight toggle"; }
@@ -168,7 +182,7 @@ binds {
 }
 
 spawn-at-startup "fcitx5"
-spawn-at-startup "kitty" "--class" "kitty-scratch" "-e" "tmux" "new-session" "-A" "-s" "scratch"
+spawn-at-startup "alacritty" "--class" "alacritty-scratch" "-e" "tmux" "new-session" "-A" "-s" "scratch"
 
 // Monitor configuration
 output "DP-3" {

@@ -1,0 +1,54 @@
+# Tokyo Night color scheme for Alacritty
+# Based on https://github.com/davidmathers/tokyo-night-kitty-theme
+
+[window]
+opacity = 0.8
+decorations = "None"
+
+[font]
+size = 14
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+
+[cursor]
+style = { shape = "Beam", blinking = "Off" }
+unfocused_hollow = true
+
+[mouse]
+hide_when_typing = true
+
+[scrolling]
+history = 50000
+
+[colors.primary]
+foreground = "#a9b1d6"
+background = "#1a1b26"
+
+[colors.cursor]
+cursor = "#c0caf5"
+text = "#1a1b26"
+
+[colors.selection]
+text = "CellForeground"
+background = "#28344a"
+
+[colors.normal]
+black = "#414868"
+red = "#f7768e"
+green = "#73daca"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#c0caf5"
+
+[colors.bright]
+black = "#414868"
+red = "#f7768e"
+green = "#73daca"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#c0caf5"

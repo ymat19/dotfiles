@@ -10,6 +10,7 @@
     grim
     slurp
     satty
+    xwayland-satellite
     inputs.niri-scratchpad.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 

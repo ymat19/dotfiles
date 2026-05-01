@@ -3,6 +3,11 @@
 
 prefer-no-csd
 
+// X11 アプリ用 (Warp など)。xwayland-satellite を起動して DISPLAY=:0 を提供する
+environment {
+    DISPLAY ":0"
+}
+
 input {
     keyboard {
         xkb {
@@ -169,6 +174,7 @@ binds {
 
 spawn-at-startup "fcitx5"
 spawn-at-startup "kitty" "--class" "kitty-scratch" "-e" "tmux" "new-session" "-A" "-s" "scratch"
+spawn-at-startup "xwayland-satellite" ":0"
 
 // Monitor configuration
 output "DP-3" {

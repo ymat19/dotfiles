@@ -317,6 +317,102 @@ let
     exit 0
   '';
 
+  codexStatusLineTomlSync = pkgs.writeText "codex-statusline-toml-sync.py" ''
+    import os
+    import re
+    import tomllib
+
+    path = os.path.expanduser("~/.codex/config.toml")
+    status_line = [
+        "model-with-reasoning",
+        "git-branch",
+        "context-used",
+        "context-remaining",
+        "used-tokens",
+        "context-window-size",
+        "five-hour-limit",
+        "weekly-limit",
+    ]
+
+
+    def quote(value):
+        return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+    def toml_key(value):
+        if re.fullmatch(r"[A-Za-z0-9_-]+", value):
+            return value
+        return quote(value)
+
+
+    def scalar(value):
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if isinstance(value, int):
+            return str(value)
+        if isinstance(value, str):
+            return quote(value)
+        if isinstance(value, list):
+            return "[" + ", ".join(scalar(item) for item in value) + "]"
+        raise TypeError(f"Unsupported TOML value: {value!r}")
+
+
+    def emit_table(lines, path_parts, table):
+        simple_items = {
+            key: value
+            for key, value in table.items()
+            if not isinstance(value, dict)
+        }
+        child_tables = {
+            key: value
+            for key, value in table.items()
+            if isinstance(value, dict)
+        }
+
+        if simple_items:
+            name = ".".join(toml_key(part) for part in path_parts)
+            lines.append(f"[{name}]")
+            for key, value in simple_items.items():
+                lines.append(f"{toml_key(key)} = {scalar(value)}")
+            lines.append("")
+
+        for key, value in child_tables.items():
+            emit_table(lines, path_parts + [key], value)
+
+
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            data = tomllib.load(f)
+    else:
+        data = {}
+
+    data.setdefault("tui", {})["status_line"] = status_line
+
+    lines = []
+    top_simple = {
+        key: value
+        for key, value in data.items()
+        if not isinstance(value, dict)
+    }
+    top_tables = {
+        key: value
+        for key, value in data.items()
+        if isinstance(value, dict)
+    }
+
+    for key, value in top_simple.items():
+        lines.append(f"{toml_key(key)} = {scalar(value)}")
+    if top_simple:
+        lines.append("")
+
+    for key, value in top_tables.items():
+        emit_table(lines, [key], value)
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines).rstrip() + "\n")
+  '';
+
 in
 {
   imports = [
@@ -404,6 +500,12 @@ in
       ' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
         && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
     fi
+  '';
+
+  # Codex CLI v0.125 reads ~/.codex/config.toml. The llm-agents-nix module writes
+  # config.yaml, so keep the TUI-only setting synced into the file Codex uses.
+  home.activation.syncCodexStatusLine = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    ${pkgs.python3}/bin/python3 ${codexStatusLineTomlSync}
   '';
 
   mcp-servers.programs = {

@@ -21,7 +21,7 @@ input {
 }
 
 layout {
-    gaps 8
+    gaps 12
 
     struts {
         left 8
@@ -38,6 +38,14 @@ layout {
         width 1
         active-color "#7aa2f7"
         inactive-color "#414868"
+    }
+
+    shadow {
+        on
+        softness 30
+        spread 5
+        offset x=0 y=5
+        color "#00000070"
     }
 }
 

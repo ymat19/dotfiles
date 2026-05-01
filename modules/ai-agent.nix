@@ -576,6 +576,18 @@ in
       notice = {
         hide_full_access_warning = true;
       };
+      tui = {
+        status_line = [
+          "model-with-reasoning"
+          "git-branch"
+          "context-used"
+          "context-remaining"
+          "used-tokens"
+          "context-window-size"
+          "five-hour-limit"
+          "weekly-limit"
+        ];
+      };
       agents = {
         max_threads = 6;
         max_depth = 1;

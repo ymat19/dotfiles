@@ -1,16 +1,12 @@
 { config, pkgs, lib, ... }:
 
 {
-  # SSH先でalacrittyのterminfoが見つからない問題を防ぐ
-  home.packages = [ pkgs.alacritty.terminfo ];
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
     syntaxHighlighting.enable = true;
-    initContent = ''
-      export TERMINFO_DIRS="${pkgs.alacritty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
-    '' + builtins.readFile ../configs/zshrc;
+    initContent = builtins.readFile ../configs/zshrc;
     oh-my-zsh = {
       enable = true;
       # 管理が面倒なのでモノがあるかどうかは保証せず、あったら嬉しいものをとりあえず並べておく
@@ -27,9 +23,6 @@
 
   programs.bash = {
     enable = true;
-    initExtra = ''
-      export TERMINFO_DIRS="${pkgs.alacritty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
-    '';
   };
 
   #powerline-go

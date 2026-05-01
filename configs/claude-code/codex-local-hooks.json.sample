@@ -1,0 +1,19 @@
+# ~/.config/codex-local-hooks.json のサンプル
+# このファイルを ~/.config/codex-local-hooks.json に配置すると、
+# nixos-rebuild / home-manager switch 時に既存の Codex hooks とリスト結合される
+#
+# 形式: イベント名をキー、hook 定義の配列を値とする JSON
+# Codex hooks は Claude Code hooks と完全互換ではないため、command hook のみに寄せる。
+{
+  "PreToolUse": [
+    {
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "/path/to/company-hook.sh"
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 { config, pkgs, lib, ... }:
 
 {
-  # SSH先でxterm-kittyのterminfoが見つからない問題を防ぐ
-  home.packages = [ pkgs.kitty.terminfo ];
+  # SSH先でalacrittyのterminfoが見つからない問題を防ぐ
+  home.packages = [ pkgs.alacritty.terminfo ];
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;
     #autosuggestion.highlight = "fg=#ff00ff,bg=cyan,bold,underline";
     syntaxHighlighting.enable = true;
     initContent = ''
-      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
+      export TERMINFO_DIRS="${pkgs.alacritty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
     '' + builtins.readFile ../configs/zshrc;
     oh-my-zsh = {
       enable = true;
@@ -28,7 +28,7 @@
   programs.bash = {
     enable = true;
     initExtra = ''
-      export TERMINFO_DIRS="${pkgs.kitty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
+      export TERMINFO_DIRS="${pkgs.alacritty.terminfo}/share/terminfo''${TERMINFO_DIRS:+:$TERMINFO_DIRS}"
     '';
   };
 

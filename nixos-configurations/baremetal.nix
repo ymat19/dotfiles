@@ -1,4 +1,13 @@
-{ config, lib, pkgs, username, homeDirectory, onWSL, envName, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  username,
+  homeDirectory,
+  onWSL,
+  envName,
+  ...
+}:
 {
   # Bootloader.
   boot = {
@@ -33,17 +42,19 @@
     nssmdns4 = true;
   };
 
-  environment.systemPackages = lib.mkAfter (with pkgs; [
-    celluloid
-    vlc
-  ] ++ lib.optionals (pkgs.stdenv.hostPlatform.isx86_64) [
-    google-chrome
-    slack
-  ]);
+  environment.systemPackages = lib.mkAfter (
+    with pkgs;
+    [
+      vlc
+    ]
+    ++ lib.optionals (pkgs.stdenv.hostPlatform.isx86_64) [
+      google-chrome
+      slack
+    ]
+  );
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
-
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -82,9 +93,19 @@
     fontDir.enable = true;
     fontconfig = {
       defaultFonts = {
-        serif = [ "Noto Serif CJK JP" "Noto Color Emoji" ];
-        sansSerif = [ "Noto Sans CJK JP" "Noto Color Emoji" ];
-        monospace = [ "FiraCode Nerd Font" "Unifont Upper" "Noto Color Emoji" ];
+        serif = [
+          "Noto Serif CJK JP"
+          "Noto Color Emoji"
+        ];
+        sansSerif = [
+          "Noto Sans CJK JP"
+          "Noto Color Emoji"
+        ];
+        monospace = [
+          "FiraCode Nerd Font"
+          "Unifont Upper"
+          "Noto Color Emoji"
+        ];
         emoji = [ "Noto Color Emoji" ];
       };
     };
@@ -93,7 +114,12 @@
   users.users.${username} = {
     isNormalUser = true;
     description = "nixos";
-    extraGroups = [ "networkmanager" "wheel" "input" "ydotool" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "input"
+      "ydotool"
+    ];
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     packages = with pkgs; [
@@ -109,7 +135,7 @@
   };
   services.displayManager.dms-greeter = {
     enable = true;
-    compositor.name = "niri";  # Or "hyprland" or "sway"
+    compositor.name = "niri"; # Or "hyprland" or "sway"
     configHome = homeDirectory;
   };
 

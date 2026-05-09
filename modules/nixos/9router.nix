@@ -2,6 +2,7 @@
 
 let
   cfg = config.programs._9router;
+  _9router_pkg = pkgs.callPackage ../../pkgs/9router.nix { };
 in
 {
   options.programs._9router = {
@@ -15,20 +16,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    home.packages = with pkgs; [
-      nodejs_22
-    ];
+    home.packages = [ _9router_pkg ];
 
     xdg.configFile."9router/config.json" = {
       source = ../../configs/9router/config.json;
-    };
-
-    home.sessionPath = [
-      "$HOME/.npm-global/bin"
-    ];
-
-    home.sessionVariables = {
-      NPM_CONFIG_PREFIX = "$HOME/.npm-global";
     };
   };
 }

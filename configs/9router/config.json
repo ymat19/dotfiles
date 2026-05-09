@@ -1,0 +1,20 @@
+# 9Router Configuration
+# Copy this to ~/.config/9router/config.json
+# After `npm install -g 9router`, run `9router` to start the dashboard
+
+{
+  "port": 20128,
+  "providers": {
+    "tier1_subscription": [],
+    "tier2_cheap": [],
+    "tier3_free": []
+  },
+  "rtk": {
+    "enabled": true,
+    "compressionLevel": "balanced"
+  },
+  "fallback": {
+    "enabled": true,
+    "order": ["subscription", "cheap", "free"]
+  }
+}

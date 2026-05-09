@@ -1,6 +1,6 @@
 # 9Router
 
-[9Router](https://github.com/decolua/9router) is an AI coding router and token saver that connects CLI tools (Claude Code, Codex, Cursor, Cline, OpenClaw, etc.) to 40+ AI providers with automatic fallback.
+[9Router](https://github.com/decolua/9router) is an AI coding router and token saver that connects CLI tools (Claude Code, Codex, OpenClaw, etc.) to 40+ AI providers with automatic fallback.
 
 ## NixOS Module
 
@@ -9,21 +9,24 @@ Enable in your home-manager config:
 ```nix
 programs._9router = {
   enable = true;
-  port = 20128;
+  port = 20128;  # default
 };
 ```
 
-After enabling, rebuild and run:
+When enabled:
+- `9router` command is available
+- systemd user service auto-starts on login (`--no-browser --log`)
+- Claude Code's `ANTHROPIC_BASE_URL` is set to `http://localhost:20128/v1`
 
-```bash
-9router  # Dashboard: http://localhost:20128
+## Usage
+
+After rebuild, 9router starts automatically. Open the dashboard:
+
+```
+http://localhost:20128
 ```
 
-## OpenClaw Integration
-
-```
-gateway.providers.anthropic.baseUrl = http://localhost:20128/v1
-```
+Connect providers in the dashboard (Kiro AI = free Claude, OpenCode Free = no auth, etc.).
 
 ## Features
 

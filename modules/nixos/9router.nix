@@ -18,8 +18,23 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = [ _9router_pkg ];
 
-    xdg.configFile."9router/config.json" = {
-      source = ../../configs/9router/config.json;
+    # Systemd user service for auto-start (headless mode)
+    systemd.user.services."9router" = {
+      Unit = {
+        Description = "9Router - AI Coding Router & Token Saver";
+        After = [ "network.target" ];
+      };
+      Service = {
+        ExecStart = "${_9router_pkg}/bin/9router --port ${toString cfg.port} --no-browser --log";
+        Restart = "on-failure";
+        RestartSec = 5;
+        Environment = [
+          "PORT=${toString cfg.port}"
+        ];
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
     };
   };
 }

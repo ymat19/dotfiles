@@ -3,6 +3,7 @@
   pkgs,
   inputs,
   onWSL ? false,
+  onNixOS ? false,
   ...
 }:
 let
@@ -425,7 +426,7 @@ in
     let
       llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
       agentBrowserPkg =
-        if onWSL then
+        if onWSL && !onNixOS then
           pkgs.writeShellScriptBin "agent-browser" ''
             exec /mnt/c/ab/agent-browser-win32-x64.exe "$@"
           ''
@@ -441,6 +442,10 @@ in
       (llmPkg "rtk")
       (llmPkg "workmux")
     ];
+
+  home.file.".agent-browser/config.json".source = jsonFormat.generate "agent-browser-config.json" {
+    headed = true;
+  };
 
   home.file.".claude/statusline.sh" = {
     source = ../configs/claude-code/statusline.sh;

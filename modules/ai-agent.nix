@@ -2,6 +2,7 @@
   lib,
   pkgs,
   inputs,
+  onWSL ? false,
   ...
 }:
 let
@@ -423,9 +424,16 @@ in
   home.packages =
     let
       llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
+      agentBrowserPkg =
+        if onWSL then
+          pkgs.writeShellScriptBin "agent-browser" ''
+            exec /mnt/c/ab/agent-browser-win32-x64.exe "$@"
+          ''
+        else
+          llmPkg "agent-browser";
     in
     [
-      (llmPkg "agent-browser")
+      agentBrowserPkg
       (llmPkg "ccusage")
       (llmPkg "ccusage-codex")
       (llmPkg "codex-acp")
@@ -803,25 +811,11 @@ in
   programs.agent-skills = {
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
-    sources.anthropic = {
-      path = pkgs.runCommand "anthropic-skills-filtered" { } ''
-        cp -r ${inputs.anthropic-skills}/skills $out
-        chmod -R u+w $out
-        rm -rf $out/playwright $out/playwright-interactive
-      '';
-    };
     sources.agent-browser = {
       path = inputs.agent-browser;
       subdir = "skills";
     };
-    sources.openai = {
-      path = pkgs.runCommand "openai-skills-filtered" { } ''
-        cp -r ${inputs.openai-skills}/skills/.curated $out
-        chmod -R u+w $out
-        rm -rf $out/pdf $out/screenshot
-      '';
-    };
-    skills.enableAll = true;
+    skills.enable = [ "prompt-review" "agent-browser" ];
     targets.claude.enable = true;
     targets.codex = {
       enable = true;

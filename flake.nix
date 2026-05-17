@@ -42,16 +42,8 @@
       url = "github:Kyure-A/agent-skills-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    anthropic-skills = {
-      url = "github:anthropics/skills";
-      flake = false;
-    };
     agent-browser = {
       url = "github:vercel-labs/agent-browser";
-      flake = false;
-    };
-    openai-skills = {
-      url = "github:openai/skills";
       flake = false;
     };
   };
@@ -125,6 +117,7 @@
             username = envUsername;
             homeDirectory = envHomeDir;
             onNixOS = false;
+            onWSL = onWSL;
             envName = "";
           };
         };

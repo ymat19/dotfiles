@@ -37,22 +37,6 @@
         "type": "github"
       }
     },
-    "anthropic-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1776964038,
-        "narHash": "sha256-xFsg66TCtKzSgRIW6Ab771FWEIhei3jPgfE4byMiB44=",
-        "owner": "anthropics",
-        "repo": "skills",
-        "rev": "5128e1865d670f5d6c9cef000e6dfc4e951fb5b9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "anthropics",
-        "repo": "skills",
-        "type": "github"
-      }
-    },
     "apple-silicon": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -480,27 +464,10 @@
         "type": "github"
       }
     },
-    "openai-skills": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1777446268,
-        "narHash": "sha256-1KIDDdwSlMAFrrzcfr9dSty4ErPm/N4Xd+LZPfSMtBs=",
-        "owner": "openai",
-        "repo": "skills",
-        "rev": "fb7b56dff09cb2a44dd390cde69c717e8a319eb7",
-        "type": "github"
-      },
-      "original": {
-        "owner": "openai",
-        "repo": "skills",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "agent-browser": "agent-browser",
         "agent-skills-nix": "agent-skills-nix",
-        "anthropic-skills": "anthropic-skills",
         "apple-silicon": "apple-silicon",
         "flake-utils": "flake-utils",
         "home-manager": "home-manager_2",
@@ -508,7 +475,6 @@
         "mcp-servers-nix": "mcp-servers-nix",
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",
-        "openai-skills": "openai-skills",
         "try": "try",
         "xremap": "xremap",
         "zen-browser": "zen-browser"

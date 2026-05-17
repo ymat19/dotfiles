@@ -75,9 +75,9 @@
         envUsername = builtins.getEnv "USER";
         envHomeDir = builtins.getEnv "HOME";
 
-        # for WSL
-        path = builtins.getEnv "PATH";
-        onWSL = builtins.match ".*system32.*" path != null;
+        # for WSL: Windows ドライブが /mnt/c にマウントされていれば WSL とみなす。
+        # PATH ベースの判定はシェル初期化前（Claude Code など）に評価すると false に倒れるため使わない。
+        onWSL = builtins.pathExists "/mnt/c/Windows";
 
         # for NixOS
         nixOSUserName = "ymat19";

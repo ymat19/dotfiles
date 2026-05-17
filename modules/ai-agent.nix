@@ -425,13 +425,17 @@ in
   home.packages =
     let
       llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
+      agentBrowserBin = llmPkg "agent-browser";
+      # WSL では WSLg の X11 ソケット (:0) を経由して Chrome ウィンドウを Windows デスクトップに表示する。
+      # 対話シェルでは通常 $DISPLAY が自動設定されるが、Claude Code 等の非対話起動では未設定のため補完する。
       agentBrowserPkg =
-        if onWSL && !onNixOS then
+        if onWSL then
           pkgs.writeShellScriptBin "agent-browser" ''
-            exec /mnt/c/ab/agent-browser-win32-x64.exe "$@"
+            export DISPLAY="''${DISPLAY:-:0}"
+            exec ${agentBrowserBin}/bin/agent-browser "$@"
           ''
         else
-          llmPkg "agent-browser";
+          agentBrowserBin;
     in
     [
       agentBrowserPkg

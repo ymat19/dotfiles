@@ -426,12 +426,100 @@ in
     let
       llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
       agentBrowserBin = llmPkg "agent-browser";
-      # WSL では WSLg の X11 ソケット (:0) を経由して Chrome ウィンドウを Windows デスクトップに表示する。
-      # 対話シェルでは通常 $DISPLAY が自動設定されるが、Claude Code 等の非対話起動では未設定のため補完する。
+      #
+      # WSL から Windows 側の Chrome に CDP 接続する設計。WSL 内に Chromium を起動しない
+      # (WSLg 経由の描画オーバーヘッドと多重起動による負荷を避けるため)。
+      #
+      # ## 必要な Windows / WSL 側セットアップ (このラッパーの動作前提)
+      #
+      # ### 1. %USERPROFILE%\.wslconfig
+      #
+      #     [wsl2]
+      #     networkingMode=mirrored
+      #
+      #     [experimental]
+      #     hostAddressLoopback=true
+      #
+      # mirrored mode により WSL 内 `localhost` が Windows host の `localhost` と一致し、
+      # Windows Chrome の CDP に到達できる。変更後 `wsl --shutdown` で反映。
+      #
+      # ### 2. Windows netsh portproxy (v4tov6)
+      #
+      # Chrome の `--remote-debugging-port` は IPv6 (`[::1]:9222`) のみで listen するため、
+      # 同じ port 番号で IPv4→IPv6 ブリッジを張る (管理者 PowerShell):
+      #
+      #     netsh interface portproxy add v4tov6 listenaddress=0.0.0.0 listenport=9222 \
+      #       connectaddress=::1 connectport=9222
+      #
+      # ### 3. Hyper-V Firewall (mirrored mode で必須)
+      #
+      # mirrored mode の DefaultInboundAction=Block を WSL VM (VMCreatorId は固定値) で許可:
+      #
+      #     New-NetFirewallHyperVRule -Name 'WSL-Chrome-Debug-9222' \
+      #       -DisplayName 'WSL Chrome Debug 9222' \
+      #       -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' \
+      #       -Direction Inbound -Protocol TCP -LocalPorts 9222 -Action Allow
+      #
+      # ### 4. Chrome 専用プロファイル
+      #
+      # 普段使いの Chrome と分離するため `%LOCALAPPDATA%\chrome-agent-profile` を
+      # `--user-data-dir` に指定 (初回起動時に自動作成)。Windows username は whoami.exe
+      # から動的取得しているので個人情報のハードコードは無い。
+      #
+      # ## このラッパーの役割
+      #
+      # - `AGENT_BROWSER_AUTO_CONNECT=1`: 起動中の Chrome を自動発見して接続
+      # - `NO_PROXY`: 企業内プロキシを bypass (localhost をプロキシ経由しない)
+      # - `XDG_RUNTIME_DIR` fallback: WSL の `/run/user/$UID` が無い環境向け
+      # - On-demand 起動: 必要時のみ Chrome を WSL Interop 経由で spawn (常駐させない)
       agentBrowserPkg =
         if onWSL then
           pkgs.writeShellScriptBin "agent-browser" ''
-            export DISPLAY="''${DISPLAY:-:0}"
+            export NO_PROXY="''${NO_PROXY:-localhost,127.0.0.1,::1}"
+            export no_proxy="''${no_proxy:-localhost,127.0.0.1,::1}"
+            export AGENT_BROWSER_AUTO_CONNECT=1
+            if [ -z "''${XDG_RUNTIME_DIR:-}" ] || [ ! -d "''${XDG_RUNTIME_DIR:-}" ]; then
+              export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
+              mkdir -p "$XDG_RUNTIME_DIR"
+              chmod 700 "$XDG_RUNTIME_DIR"
+            fi
+
+            # On-demand 起動: Windows Chrome (debug port 9222) が未起動なら cmd.exe 経由で起動
+            cdp_probe() {
+              ${pkgs.curl}/bin/curl -sf --max-time 1 --noproxy '*' \
+                http://localhost:9222/json/version >/dev/null 2>&1
+            }
+            if ! cdp_probe; then
+              # 並行起動でのレース回避用 lock (200ms 単位で取得試行、3秒で諦め)
+              lock="/tmp/agent-browser-chrome-launch.lock"
+              for _ in $(seq 1 15); do
+                if ( set -C; : > "$lock" ) 2>/dev/null; then
+                  trap 'rm -f "$lock"' EXIT
+                  break
+                fi
+                # 他プロセスが起動中の可能性 → 再 probe
+                cdp_probe && break
+                sleep 0.2
+              done
+
+              if ! cdp_probe; then
+                # cmd.exe は WSL cwd (UNCパス) で起動できないため、WSL Interop で chrome.exe を直接 spawn。
+                # Windows username は whoami.exe から動的取得 (DOMAIN\user 形式の user 部分)。
+                win_user=$(/mnt/c/Windows/System32/whoami.exe 2>/dev/null | sed 's/.*\\//' | tr -d '\r\n')
+                '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe' \
+                  --remote-debugging-port=9222 \
+                  "--user-data-dir=C:\\Users\\''${win_user}\\AppData\\Local\\chrome-agent-profile" \
+                  --no-first-run --no-default-browser-check \
+                  </dev/null >/dev/null 2>&1 &
+                disown
+                # 起動完了待ち (最大 20 秒、Chrome の初回起動は重い)
+                for _ in $(seq 1 100); do
+                  cdp_probe && break
+                  sleep 0.2
+                done
+              fi
+            fi
+
             exec ${agentBrowserBin}/bin/agent-browser "$@"
           ''
         else
@@ -448,7 +536,8 @@ in
     ];
 
   home.file.".agent-browser/config.json".source = jsonFormat.generate "agent-browser-config.json" {
-    headed = true;
+    # WSL: AGENT_BROWSER_AUTO_CONNECT で Windows Chrome に CDP 接続するため headed 不要。
+    # 非WSL環境では agent-browser CLI が自前でブラウザを起動する (デフォルト挙動)。
   };
 
   home.file.".claude/statusline.sh" = {
@@ -513,7 +602,7 @@ in
     if [ -f "$CLAUDE_JSON" ] && [ -f "$MCP_JSON" ]; then
       ${pkgs.jq}/bin/jq --slurpfile mcp "$MCP_JSON" '
         .mcpServers = $mcp[0].mcpServers |
-        .autoCompactEnabled = false
+        .autoCompactEnabled = true
       ' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
         && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
     fi

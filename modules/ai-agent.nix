@@ -575,7 +575,6 @@ in
     [
       agentBrowserPkg
       (llmPkg "ccusage")
-      (llmPkg "ccusage-codex")
       (llmPkg "codex-acp")
       (llmPkg "oh-my-codex")
       (llmPkg "rtk")

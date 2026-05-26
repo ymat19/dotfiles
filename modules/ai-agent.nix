@@ -709,16 +709,6 @@ in
             ];
           }
         ];
-        UserPromptSubmit = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "workmux set-window-status working";
-              }
-            ];
-          }
-        ];
         PostToolUse = [
           {
             matcher = "Write|Edit";
@@ -727,15 +717,15 @@ in
                 type = "command";
                 command = "${promptEditHook}";
               }
-            ];
-          }
-          {
+              {
             hooks = [
               {
                 type = "command";
-                command = "workmux set-window-status working";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude activity-log";
               }
             ];
+          }
+        ];
           }
         ];
         TeammateIdle = [
@@ -745,7 +735,15 @@ in
                 type = "command";
                 command = "~/.claude/hooks/teammate-idle-gate.sh";
               }
+              {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude teammate-idle";
+              }
             ];
+          }
+        ];
           }
         ];
         TaskCompleted = [
@@ -755,7 +753,15 @@ in
                 type = "command";
                 command = "~/.claude/hooks/task-completed-gate.sh";
               }
+              {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude task-completed";
+              }
             ];
+          }
+        ];
           }
         ];
         Notification = [
@@ -765,16 +771,15 @@ in
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
               }
-            ];
-          }
-          {
-            matcher = "permission_prompt|elicitation_dialog";
+              {
             hooks = [
               {
                 type = "command";
-                command = "workmux set-window-status waiting";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude notification";
               }
             ];
+          }
+        ];
           }
         ];
         Stop = [
@@ -784,13 +789,93 @@ in
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
               }
+              {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude stop";
+              }
             ];
           }
+        ];
+          }
+        ];
+        SessionStart = [
           {
             hooks = [
               {
                 type = "command";
-                command = "workmux set-window-status done";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude session-start";
+              }
+            ];
+          }
+        ];
+        SessionEnd = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude session-end";
+              }
+            ];
+          }
+        ];
+        StopFailure = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude stop-failure";
+              }
+            ];
+          }
+        ];
+        PermissionDenied = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude permission-denied";
+              }
+            ];
+          }
+        ];
+        CwdChanged = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude cwd-changed";
+              }
+            ];
+          }
+        ];
+        SubagentStart = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude subagent-start";
+              }
+            ];
+          }
+        ];
+        SubagentStop = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude subagent-stop";
+              }
+            ];
+          }
+        ];
+        TaskCreated = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude task-created";
               }
             ];
           }
@@ -878,9 +963,9 @@ in
           hooks = [
             {
               type = "command";
-              command = "workmux set-window-status working";
+              command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude user-prompt-submit";
               timeout = 5;
-              statusMessage = "Setting workmux status";
+              statusMessage = "tmux-agent-sidebar hook";
             }
             {
               type = "command";
@@ -909,9 +994,9 @@ in
           hooks = [
             {
               type = "command";
-              command = "workmux set-window-status done";
+              command = "bash ~/.tmux/plugins/tmux-agent-sidebar/hook.sh claude stop";
               timeout = 5;
-              statusMessage = "Setting workmux status";
+              statusMessage = "tmux-agent-sidebar hook";
             }
             {
               type = "command";

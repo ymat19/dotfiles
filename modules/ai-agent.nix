@@ -229,11 +229,11 @@ let
     paths = [ codexPackage ];
     buildInputs = [ pkgs.makeWrapper ];
     postBuild = ''
-    rm -f "$out/bin/codex"
-    makeWrapper ${pkgs.python3}/bin/python3 "$out/bin/codex" \
-      --add-flags ${codexAutoTrustScript} \
-      --set CODEX_REAL_BIN ${codexPackage}/bin/codex \
-      --set CODEX_GIT_BIN ${pkgs.git}/bin/git
+      rm -f "$out/bin/codex"
+      makeWrapper ${pkgs.python3}/bin/python3 "$out/bin/codex" \
+        --add-flags ${codexAutoTrustScript} \
+        --set CODEX_REAL_BIN ${codexPackage}/bin/codex \
+        --set CODEX_GIT_BIN ${pkgs.git}/bin/git
     '';
   };
 
@@ -243,18 +243,13 @@ let
   codexExtraHooksFile = /home/ymat19/.config/codex-local-hooks.json;
 
   readHooksFile =
-    path:
-    if builtins.pathExists path then
-      builtins.fromJSON (builtins.readFile path)
-    else
-      { };
+    path: if builtins.pathExists path then builtins.fromJSON (builtins.readFile path) else { };
 
   extraHooks = readHooksFile extraHooksFile;
   codexExtraHooks = readHooksFile codexExtraHooksFile;
 
   mergeHookSets =
-    extra:
-    base:
+    extra: base:
     lib.mapAttrs (name: baseList: baseList ++ (extra.${name} or [ ])) base
     // lib.filterAttrs (name: _: !(base ? ${name})) extra;
 
@@ -323,7 +318,8 @@ let
     # ユーザー設定
 
     日本語で応答してください。
-  '' + (lib.optionalString onWSL ''
+  ''
+  + (lib.optionalString onWSL ''
 
     ## agent-browser (WSL)
 
@@ -586,6 +582,31 @@ in
     # WSL: ラッパーが `--cdp <port>` を渡して Windows Chrome に接続するため設定不要。
     # 非WSL環境では agent-browser CLI が自前でブラウザを起動する (デフォルト headless)。
   };
+
+  # WSL 上の Claude Code が頻繁に powershell.exe を起こして Windows プロファイルを
+  # 取得しに行く挙動を抑制する。参考: https://zenn.dev/momonga/articles/ee5b114e038938
+  # zshenv / bashrc 双方で適用 (Claude Code 起動シェルがどちらでもよいように)。
+  programs.zsh.envExtra = lib.mkIf onWSL ''
+    export CLAUDE_CODE_SKIP_WINDOWS_PROFILE=1
+    if [ -z "''${USERPROFILE:-}" ] && [ -x /mnt/c/Windows/System32/whoami.exe ]; then
+      __wsl_win_user=$(/mnt/c/Windows/System32/whoami.exe 2>/dev/null | sed 's/.*\\//' | tr -d '\r\n')
+      if [ -n "$__wsl_win_user" ] && [ -d "/mnt/c/Users/$__wsl_win_user" ]; then
+        export USERPROFILE="/mnt/c/Users/$__wsl_win_user"
+      fi
+      unset __wsl_win_user
+    fi
+  '';
+
+  programs.bash.bashrcExtra = lib.mkIf onWSL ''
+    export CLAUDE_CODE_SKIP_WINDOWS_PROFILE=1
+    if [ -z "''${USERPROFILE:-}" ] && [ -x /mnt/c/Windows/System32/whoami.exe ]; then
+      __wsl_win_user=$(/mnt/c/Windows/System32/whoami.exe 2>/dev/null | sed 's/.*\\//' | tr -d '\r\n')
+      if [ -n "$__wsl_win_user" ] && [ -d "/mnt/c/Users/$__wsl_win_user" ]; then
+        export USERPROFILE="/mnt/c/Users/$__wsl_win_user"
+      fi
+      unset __wsl_win_user
+    fi
+  '';
 
   home.file.".claude/statusline.sh" = {
     source = ../configs/claude-code/statusline.sh;
@@ -952,7 +973,10 @@ in
       path = inputs.agent-browser;
       subdir = "skills";
     };
-    skills.enable = [ "prompt-review" "agent-browser" ];
+    skills.enable = [
+      "prompt-review"
+      "agent-browser"
+    ];
     targets.claude.enable = true;
     targets.codex = {
       enable = true;

@@ -85,4 +85,10 @@ set -g @tokyo-night-tmux_show_wbg 0
 
   # tmux-agent-sidebar plugin (source + pre-built binary)
   xdg.configFile."tmux/plugins/tmux-agent-sidebar".source = tmux-agent-sidebar-plugin;
+
+  # prefix+J/K で呼ぶ "sidebar 並び順を再現してエージェントペインを cycle" スクリプト
+  xdg.configFile."tmux/cycle-agent.sh" = {
+    source = ../configs/tmux-cycle-agent.sh;
+    executable = true;
+  };
 }

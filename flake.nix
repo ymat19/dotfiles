@@ -55,6 +55,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
+          packages._9router = pkgs.callPackage ./pkgs/9router.nix { };
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
             ];

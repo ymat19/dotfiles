@@ -863,6 +863,8 @@ in
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      } // lib.optionalAttrs config.programs._9router.enable {
+        ANTHROPIC_BASE_URL = "http://localhost:${toString config.programs._9router.port}/v1";
       };
       statusLine = {
         type = "command";

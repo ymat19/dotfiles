@@ -15,17 +15,50 @@ zle -N edit-command-line
 bindkey '^g' edit-command-line
 bindkey -s '^y' 'try\n'
 
-# 1コマンドで worktree 付き claude を新規 tmux セッションとして起動する。
-# worktree の作成・配置は claude --worktree に委譲し、ここは tmux セッション生成のみ担う。
-# 使い方: cwt [worktree名]  (省略時は claude 側でランダム名)
+# 1コマンドで git worktree を作成し、その worktree を起点とする tmux セッションで
+# claude --worktree を起動する。
+#
+# worktree のパス/ブランチは claude --worktree の規約
+# (<repo>/.claude/worktrees/<name>, branch worktree-<name>) に合わせて先に作成しておく。
+# claude --worktree は既存の worktree をそのまま再利用する(エラーにならないことを検証済み)。
+#
+# 重要: tmux のセッション cwd は「new-session を呼んだ時点の呼び出し側 cwd」で決まる。
+# new-session の -c フラグは外部コマンド実行では呼び出し側 cwd に上書きされて効かない
+# (検証済み)。そのため -c ではなく、worktree へ cd してから new-session を呼ぶ。
+# これでセッション cwd が worktree になり、prefix+v 等の分割も worktree 側で開く
+# (本物のキー入力で分割先が worktree になることを検証済み)。
+#
+# 使い方: cwt <worktree名>
 cwt() {
   local name="$1"
-  local session="wt-${name:-$RANDOM}"
-  tmux new-session -d -s "$session" -c "$PWD" "claude --worktree ${name:+$name}"
+  if [ -z "$name" ]; then
+    echo "usage: cwt <worktree-name>" >&2
+    return 1
+  fi
+  # メイン worktree のルート(worktree 内から実行してもネストしないよう先頭エントリを使う)
+  local root
+  root=$(git worktree list --porcelain 2>/dev/null | sed -n '1s/^worktree //p')
+  if [ -z "$root" ]; then
+    echo "cwt: not in a git repository" >&2
+    return 1
+  fi
+  local wt="$root/.claude/worktrees/$name"
+  local session="wt-$name"
+
+  # worktree を先に作成(既存ならそのまま使う)。claude が後で再利用する。
+  if [ ! -d "$wt" ]; then
+    git worktree add -b "worktree-$name" "$wt" || return 1
+  fi
+
+  # worktree へ cd してから new-session を呼ぶ(これがセッション cwd を決める)。
+  # サブシェルで cd するので呼び出し元のシェルの cwd は変わらない。
+  if ! tmux has-session -t "=$session" 2>/dev/null; then
+    ( cd "$wt" && tmux new-session -d -s "$session" "claude --worktree $name" )
+  fi
   if [ -n "$TMUX" ]; then
-    tmux switch-client -t "$session"
+    tmux switch-client -t "=$session"
   else
-    tmux attach-session -t "$session"
+    tmux attach-session -t "=$session"
   fi
 }
 

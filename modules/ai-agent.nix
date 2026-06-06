@@ -274,7 +274,7 @@ let
 
   codexUserPromptHook = pkgs.writeShellScript "codex-user-prompt-hook" ''
     ${pkgs.jq}/bin/jq -n \
-      --arg context 'Codex setup note: prefer rtk wrappers for high-volume shell output when an equivalent exists (for example: rtk git, rtk grep, rtk read, rtk test, rtk npm, rtk cargo). Codex hooks cannot rewrite tool input yet; PreToolUse updatedInput currently fails open, so choose rtk directly when running commands. Treat workmux status as active while handling this turn.' \
+      --arg context 'Codex setup note: prefer rtk wrappers for high-volume shell output when an equivalent exists (for example: rtk git, rtk grep, rtk read, rtk test, rtk npm, rtk cargo). Codex hooks cannot rewrite tool input yet; PreToolUse updatedInput currently fails open, so choose rtk directly when running commands.' \
       '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$context}}'
   '';
 
@@ -574,7 +574,6 @@ in
       (llmPkg "codex-acp")
       (llmPkg "oh-my-codex")
       (llmPkg "rtk")
-      (llmPkg "workmux")
     ];
 
   home.file.".agent-browser/config.json".source = jsonFormat.generate "agent-browser-config.json" {
@@ -627,40 +626,14 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/rtk-rewrite.sh" = {
+    source = ../configs/claude-code/hooks/rtk-rewrite.sh;
+    executable = true;
+  };
+
   home.file.".claude/assets/claude-icon.png" = {
     source = ../configs/claude-code/assets/claude-icon.png;
   };
-
-  # workmux global config
-  xdg.configFile."workmux/config.yaml".text = ''
-    nerdfont: true
-    agent: claude
-    merge_strategy: rebase
-    mode: session
-    panes:
-      - command: <agent>
-        focus: true
-    files:
-      copy:
-        - .env
-    post_create:
-      - pnpm install || true
-  '';
-
-  xdg.configFile."workmux/codex.yaml".text = ''
-    nerdfont: true
-    agent: codex
-    merge_strategy: rebase
-    mode: session
-    panes:
-      - command: <agent>
-        focus: true
-    files:
-      copy:
-        - .env
-    post_create:
-      - pnpm install || true
-  '';
 
   # rebuild 時に ~/.claude.json の mcpServers と autoCompactEnabled を Nix 管理の設定で同期
   home.activation.syncClaudeMcpServers = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -704,7 +677,7 @@ in
             hooks = [
               {
                 type = "command";
-                command = "~/.claude/hooks/rtk-rewrite.sh";
+                command = "bash ~/.claude/hooks/rtk-rewrite.sh";
               }
             ];
           }

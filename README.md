@@ -341,7 +341,6 @@ touch ~/.gitconfig
 | **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
 | **ccusage** | Claude Code の使用量トラッキング |
 | **rtk** | コマンド出力のトークン節約ラッパー（フックと連携） |
-| **workmux** | git worktree ラッパー（手動利用のみ、AI エージェントからは使用しない） |
 
 ### Neovim 連携
 

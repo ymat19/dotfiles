@@ -324,6 +324,14 @@ let
     ## agent-browser (WSL)
 
     agent-browser はデフォルト headless で動く (Windows Chrome へ CDP 接続)。ウィンドウ表示が必要なときだけ `--headed` を付けること。
+
+    ### 絶対禁止: chrome / daemon を pkill しない (再発防止)
+    agent-browser は **1 daemon が Chrome 1 個を CDP で管理する**構造。`pkill` / `kill -9` で chrome や daemon を横から殺すと、daemon が死んだ Chrome に再接続して **about:blank / wedge** になり、次のコマンドで daemon が再 spawn されて **daemon・孤児 Chrome が多重化**し、コマンドがどのインスタンスに当たるか不定の不安定状態になる (過去にこれで大量のトークンと時間を浪費した)。
+
+    - リセットは **`agent-browser close --all` のみ**。`pkill -9 chrome` / `pkill agent-browser` は使わない。
+    - 調査・計測シーケンスの**途中で kill しない**。1 インスタンスを壊さず使い続ける。
+    - about:blank 等の異常を見たら、結論を出す前に必ず自分の環境を疑う: `pgrep -fc 'chrome-linux64/chrome'` (健全な単一インスタンス = 6〜8 procs) と daemon 数を確認。多重化していたら掃除してから再開する。
+    - 「アプリが遅い/壊れている」と結論する前に、backend 応答 (`curl -w` で時間計測) と自環境のプロセス数を切り分ける。
   '');
 
   codexStatusLineTomlSync = pkgs.writeText "codex-statusline-toml-sync.py" ''

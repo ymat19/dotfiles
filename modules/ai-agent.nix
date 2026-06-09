@@ -676,7 +676,7 @@ in
     settings = {
       effortLevel = "high";
       editorMode = "normal";
-      autoMemoryEnabled = false;
+      autoMemoryEnabled = true;
       skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [

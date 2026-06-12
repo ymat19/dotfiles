@@ -434,8 +434,9 @@ require('lazy').setup({
 
       for server_name, server in pairs(servers) do
         server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-        require('lspconfig')[server_name].setup(server)
+        vim.lsp.config(server_name, server)
       end
+      vim.lsp.enable(vim.tbl_keys(servers))
     end,
   },
 

@@ -50,6 +50,14 @@
       url = "github:vercel-labs/agent-browser";
       flake = false;
     };
+    agent-deck = {
+      url = "github:asheshgoplani/agent-deck";
+      flake = false;
+    };
+    overstory = {
+      url = "github:jayminwest/overstory";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

@@ -6,15 +6,9 @@ project:
   root: /home/ymat19/repos/dotfiles
   canonicalBranch: main
   qualityGates:
-    - name: Tests
-      command: bun test
-      description: all tests must pass
-    - name: Lint
-      command: bun run lint
-      description: zero errors
-    - name: Typecheck
-      command: bun run typecheck
-      description: no TypeScript errors
+    - name: Flake check
+      command: nix flake check --no-build --impure
+      description: flake evaluates and all checks pass
 agents:
   manifestPath: .overstory/agent-manifest.json
   baseDir: .overstory/agent-defs

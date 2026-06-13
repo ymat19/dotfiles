@@ -89,11 +89,76 @@ let
     mkdir -p $out/bin
     ln -s ${overstory}/bin/overstory $out/bin/ov
   '';
+
+  # os-eco エコシステム CLI 群 (overstory が連携する seeds/mulch/canopy)。
+  # いずれも bun TS CLI でビルド不要。npm から固定バージョンを取得し node_modules を
+  # FOD で確定させ、各 bin を bun ラッパーで起動する。
+  osEcoPkgJson = builtins.toJSON {
+    name = "os-eco-clis";
+    private = true;
+    dependencies = {
+      "@os-eco/seeds-cli" = "0.5.10";
+      "@os-eco/mulch-cli" = "0.10.7";
+      "@os-eco/canopy-cli" = "0.2.6";
+    };
+  };
+  osEcoEnv = pkgs.stdenvNoCC.mkDerivation {
+    pname = "os-eco-clis-env";
+    version = "0";
+    dontUnpack = true;
+    nativeBuildInputs = [
+      pkgs.bun
+      pkgs.cacert
+    ];
+    buildPhase = ''
+      runHook preBuild
+      export HOME=$TMPDIR
+      export BUN_INSTALL_CACHE_DIR=$TMPDIR/bun-cache
+      export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+      export NODE_EXTRA_CA_CERTS=$SSL_CERT_FILE
+      mkdir -p build && cd build
+      cp ${pkgs.writeText "os-eco-package.json" osEcoPkgJson} package.json
+      bun install --no-progress --ignore-scripts
+      runHook postBuild
+    '';
+    installPhase = ''
+      runHook preInstall
+      mkdir -p $out
+      cp -R package.json node_modules $out/
+      runHook postInstall
+    '';
+    dontFixup = true;
+    outputHashAlgo = "sha256";
+    outputHashMode = "recursive";
+    outputHash = "sha256-T98SmjCHUTAyi+cHIJwfg9QQzz+ZsKTi3DBBg9tg1IY=";
+  };
+  osEcoBin =
+    name: rel:
+    pkgs.writeShellScriptBin name ''
+      export PATH=${
+        pkgs.lib.makeBinPath [
+          pkgs.bun
+          pkgs.tmux
+          pkgs.git
+        ]
+      }:$PATH
+      exec ${pkgs.bun}/bin/bun ${osEcoEnv}/node_modules/${rel} "$@"
+    '';
+  os-eco-clis = pkgs.symlinkJoin {
+    name = "os-eco-clis";
+    paths = [
+      (osEcoBin "sd" "@os-eco/seeds-cli/src/index.ts")
+      (osEcoBin "mulch" "@os-eco/mulch-cli/src/cli.ts")
+      (osEcoBin "ml" "@os-eco/mulch-cli/src/cli.ts")
+      (osEcoBin "cn" "@os-eco/canopy-cli/src/index.ts")
+    ];
+  };
 in
 {
   home.packages = [
     agent-deck
     overstory
     overstory-ov
+    os-eco-clis
   ];
 }

@@ -66,12 +66,17 @@ let
       cp -R . $out/
       # ランタイムでは不要な ui のビルド用 node_modules を削減 (ui/dist は残す)。
       rm -rf $out/ui/node_modules $out/.git
+      # overstory は tmux セッション spawn で /bin/bash をハードコードするが (worktree/tmux.ts)、
+      # NixOS には /bin/bash が無く coordinator/worker の claude 起動が即死する。
+      # 実在する nix の bash 絶対パスへ置換する。
+      substituteInPlace $out/src/worktree/tmux.ts \
+        --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
       runHook postInstall
     '';
     dontFixup = true;
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
-    outputHash = "sha256-muXhN/bFFVX94g5x0+ZBylikwXEV6ZCcW4UHlktEEsE=";
+    outputHash = "sha256-li2upkDyj0HYyusLsfYLGS3+fll95kO9vVxXRZ+5FxQ=";
   };
 
   overstory = pkgs.writeShellScriptBin "overstory" ''

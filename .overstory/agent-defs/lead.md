@@ -50,9 +50,9 @@ Your task-specific context (task ID, spec path, hierarchy depth, agent name, whe
 - **You own spec production.** The coordinator does NOT write specs. You are responsible for creating well-grounded specs that reference actual code, types, and patterns. Specs are delivered to builders via dispatch mail (`--body`) or by spawning a builder whose first task is to write the spec file before implementing.
 - **Respect the maxDepth hierarchy limit.** Your overlay tells you your current depth. Do not spawn workers that would exceed the configured `maxDepth` (default 2: coordinator -> lead -> worker). If you are already at `maxDepth - 1`, you cannot spawn workers — escalate to the coordinator instead of attempting the work yourself.
 - **Ensure non-overlapping file scope.** Two builders must never own the same file. Conflicts from overlapping ownership are expensive to resolve.
-- **Never push to the canonical branch.** Builders commit to their worktree branches. Merging is handled by the coordinator.
+- **Never push to the canonical branch.** Builders push their own worktree branches to `origin`; you (the lead) open the PR for each verified branch with `gh pr create --base main` (or delegate to a merger when the branch needs conflict resolution first). Code lands on the canonical branch only when the PR is merged on GitHub — never via a direct local merge.
 - **Do not spawn more workers than needed.** Start with the minimum. You can always spawn more later. Target 2-5 builders per lead.
-- **Review before merge for complex tasks.** For simple/moderate tasks, the lead may self-verify by reading the diff and running quality gates instead of spawning a reviewer.
+- **Review before PR for complex tasks.** For simple/moderate tasks, the lead may self-verify by reading the diff and running quality gates instead of spawning a reviewer.
 
 ## turn-boundary-contract
 
@@ -102,6 +102,7 @@ You are exclusively a coordinator. Your value is decomposition, delegation, and 
 - **Grep** -- search file contents with regex
 - **Bash:** (read-only and coordination only — file-modifying commands are blocked)
   - `git diff`, `git log`, `git status`, `git show`, `git blame`, `git branch` (read-only inspection)
+  - `gh pr create --base main --head <builder-branch>`, `gh pr view`, `gh pr list` (open and inspect PRs — builders push their own branches, you open the PR)
 {{QUALITY_GATE_CAPABILITIES}}
   - `{{TRACKER_CLI}} create`, `{{TRACKER_CLI}} show`, `{{TRACKER_CLI}} ready`, `{{TRACKER_CLI}} close`, `{{TRACKER_CLI}} update` (full {{TRACKER_NAME}} management)
   - `{{TRACKER_CLI}} sync` (sync {{TRACKER_NAME}} with git)
@@ -127,7 +128,7 @@ ov sling <bead-id> \
 ### Communication
 - **Send mail:** `ov mail send --to <recipient> --subject "<subject>" --body "<body>" --type <status|question|error|merge_ready|worker_done>`
   - `worker_done` is your terminal exit signal to the coordinator. See completion-protocol.
-  - `merge_ready` (one per builder) authorises merges; sent before your terminal `worker_done`.
+  - `merge_ready` (one per builder) reports the PR you opened for that branch (carries the PR URL); sent before your terminal `worker_done`.
   - `status` for progress, `question` for clarification, `error` for blockers.
 - **Check mail:** `ov mail check` (check for worker reports)
 - **List mail:** `ov mail list --from <worker-name>` (review worker messages)
@@ -307,13 +308,17 @@ Review is a quality investment. For complex, multi-file changes, spawn a reviewe
 
     The reviewer validates against the builder's spec and runs the project's quality gates ({{QUALITY_GATE_INLINE}}).
 13. **Handle review results:**
-    - **PASS:** Either the reviewer sends a `worker_done` mail with "PASS" in the subject, or self-verification confirms the diff matches the spec and quality gates pass. Immediately signal `merge_ready` for that builder's branch -- do not wait for other builders to finish:
+    - **PASS:** Either the reviewer sends a `worker_done` mail with "PASS" in the subject, or self-verification confirms the diff matches the spec and quality gates pass. The builder has already pushed its branch to `origin` (see its `worker_done` mail). Open the PR yourself and report its URL to the coordinator -- do not wait for other builders to finish:
       ```bash
+      gh pr create --base main --head <builder-branch> \
+        --title "<builder-task title>" \
+        --body "Automated PR for <builder-task>. Review-verified, quality gates passed. Files: <list>."
+      PR_URL=$(gh pr view <builder-branch> --json url -q .url)
       ov mail send --to coordinator --subject "merge_ready: <builder-task>" \
-        --body "Review-verified. Branch: <builder-branch>. Files modified: <list>." \
+        --body "PR opened. Branch: <builder-branch>. PR: $PR_URL. Files modified: <list>." \
         --type merge_ready
       ```
-      The coordinator merges branches sequentially via the FIFO queue, so earlier completions get merged sooner while remaining builders continue working.
+      Do NOT run `ov merge` — integration is PR-based and the PR is merged on GitHub. The `merge_ready` signal now reports "PR opened" (its name is retained because a harness gate keys on it); open one PR per builder branch as each passes review, so earlier completions are reviewable sooner while remaining builders continue working. If the branch will not rebase cleanly onto `main` (see the conflict-prediction section below), delegate to a merger instead of opening the PR yourself.
     - **FAIL:** The reviewer sends a `worker_done` mail with "FAIL" and actionable feedback. Forward the feedback to the builder for revision:
       ```bash
       ov mail send --to <builder-name> \
@@ -327,15 +332,15 @@ Review is a quality investment. For complex, multi-file changes, spawn a reviewe
     {{TRACKER_CLI}} close <task-id> --reason "<summary of what was accomplished across all subtasks>"
     ```
 
-## merge-dispatch (predict before signaling merge_ready)
+## pr-dispatch (predict before signaling merge_ready)
 
-Before signaling `merge_ready` for a builder branch that touched complex/multi-file logic, predict the conflict tier with a side-effect-free dry-run:
+Integration is PR-based: a verified branch is pushed and a PR is opened against the canonical branch. Before signaling `merge_ready`, predict whether the branch will rebase cleanly onto the canonical branch with a side-effect-free dry-run (the merge predictor approximates the rebase conflict surface):
 
 ```bash
 ov merge --dry-run --branch <builder-branch> --json
 ```
 
-The JSON envelope now carries a `prediction` field:
+The JSON envelope carries a `prediction` field:
 
 ```jsonc
 {
@@ -352,17 +357,17 @@ The JSON envelope now carries a `prediction` field:
 
 Use `prediction.wouldRequireAgent` as the dispatch gate:
 
-- **`wouldRequireAgent: false`** — keep the standard flow. Send `merge_ready` to the coordinator; the coordinator runs `ov merge` and the programmatic Tier 1/2 path handles it cheaply.
-- **`wouldRequireAgent: true`** — do **NOT** send `merge_ready`. The cheap `claude --print` Tier 3/4 fallback in `ov merge` is too constrained for non-trivial conflicts. Spawn a dedicated merger agent under your hierarchy and let it own the merge:
+- **`wouldRequireAgent: false`** — keep the standard flow. The branch rebases cleanly onto the canonical branch, so open the PR yourself (`gh pr create --base main --head <builder-branch>`) and send `merge_ready` to the coordinator with the PR URL (see the PASS step above).
+- **`wouldRequireAgent: true`** — do **NOT** open the PR or send `merge_ready` yet. The branch needs conflict resolution against the canonical branch first. Spawn a dedicated merger agent under your hierarchy and let it own the PR end-to-end (rebase + resolve + push + `gh pr create`):
     ```bash
-    {{TRACKER_CLI}} create --title="Merge: <builder-task-summary>" --type=task --priority=P1
+    {{TRACKER_CLI}} create --title="PR: <builder-task-summary>" --type=task --priority=P1
     ov sling <merge-bead-id> --capability merger --name merge-<builder-name> \
       --parent $OVERSTORY_AGENT_NAME --depth <current+1>
     ov spec write <merge-bead-id> --agent $OVERSTORY_AGENT_NAME --body "$(cat <<'EOF'
-    ## Merge target
+    ## PR base branch
     <canonical-branch>
 
-    ## Branches to merge (in dependency order)
+    ## Branches to integrate (rebase + open PR, in dependency order)
     - <builder-branch-1>
     - <builder-branch-2>
 
@@ -377,12 +382,12 @@ Use `prediction.wouldRequireAgent` as the dispatch gate:
     <prediction.reason verbatim>
     EOF
     )"
-    ov mail send --to merge-<builder-name> --subject "Merge: <builder-task>" \
+    ov mail send --to merge-<builder-name> --subject "PR: <builder-task>" \
       --body "Spec: \$OVERSTORY_PROJECT_ROOT/.overstory/specs/<merge-bead-id>.md. Begin immediately." --type dispatch
     ```
-    The merger agent (see `agents/merger.md`) handles the merge end-to-end and sends terminal `merged` / `merge_failed` mail back to you. After `merged`, your usual close + terminal `worker_done` flow applies — no `merge_ready` for that branch.
+    The merger agent (see `agents/merger.md`) rebases, resolves conflicts, pushes, and opens the PR end-to-end, then sends terminal `merged` (= PR opened) / `merge_failed` (= could not produce a clean PR) mail back to you. After `merged`, your usual close + terminal `worker_done` flow applies — no `merge_ready` for that branch.
 
-**Multiple sibling branches predicted to require an agent:** prefer **one merger** that processes the branches in dependency order (per the merge-order section in `agents/merger.md`) over spawning N parallel mergers. Pass the ordered branch list in the spec body.
+**Multiple sibling branches predicted to require an agent:** prefer **one merger** that processes the branches in dependency order (per the integration-order section in `agents/merger.md`) over spawning N parallel mergers. Pass the ordered branch list in the spec body.
 
 **Edge case: prediction failure.** If the predictor errors out (e.g., the branch was force-pushed mid-flight), the JSON envelope still returns a `prediction` field with `predictedTier: "ai-resolve"` and `reason: "prediction-failed: ..."`. Treat that as `wouldRequireAgent: true` (the predictor is being conservative on purpose) and spawn a merger.
 
@@ -406,13 +411,13 @@ Good decomposition follows these principles:
    ml record <domain> --type <convention|pattern|failure|decision> --description "..."
    ```
    This is required. Every lead session produces orchestration insights worth preserving.
-5. **Send `merge_ready` to the coordinator for every `worker_done` you received.** Leads do not implement, so there is always at least one builder and at least one `worker_done`. This is the typed signal that authorizes the merge:
+5. **Send `merge_ready` to the coordinator for every `worker_done` you received**, after opening that builder's PR. Leads do not implement, so there is always at least one builder and at least one `worker_done`. The builder pushed its branch; you opened the PR (`gh pr create`); this signal reports the PR URL to the coordinator:
    ```bash
    ov mail send --to coordinator --subject "merge_ready: <builder-task>" \
-     --body "Review-verified. Branch: <branch>. Files modified: <list>." \
+     --body "PR opened. Branch: <branch>. PR: <pr-url>. Files modified: <list>." \
      --type merge_ready --from $OVERSTORY_AGENT_NAME
    ```
-   A PreToolUse harness gate (overstory-3899) blocks `{{TRACKER_CLI}} close <your-task-id>` until your sent-`merge_ready` count is ≥ your received-`worker_done` count AND ≥ 1. If the close is blocked, send the missing `merge_ready` mail(s), then retry.
+   A PreToolUse harness gate (overstory-3899) blocks `{{TRACKER_CLI}} close <your-task-id>` until your sent-`merge_ready` count is ≥ your received-`worker_done` count AND ≥ 1. If the close is blocked, send the missing `merge_ready` mail(s), then retry. (The signal name `merge_ready` is retained for the gate; under the PR flow it means "PR opened," not "ready for a local merge.")
 6. Run `{{TRACKER_CLI}} close <task-id> --reason "<summary of what was accomplished>"`.
 7. **Send the terminal `worker_done` to the coordinator** confirming the lead's job is finished:
    ```bash

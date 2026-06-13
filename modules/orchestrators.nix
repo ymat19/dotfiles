@@ -76,16 +76,49 @@ let
     outputHash = "sha256-muXhN/bFFVX94g5x0+ZBylikwXEV6ZCcW4UHlktEEsE=";
   };
 
+  # ov は全エージェントセッションの `git push` を無条件ブロックする hook を起動毎に
+  # 再生成・上書きする (生成源は下記4ソース)。PRベース統合フローでは feature/worktree
+  # ブランチの push が必須のため、「main への push のみブロック」へ恒久緩和する。
+  # 判定方式は .overstory/hooks.json と一貫させ「コマンドが git push かつ main を含む時のみ block」。
+  # substituteInPlace は検索文字列が見つからないとビルド失敗する (--replace-fail) ため、
+  # 文字列はディスク上の実バイト列と厳密一致させ、escapeShellArg で安全に渡す。
+  esc = pkgs.lib.escapeShellArg;
+  # 共通の reason 文言 (hooks-deployer.ts と pi-guards.ts で同一)。
+  pushReasonFrom = "git push is blocked — use ov merge to integrate changes, push manually when ready";
+  pushReasonTo = "git push to main is blocked — open a PR with gh pr create instead; pushing feature/worktree branches is allowed";
+
   # FOD 出力に nix store path を要する patch を適用する後段 (非FOD なので store 参照可)。
   # overstory は tmux セッション spawn で /bin/bash をハードコードするが (worktree/tmux.ts)、
   # NixOS には /bin/bash が無く coordinator/worker の claude 起動が即死する。
-  # 実在する nix の bash 絶対パスへ置換する。
+  # 実在する nix の bash 絶対パスへ置換する。あわせて push ガードを main 限定へ緩和し、
+  # Web UI からサブスク枠 coordinator を操作可能にする patch を適用する。
+  # bun 実行 (patch-web-coordinator.ts) のため nativeBuildInputs=[pkgs.bun] と HOME が必要。
   overstoryEnv =
     pkgs.runCommand "overstory-env" { nativeBuildInputs = [ pkgs.bun ]; } ''
       export HOME=$TMPDIR
       cp -R --no-preserve=mode,ownership ${overstoryRaw} $out
       substituteInPlace $out/src/worktree/tmux.ts \
         --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
+
+      # 1) Claude runtime の hook 生成本体 (deployHooks → settings.local.json)。
+      substituteInPlace $out/src/agents/hooks-deployer.ts \
+        --replace-fail ${esc "grep -qE '\\\\bgit\\\\s+push\\\\b'; then"} ${esc "grep -qE '\\\\bgit\\\\s+push\\\\b' && echo \\\"$CMD\\\" | grep -qE '\\\\bmain\\\\b'; then"} \
+        --replace-fail ${esc pushReasonFrom} ${esc pushReasonTo}
+
+      # 2) `ov init` が書き出す settings.local.json テンプレート。
+      substituteInPlace $out/src/commands/init.ts \
+        --replace-fail ${esc "grep -qE \\'\\\\bgit\\\\s+push\\\\b\\'; then"} ${esc "grep -qE \\'\\\\bgit\\\\s+push\\\\b\\' && echo \"$CMD\" | grep -qE \\'\\\\bmain\\\\b\\'; then"} \
+        --replace-fail ${esc "git push is blocked by overstory — merge locally, push manually when ready"} ${esc "git push to main is blocked by overstory — open a PR with gh pr create instead; pushing feature/worktree branches is allowed"}
+
+      # 3) Pi runtime のバッシュガード。
+      substituteInPlace $out/src/runtimes/pi-guards.ts \
+        --replace-fail ${esc "if (/\\\\bgit\\\\s+push\\\\b/.test(cmd)) {"} ${esc "if (/\\\\bgit\\\\s+push\\\\b/.test(cmd) && /\\\\bmain\\\\b/.test(cmd)) {"} \
+        --replace-fail ${esc pushReasonFrom} ${esc pushReasonTo}
+
+      # 4) 非実装エージェント向け危険コマンド一覧 (DANGEROUS_BASH_PATTERNS) の git push エントリ。
+      substituteInPlace $out/src/agents/guard-rules.ts \
+        --replace-fail ${esc "\"\\\\bgit\\\\s+push\\\\b\","} ${esc "\"\\\\bgit\\\\s+push\\\\b.*\\\\bmain\\\\b\","}
+
       # Web UI からサブスク枠 (tmux) coordinator へ send/ask できるようにする patch
       # (既定は tmux-only として Web からの操作を拒否する。詳細は patch スクリプト参照)。
       bun ${../configs/overstory/patch-web-coordinator.ts} \

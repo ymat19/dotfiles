@@ -38,8 +38,10 @@ let
   # CLI は src/index.ts を bun で直接実行する形態。web UI (ov serve) は ui/dist を必要とするが
   # 未コミットのため、FOD (ネットワーク許可ビルド) 内で bun install と ui ビルドを実行し、
   # node_modules と ui/dist を含んだソースツリーを固定出力として確定させる。
-  overstoryEnv = pkgs.stdenvNoCC.mkDerivation {
-    pname = "overstory-env";
+  # 注意: FOD は store path を参照できないため、ここでは無改変のツリーのみ生成し、
+  # nix store path を要する patch は後段の overstoryEnv (非FOD) で行う。
+  overstoryRaw = pkgs.stdenvNoCC.mkDerivation {
+    pname = "overstory-raw";
     version = "0.11.0";
     src = inputs.overstory;
     nativeBuildInputs = [
@@ -66,18 +68,23 @@ let
       cp -R . $out/
       # ランタイムでは不要な ui のビルド用 node_modules を削減 (ui/dist は残す)。
       rm -rf $out/ui/node_modules $out/.git
-      # overstory は tmux セッション spawn で /bin/bash をハードコードするが (worktree/tmux.ts)、
-      # NixOS には /bin/bash が無く coordinator/worker の claude 起動が即死する。
-      # 実在する nix の bash 絶対パスへ置換する。
-      substituteInPlace $out/src/worktree/tmux.ts \
-        --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
       runHook postInstall
     '';
     dontFixup = true;
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
-    outputHash = "sha256-li2upkDyj0HYyusLsfYLGS3+fll95kO9vVxXRZ+5FxQ=";
+    outputHash = "sha256-muXhN/bFFVX94g5x0+ZBylikwXEV6ZCcW4UHlktEEsE=";
   };
+
+  # FOD 出力に nix store path を要する patch を適用する後段 (非FOD なので store 参照可)。
+  # overstory は tmux セッション spawn で /bin/bash をハードコードするが (worktree/tmux.ts)、
+  # NixOS には /bin/bash が無く coordinator/worker の claude 起動が即死する。
+  # 実在する nix の bash 絶対パスへ置換する。
+  overstoryEnv = pkgs.runCommand "overstory-env" { } ''
+    cp -R --no-preserve=mode,ownership ${overstoryRaw} $out
+    substituteInPlace $out/src/worktree/tmux.ts \
+      --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
+  '';
 
   overstory = pkgs.writeShellScriptBin "overstory" ''
     export PATH=${

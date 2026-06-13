@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "agent-deck": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781334742,
+        "narHash": "sha256-K7fBs8F2B83JlVJfl7hr4+dW2CTe4MZjRW3DrZTDgLo=",
+        "owner": "asheshgoplani",
+        "repo": "agent-deck",
+        "rev": "048bae919903114422c1df163c3192cb6c610adb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "asheshgoplani",
+        "repo": "agent-deck",
+        "type": "github"
+      }
+    },
     "agent-skills-nix": {
       "inputs": {
         "home-manager": "home-manager",
@@ -517,9 +533,26 @@
         "type": "github"
       }
     },
+    "overstory": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1779988364,
+        "narHash": "sha256-WyjRzEjpIQn3TYLw4b7NiYKo/vx8XYrl29TKXMEvgDE=",
+        "owner": "jayminwest",
+        "repo": "overstory",
+        "rev": "ff38f3f76f084abcc34f519bcaa69580f6e53cf1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jayminwest",
+        "repo": "overstory",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "agent-browser": "agent-browser",
+        "agent-deck": "agent-deck",
         "agent-skills-nix": "agent-skills-nix",
         "apple-silicon": "apple-silicon",
         "claude-desktop": "claude-desktop",
@@ -529,6 +562,7 @@
         "mcp-servers-nix": "mcp-servers-nix",
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",
+        "overstory": "overstory",
         "try": "try",
         "xremap": "xremap",
         "zen-browser": "zen-browser"

@@ -80,11 +80,17 @@ let
   # overstory は tmux セッション spawn で /bin/bash をハードコードするが (worktree/tmux.ts)、
   # NixOS には /bin/bash が無く coordinator/worker の claude 起動が即死する。
   # 実在する nix の bash 絶対パスへ置換する。
-  overstoryEnv = pkgs.runCommand "overstory-env" { } ''
-    cp -R --no-preserve=mode,ownership ${overstoryRaw} $out
-    substituteInPlace $out/src/worktree/tmux.ts \
-      --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
-  '';
+  overstoryEnv =
+    pkgs.runCommand "overstory-env" { nativeBuildInputs = [ pkgs.bun ]; } ''
+      export HOME=$TMPDIR
+      cp -R --no-preserve=mode,ownership ${overstoryRaw} $out
+      substituteInPlace $out/src/worktree/tmux.ts \
+        --replace-quiet '/bin/bash -c' '${pkgs.bash}/bin/bash -c'
+      # Web UI からサブスク枠 (tmux) coordinator へ send/ask できるようにする patch
+      # (既定は tmux-only として Web からの操作を拒否する。詳細は patch スクリプト参照)。
+      bun ${../configs/overstory/patch-web-coordinator.ts} \
+        $out/src/commands/serve/coordinator-actions.ts
+    '';
 
   overstory = pkgs.writeShellScriptBin "overstory" ''
     export PATH=${

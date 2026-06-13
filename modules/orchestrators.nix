@@ -73,7 +73,10 @@ let
     dontFixup = true;
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
-    outputHash = "sha256-muXhN/bFFVX94g5x0+ZBylikwXEV6ZCcW4UHlktEEsE=";
+    outputHash = {
+      aarch64-linux = "sha256-muXhN/bFFVX94g5x0+ZBylikwXEV6ZCcW4UHlktEEsE=";
+      x86_64-linux = "sha256-ykLwEKtNExmD6WqFCIgx63oan5fa+MlyH+dipIyqc9o=";
+    }.${pkgs.stdenv.hostPlatform.system};
   };
 
   # ov は全エージェントセッションの `git push` を無条件ブロックする hook を起動毎に
@@ -181,7 +184,10 @@ let
     dontFixup = true;
     outputHashAlgo = "sha256";
     outputHashMode = "recursive";
-    outputHash = "sha256-T98SmjCHUTAyi+cHIJwfg9QQzz+ZsKTi3DBBg9tg1IY=";
+    outputHash = {
+      aarch64-linux = "sha256-T98SmjCHUTAyi+cHIJwfg9QQzz+ZsKTi3DBBg9tg1IY=";
+      x86_64-linux = "sha256-enODnB4NuysHq7z7UoSmLwFcqwgQ8R9rSdmCr7Frvck=";
+    }.${pkgs.stdenv.hostPlatform.system};
   };
   osEcoBin =
     name: rel:

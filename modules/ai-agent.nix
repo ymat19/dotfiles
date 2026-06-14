@@ -698,10 +698,6 @@ in
                 type = "command";
                 command = "${promptEditHook}";
               }
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude activity-log";
-              }
             ];
           }
         ];
@@ -711,10 +707,6 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/teammate-idle-gate.sh";
-              }
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude teammate-idle";
               }
             ];
           }
@@ -726,10 +718,6 @@ in
                 type = "command";
                 command = "~/.claude/hooks/task-completed-gate.sh";
               }
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude task-completed";
-              }
             ];
           }
         ];
@@ -740,10 +728,6 @@ in
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
               }
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude notification";
-              }
             ];
           }
         ];
@@ -753,90 +737,6 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/notify-send.sh";
-              }
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop";
-              }
-            ];
-          }
-        ];
-        SessionStart = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session-start";
-              }
-            ];
-          }
-        ];
-        SessionEnd = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude session-end";
-              }
-            ];
-          }
-        ];
-        StopFailure = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop-failure";
-              }
-            ];
-          }
-        ];
-        PermissionDenied = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude permission-denied";
-              }
-            ];
-          }
-        ];
-        CwdChanged = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude cwd-changed";
-              }
-            ];
-          }
-        ];
-        SubagentStart = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude subagent-start";
-              }
-            ];
-          }
-        ];
-        SubagentStop = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude subagent-stop";
-              }
-            ];
-          }
-        ];
-        TaskCreated = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude task-created";
               }
             ];
           }
@@ -924,12 +824,6 @@ in
           hooks = [
             {
               type = "command";
-              command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude user-prompt-submit";
-              timeout = 5;
-              statusMessage = "tmux-agent-sidebar hook";
-            }
-            {
-              type = "command";
               command = "${codexUserPromptHook}";
               timeout = 5;
               statusMessage = "Loading Codex turn guidance";
@@ -953,12 +847,6 @@ in
       Stop = [
         {
           hooks = [
-            {
-              type = "command";
-              command = "bash ~/.config/tmux/plugins/tmux-agent-sidebar/hook.sh claude stop";
-              timeout = 5;
-              statusMessage = "tmux-agent-sidebar hook";
-            }
             {
               type = "command";
               command = "${codexNotifyHook}";

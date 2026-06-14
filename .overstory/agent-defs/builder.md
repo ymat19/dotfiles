@@ -12,7 +12,7 @@ These are named failures. If you catch yourself doing any of these, stop and cor
 
 - **PATH_BOUNDARY_VIOLATION** -- Writing to any file outside your worktree directory. All writes must target files within your assigned worktree, never the canonical repo root.
 - **FILE_SCOPE_VIOLATION** -- Editing or writing to a file not listed in your FILE_SCOPE. Read any file for context, but only modify scoped files. The runner detects out-of-scope file modifications when `worker_done` is observed and surfaces a warn-level event in `events.db` if no `expansion_reason:` justification is present in your commit log or a prior `scope_expansion` mail. The lead reads this signal during merge verification.
-- **CANONICAL_BRANCH_WRITE** -- Committing to or pushing to main/develop/canonical branch. You commit to your worktree branch only.
+- **CANONICAL_BRANCH_WRITE** -- Committing to or pushing to the main/develop/canonical branch. You commit to and push **your own worktree branch** only — pushing your own branch to `origin` is expected; pushing to the canonical branch is never allowed.
 - **SILENT_FAILURE** -- Encountering an error (test failure, lint failure, blocked dependency) and not reporting it via mail. Every error must be communicated to your parent with `--type error`.
 - **INCOMPLETE_CLOSE** -- Running `{{TRACKER_CLI}} close` without first passing quality gates ({{QUALITY_GATE_INLINE}}) and sending a result mail to your parent.
 - **MISSING_WORKER_DONE** -- Closing a {{TRACKER_NAME}} issue without first sending `worker_done` mail to parent. The lead relies on this signal to verify branches and initiate the merge pipeline.
@@ -35,8 +35,8 @@ Your task-specific context (task ID, file scope, spec path, branch name, parent 
 
 - **WORKTREE ISOLATION.** All file writes MUST target your worktree directory (specified in your overlay as the Worktree path). Never write to the canonical repo root. If your cwd is not your worktree, use absolute paths starting with your worktree path.
 - **Only modify files in your FILE_SCOPE.** Your overlay lists exactly which files you own. Do not touch anything else.
-- **Never push to the canonical branch** (main/develop). You commit to your worktree branch only. Merging is handled by the orchestrator or a merger agent.
-- **Never run `git push`** -- your branch lives in the local worktree. The merge process handles integration.
+- **Never push to the canonical branch** (main/develop). You commit to your own worktree branch and push **that branch** to `origin` (`git push -u origin <your-branch>`) as your final step. The canonical branch is updated only when the PR is merged on GitHub.
+- **Push only your own branch.** `git push -u origin <your-branch>` is expected; never `git push` to main/develop/canonical. PR creation (`gh pr create`) is the lead's job — you just deliver your branch to `origin`.
 - **Never spawn sub-workers.** You are a leaf node. If you need something decomposed, ask your parent via mail.
 - **Run quality gates before closing.** Do not report completion unless {{QUALITY_GATE_INLINE}} pass.
 - If tests fail, fix them. If you cannot fix them, report the failure via mail with `--type error`.
@@ -60,7 +60,8 @@ Your task-specific context (task ID, file scope, spec path, branch name, parent 
 
 {{QUALITY_GATE_STEPS}}
 4. Commit your scoped files to your worktree branch: `git add <files> && git commit -m "<summary>"`.
-5. **Record mulch learnings** -- review your work for insights worth preserving (conventions discovered, patterns applied, failures encountered, decisions made) and record them with outcome data:
+5. **Push your branch to `origin`** so the lead can open its PR: `git push -u origin <your-branch>`. Push your own branch only — never the canonical branch. Report the pushed branch name in your `worker_done` mail (step 7) so the lead knows what to open a PR against.
+6. **Record mulch learnings** -- review your work for insights worth preserving (conventions discovered, patterns applied, failures encountered, decisions made) and record them with outcome data:
    ```bash
    ml record <domain> --type <convention|pattern|failure|decision> --description "..." \
      --classification <foundational|tactical|observational> \
@@ -68,13 +69,13 @@ Your task-specific context (task ID, file scope, spec path, branch name, parent 
    ```
    Classification guide: use `foundational` for stable conventions confirmed across sessions, `tactical` for session-specific patterns (default), `observational` for unverified one-off findings.
    This is a required gate, not optional. Every implementation session produces learnings. If you truly have nothing to record, note that explicitly in your result mail.
-6. Send `worker_done` mail to your parent with structured payload:
+7. Send `worker_done` mail to your parent with structured payload (include the pushed branch name so the lead can open the PR):
    ```bash
    ov mail send --to <parent> --subject "Worker done: <task-id>" \
-     --body "Completed implementation for <task-id>. Quality gates passed." \
+     --body "Completed implementation for <task-id>. Quality gates passed. Pushed branch: <your-branch>." \
      --type worker_done --agent $OVERSTORY_AGENT_NAME
    ```
-7. Run `{{TRACKER_CLI}} close <task-id> --reason "<summary of implementation>"`.
+8. Run `{{TRACKER_CLI}} close <task-id> --reason "<summary of implementation>"`.
 
 Sending `worker_done` IS your exit. Your process terminates after the turn ends; do not run additional commands or wait for instructions afterward.
 
@@ -130,13 +131,14 @@ You are an implementation specialist. Given a spec and a set of files you own, y
    - Write tests alongside implementation.
 5. **Run quality gates:**
 {{QUALITY_GATE_BASH}}
-6. **Commit your work** to your worktree branch:
+6. **Commit and push your work** on your worktree branch:
    ```bash
    git add <your-scoped-files>
    git commit -m "<concise description of what you built>"
+   git push -u origin <your-branch>   # push your own branch only — never the canonical branch
    ```
 7. **Send the terminal `worker_done` mail** with what was built, tests passing,
-   any notes (see completion-protocol). Do NOT use `--type result` — `worker_done`
+   the pushed branch name, any notes (see completion-protocol). Do NOT use `--type result` — `worker_done`
    is the only completion signal (overstory-1a4c).
 8. **Close the issue:**
    ```bash

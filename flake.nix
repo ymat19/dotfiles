@@ -93,13 +93,6 @@
 
         # for NixOS
         nixOSUserName = "ymat19";
-        hostPlatforms = {
-          ymat19 = "x86_64-linux";
-          main = "x86_64-linux";
-          mini = "x86_64-linux";
-          dyna = "x86_64-linux";
-          air = "aarch64-linux";
-        };
         nixOSSpecialArgs = {
           inherit inputs;
           username = nixOSUserName;
@@ -112,7 +105,7 @@
           ./configuration.nix
           home-manager.nixosModules.home-manager
           {
-            nixpkgs.hostPlatform = hostPlatforms.${envName};
+            nixpkgs.hostPlatform = system;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${nixOSUserName} = import ./home.nix;

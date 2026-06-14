@@ -102,6 +102,7 @@
         };
         mkNixOSModules = envName: [
           ./configuration.nix
+          ./modules/nixos/system/mosh.nix
           home-manager.nixosModules.home-manager
           {
             nixpkgs.hostPlatform = hostPlatforms.${envName};

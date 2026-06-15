@@ -2,9 +2,16 @@
   config,
   pkgs,
   lib,
+  onWSL ? false,
   ...
 }:
 
+let
+  # WSL 向け mosh-server ラッパー（詳細は scripts/mosh-server-wrap.sh 参照）。
+  mosh-server-wrap = pkgs.writeShellScriptBin "mosh-server-wrap" (
+    builtins.readFile ../scripts/mosh-server-wrap.sh
+  );
+in
 {
   # mosh は client (mosh / mosh-client) と server (mosh-server) の両方を含む。
   # 全ホストにクライアントとして入れておく。
@@ -16,4 +23,10 @@
       mosh
     ]
   );
+
+  # WSL では mirrored networking のため mosh-server をそのまま使えない。
+  # ラッパーを ~/bin に置き、mosh client 側から --server で指定して使う。
+  home.file = lib.mkIf onWSL {
+    "bin/mosh-server-wrap".source = "${mosh-server-wrap}/bin/mosh-server-wrap";
+  };
 }

@@ -488,6 +488,19 @@ in
     };
   };
 
+  # programs.codex は ~/.codex/config.toml を read-only な nix store symlink (0444) として管理するが、
+  # omnigent の codex-native harness は config.toml を shutil.copy2 でコピー (権限も複製) してから
+  # MCP 設定を write_text で追記するため、0444 のコピーへの書き込みが PermissionError で失敗する。
+  # store の内容を保ったまま writable な実ファイル (0600) として materialize して回避する。
+  home.activation.materializeCodexConfigToml = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    cfg="$HOME/.codex/config.toml"
+    if [ -L "$cfg" ]; then
+      src="$(readlink -f "$cfg")"
+      run rm -f "$cfg"
+      run install -m 600 "$src" "$cfg"
+    fi
+  '';
+
   home.file.".codex/hooks.json".source = jsonFormat.generate "codex-hooks.json" {
     hooks = mergeCodexHooks {
       UserPromptSubmit = [

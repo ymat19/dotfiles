@@ -30,6 +30,12 @@
   # Thunar のデフォルト表示設定
   # - 詳細リスト表示 (ThunarDetailsView)
   # - 最終更新日の降順 (新しい順)
-  home-manager.users.${username}.home.file.".config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml".source =
-    ../../../configs/xfce4/xfconf/xfce-perchannel-xml/thunar.xml;
+  # Thunar は GUI 操作のたびにこのファイル（ウィンドウ列幅などのランタイム状態）を
+  # 書き換えてシンボリックリンクを実体ファイルに置き換えてしまう。そのままだと
+  # 次回 rebuild 時にバックアップ衝突で activation が失敗するため、force でリポジトリ
+  # の初期値を毎回上書きする（GUI 由来の変更は破棄される割り切り）。
+  home-manager.users.${username}.home.file.".config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml" = {
+    source = ../../../configs/xfce4/xfconf/xfce-perchannel-xml/thunar.xml;
+    force = true;
+  };
 }

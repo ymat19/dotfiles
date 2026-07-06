@@ -2,9 +2,11 @@ onboarding = false
 
 [keys]
 prefix = "ctrl+f"
+# 既定 goto(prefix+g) を prefix+f へ移し、prefix+g を lazygit に空ける
+goto = "prefix+f"
 
 [[keys.command]]
-key = "prefix+f"
+key = "prefix+g"
 type = "pane"
 command = "zsh -c 'source ~/.zshrc && lazygit'"
 description = "lazygit"

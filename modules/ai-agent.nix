@@ -532,6 +532,7 @@ in
     skills.enable = [
       "prompt-review"
       "agent-browser"
+      "herdr"
     ];
     targets.claude.enable = true;
     targets.codex = {

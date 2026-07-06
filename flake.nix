@@ -5,10 +5,12 @@
     extra-substituters = [
       "https://cache.numtide.com"
       "https://nixos-apple-silicon.cachix.org"
+      "https://herdr-nix.cachix.org"
     ];
     extra-trusted-public-keys = [
       "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       "nixos-apple-silicon.cachix.org-1:8psDu5SA5dAD7qA0zMy5UT292TxeEPzIz8VVEr2Js20="
+      "herdr-nix.cachix.org-1:+AT7TY8E6j/Pe9lB8Vjmp15Y4RPb8YtOnOwr/fboDS8="
     ];
   };
 
@@ -49,6 +51,10 @@
     agent-browser = {
       url = "github:vercel-labs/agent-browser";
       flake = false;
+    };
+    herdr-nix = {
+      url = "github:AodhanHayter/herdr-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 

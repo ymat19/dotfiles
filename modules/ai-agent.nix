@@ -64,29 +64,6 @@ let
     exit 0
   '';
 
-  codexNotifyHook = pkgs.writeShellScript "codex-notify-hook" ''
-    set -euo pipefail
-    command -v notify-send >/dev/null 2>&1 || exit 0
-
-    payload="$(cat)"
-    title="Codex"
-    body="ターンが返ってきました"
-
-    if command -v jq >/dev/null 2>&1; then
-      summary="$(printf '%s' "$payload" | jq -r '.last_assistant_message // .message // .summary // empty' 2>/dev/null || true)"
-      if [ -n "$summary" ]; then
-        body="$summary"
-      fi
-    fi
-
-    if [ "''${#body}" -gt 200 ]; then
-      body="''${body:0:200}..."
-    fi
-
-    notify-send --app-name="Codex" --icon="dialog-information" "$title" "$body" >/dev/null 2>&1 || true
-    exit 0
-  '';
-
   agentContext = ''
     # ユーザー設定
 
@@ -306,11 +283,6 @@ in
     executable = true;
   };
 
-  home.file.".claude/hooks/notify-send.sh" = {
-    source = ../configs/claude-code/hooks/notify-send.sh;
-    executable = true;
-  };
-
   home.file.".claude/hooks/rtk-rewrite.sh" = {
     source = ../configs/claude-code/hooks/rtk-rewrite.sh;
     executable = true;
@@ -392,26 +364,6 @@ in
             ];
           }
         ];
-        Notification = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/notify-send.sh";
-              }
-            ];
-          }
-        ];
-        Stop = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/notify-send.sh";
-              }
-            ];
-          }
-        ];
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
@@ -456,7 +408,6 @@ in
       model_reasoning_effort = "high";
       approval_policy = "never";
       sandbox_mode = "danger-full-access";
-      notify = [ "${codexNotifyHook}" ];
       notice = {
         hide_full_access_warning = true;
       };
@@ -524,18 +475,6 @@ in
               command = "${codexPromptEditHook}";
               timeout = 10;
               statusMessage = "Reviewing prompt-file edits";
-            }
-          ];
-        }
-      ];
-      Stop = [
-        {
-          hooks = [
-            {
-              type = "command";
-              command = "${codexNotifyHook}";
-              timeout = 5;
-              statusMessage = "Sending notification";
             }
           ];
         }

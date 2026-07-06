@@ -1,0 +1,49 @@
+# herdr configuration — https://herdr.dev/docs/configuration/
+# 旧 tmux (configs/tmux.conf) からの移行設定。
+#
+# 再現できなかった tmux 機能（herdr に相当機能なし）:
+#   - C-s による prefix ON/OFF トグル（パススルー）
+#   - synchronize-panes（全 pane 同時入力 / 旧 bind y）
+#   - status-line カスタム表示（SYNC / PREFIX インジケータ）
+# クリップボード連携・リモート越しのコピーは herdr がネイティブに扱うため
+# 旧 copy-command / mosh OSC52 パッチ相当の設定は不要。
+
+onboarding = false
+
+[keys]
+# 旧 tmux prefix C-f を踏襲
+prefix = "ctrl+f"
+# 分割はデフォルトで旧 tmux と一致:
+#   split_vertical   = "prefix+v"     (旧 bind v: 左右分割)
+#   split_horizontal = "prefix+minus" (旧 bind -: 上下分割)
+
+# lazygit popup（旧 tmux: bind g）。worktree 対応の lazygit-here を pane で開く。
+# 関数は ~/.zshrc（home-manager 生成）で定義されるため source して呼ぶ。
+[[keys.command]]
+key = "prefix+g"
+type = "pane"
+command = "zsh -c 'source ~/.zshrc && lazygit-here'"
+description = "lazygit (worktree-aware)"
+
+# lazydocker popup（旧 tmux: bind q）
+[[keys.command]]
+key = "prefix+q"
+type = "pane"
+command = "zsh -c 'source ~/.zshrc && lazydocker'"
+description = "lazydocker"
+
+[theme]
+# 旧 tokyo-night-tmux テーマを踏襲（herdr ビルトイン）
+name = "tokyo-night"
+
+[terminal]
+default_shell = "zsh"
+# 新規 pane は現在の pane の cwd を引き継ぐ（旧 tmux popup -d '#{pane_current_path}' 相当）
+new_cwd = "follow"
+
+[ui]
+mouse_capture = true
+
+[advanced]
+# 旧 tmux history-limit 50000 相当のスクロールバック（bytes 指定, 約 20MB）
+scrollback_limit_bytes = 20971520

@@ -1,6 +1,6 @@
-if command -v tmux >/dev/null; then
-  if [ -n "$USE_TMUX" ] && [ -z "$TMUX" ]; then
-    tmux attach-session -t main || tmux new-session -s main
+if command -v herdr >/dev/null; then
+  if [ -n "$USE_HERDR" ] && [ -z "$HERDR_ENV" ]; then
+    herdr
   fi
 fi
 

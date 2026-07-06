@@ -305,6 +305,21 @@ in
     fi
   '';
 
+  # rebuild 時に Claude Code の settings.local.json から hooks を剥がす。
+  # フックは Nix 管理 (~/.claude/settings.json) が正であり、local 側に入る hooks は
+  # 外部ツール（overstory 等）が注入した残骸なので一律除去する。permissions 等は保持。
+  # 対象: ~/.claude と ~/repos/* 直下リポジトリの .claude/settings.local.json。
+  home.activation.pruneClaudeLocalHooks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    for f in "$HOME/.claude/settings.local.json" "$HOME"/repos/*/.claude/settings.local.json; do
+      [ -f "$f" ] || continue
+      if ${pkgs.jq}/bin/jq -e 'has("hooks")' "$f" >/dev/null 2>&1; then
+        ${pkgs.jq}/bin/jq 'del(.hooks)' "$f" > "$f.tmp" \
+          && mv "$f.tmp" "$f" \
+          && echo "pruned stale hooks from $f"
+      fi
+    done
+  '';
+
   mcp-servers.programs = {
     context7.enable = true;
   };

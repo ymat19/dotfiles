@@ -17,6 +17,12 @@ type = "pane"
 command = "zsh -c 'source ~/.zshrc && lazydocker'"
 description = "lazydocker"
 
+[[keys.command]]
+key = "prefix+shift+c"
+type = "pane"
+command = "zsh -c 'source ~/.zshrc && hwt'"
+description = "ghq repo を fzf 選択して worktree+ワークスペース作成"
+
 [theme]
 name = "tokyo-night"
 

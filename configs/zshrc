@@ -15,3 +15,22 @@ zle -N edit-command-line
 bindkey '^g' edit-command-line
 bindkey -s '^y' 'try\n'
 
+# herdr: ghq リポジトリを fzf で選び、その repo に worktree+ワークスペースを作成
+# herdr の [[keys.command]] (type=pane) から呼ぶ想定。fzf/read は実ペインの TTY で動く
+# base はリモート既定ブランチ(origin/HEAD)を自動判定して fetch 後に採用（master/main 混在に対応）
+# origin が無い/取得失敗時はローカル HEAD から切る
+hwt() {
+  local repo branch remote_head
+  repo=$(ghq list -p | fzf --prompt 'repo> ') || return
+  [ -n "$repo" ] || return
+  read "branch?branch> " || return
+  [ -n "$branch" ] || return
+  remote_head=$(git -C "$repo" ls-remote --symref origin HEAD 2>/dev/null \
+    | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2; exit}')
+  if [ -n "$remote_head" ] && git -C "$repo" fetch origin "$remote_head" --quiet 2>/dev/null; then
+    herdr worktree create --cwd "$repo" --branch "$branch" --base "origin/$remote_head" --label "$branch"
+  else
+    herdr worktree create --cwd "$repo" --branch "$branch" --label "$branch"
+  fi
+}
+

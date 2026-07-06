@@ -64,29 +64,6 @@ let
     exit 0
   '';
 
-  codexNotifyHook = pkgs.writeShellScript "codex-notify-hook" ''
-    set -euo pipefail
-    command -v notify-send >/dev/null 2>&1 || exit 0
-
-    payload="$(cat)"
-    title="Codex"
-    body="ターンが返ってきました"
-
-    if command -v jq >/dev/null 2>&1; then
-      summary="$(printf '%s' "$payload" | jq -r '.last_assistant_message // .message // .summary // empty' 2>/dev/null || true)"
-      if [ -n "$summary" ]; then
-        body="$summary"
-      fi
-    fi
-
-    if [ "''${#body}" -gt 200 ]; then
-      body="''${body:0:200}..."
-    fi
-
-    notify-send --app-name="Codex" --icon="dialog-information" "$title" "$body" >/dev/null 2>&1 || true
-    exit 0
-  '';
-
   agentContext = ''
     # ユーザー設定
 
@@ -306,11 +283,6 @@ in
     executable = true;
   };
 
-  home.file.".claude/hooks/notify-send.sh" = {
-    source = ../configs/claude-code/hooks/notify-send.sh;
-    executable = true;
-  };
-
   home.file.".claude/hooks/rtk-rewrite.sh" = {
     source = ../configs/claude-code/hooks/rtk-rewrite.sh;
     executable = true;
@@ -331,6 +303,21 @@ in
       ' "$CLAUDE_JSON" > "$CLAUDE_JSON.tmp" \
         && mv "$CLAUDE_JSON.tmp" "$CLAUDE_JSON"
     fi
+  '';
+
+  # rebuild 時に Claude Code の settings.local.json から hooks を剥がす。
+  # フックは Nix 管理 (~/.claude/settings.json) が正であり、local 側に入る hooks は
+  # 外部ツール（overstory 等）が注入した残骸なので一律除去する。permissions 等は保持。
+  # 対象: ~/.claude と ~/repos/* 直下リポジトリの .claude/settings.local.json。
+  home.activation.pruneClaudeLocalHooks = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    for f in "$HOME/.claude/settings.local.json" "$HOME"/repos/*/.claude/settings.local.json; do
+      [ -f "$f" ] || continue
+      if ${pkgs.jq}/bin/jq -e 'has("hooks")' "$f" >/dev/null 2>&1; then
+        ${pkgs.jq}/bin/jq 'del(.hooks)' "$f" > "$f.tmp" \
+          && mv "$f.tmp" "$f" \
+          && echo "pruned stale hooks from $f"
+      fi
+    done
   '';
 
   mcp-servers.programs = {
@@ -392,26 +379,6 @@ in
             ];
           }
         ];
-        Notification = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/notify-send.sh";
-              }
-            ];
-          }
-        ];
-        Stop = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/notify-send.sh";
-              }
-            ];
-          }
-        ];
       };
       env = {
         CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
@@ -456,7 +423,6 @@ in
       model_reasoning_effort = "high";
       approval_policy = "never";
       sandbox_mode = "danger-full-access";
-      notify = [ "${codexNotifyHook}" ];
       notice = {
         hide_full_access_warning = true;
       };
@@ -528,18 +494,6 @@ in
           ];
         }
       ];
-      Stop = [
-        {
-          hooks = [
-            {
-              type = "command";
-              command = "${codexNotifyHook}";
-              timeout = 5;
-              statusMessage = "Sending notification";
-            }
-          ];
-        }
-      ];
     };
   };
 
@@ -593,6 +547,7 @@ in
     skills.enable = [
       "prompt-review"
       "agent-browser"
+      "herdr"
     ];
     targets.claude.enable = true;
     targets.codex = {

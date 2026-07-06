@@ -58,21 +58,5 @@
         command lazydocker "$@"
       fi
     }
-
-    # cwd が git リポジトリ内ならそれを即開く（最優先）。
-    # リポジトリ外のときだけ、並列実行中の agent の worktree を fzf で選んで開く。
-    function lazygit-here {
-      if git rev-parse --is-inside-work-tree > /dev/null 2>&1
-      then
-        lazygit
-        return
-      fi
-      local sel dir
-      sel=$(claude agents --json 2>/dev/null \
-        | jq -r '.[] | select(.cwd | test("/.claude/worktrees/")) | "\(.name // .sessionId)\t\(.cwd)"' \
-        | fzf --delimiter='\t' --with-nth=1 --prompt='worktree > ') || return
-      dir=$(printf '%s' "$sel" | cut -f2)
-      [ -n "$dir" ] && cd "$dir" && lazygit
-    }
   '';
 }

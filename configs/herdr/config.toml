@@ -6,8 +6,8 @@ prefix = "ctrl+f"
 [[keys.command]]
 key = "prefix+f"
 type = "pane"
-command = "zsh -c 'source ~/.zshrc && lazygit-here'"
-description = "lazygit (worktree-aware)"
+command = "zsh -c 'source ~/.zshrc && lazygit'"
+description = "lazygit"
 
 [[keys.command]]
 key = "prefix+d"

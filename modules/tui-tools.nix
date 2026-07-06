@@ -59,7 +59,7 @@
       fi
     }
 
-    # herdr popup 用: cwd が git リポジトリ内ならそれを即開く（最優先）。
+    # cwd が git リポジトリ内ならそれを即開く（最優先）。
     # リポジトリ外のときだけ、並列実行中の agent の worktree を fzf で選んで開く。
     function lazygit-here {
       if git rev-parse --is-inside-work-tree > /dev/null 2>&1
@@ -75,6 +75,4 @@
       [ -n "$dir" ] && cd "$dir" && lazygit
     }
   '';
-  # lazygit / lazydocker の popup 起動は herdr の keys.command で定義
-  # （configs/herdr/config.toml, prefix+g / prefix+q）。
 }

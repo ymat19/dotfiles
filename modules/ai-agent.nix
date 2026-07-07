@@ -458,6 +458,20 @@ in
   # omnigent の codex-native harness は config.toml を shutil.copy2 でコピー (権限も複製) してから
   # MCP 設定を write_text で追記するため、0444 のコピーへの書き込みが PermissionError で失敗する。
   # store の内容を保ったまま writable な実ファイル (0600) として materialize して回避する。
+  #
+  # ただし materialize すると config.toml は symlink ではない実ファイルになるため、次回の
+  # switch で home-manager の checkLinkTargets が「symlink を作る位置に実ファイルがある」と判断し
+  # config.toml.backup へ退避しようとする。backup が既にあると clobber エラーで switch が失敗する。
+  # materialize 後の実ファイルの内容は store と同一なので、link 検査前に安全に削除して
+  # home-manager が改めて symlink を張り直せるようにする（stale backup も掃除する）。
+  home.activation.cleanupCodexConfigTomlBeforeLink = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+    cfg="$HOME/.codex/config.toml"
+    if [ -e "$cfg" ] && [ ! -L "$cfg" ]; then
+      run rm -f "$cfg"
+    fi
+    run rm -f "$cfg.backup" "$cfg.backup.stale"
+  '';
+
   home.activation.materializeCodexConfigToml = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
     cfg="$HOME/.codex/config.toml"
     if [ -L "$cfg" ]; then

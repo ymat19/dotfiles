@@ -9,8 +9,9 @@ export PATH="${XDG_BIN_HOME:-$HOME/.local/bin}:$PATH"
 # abbr (zsh-abbr): コマンド入力時にスペース/Enter で展開される略語。
 # セッションスコープ (-S) で宣言し、ユーザーファイルには永続化しない（宣言的に管理するため）。
 if (( $+functions[abbr] )); then
-  abbr -S -q cc='claude -c' 2>/dev/null    # 直前のセッションを継続
-  abbr -S -q ccr='claude -r' 2>/dev/null   # セッションを選んで再開
+  abbr -S -q cc='claude -c' 2>/dev/null        # 直前のセッションを継続
+  abbr -S -q cr='claude -r' 2>/dev/null        # セッションを選んで再開
+  abbr -S -q ca='claude agents' 2>/dev/null    # agent view
 fi
 
 bindkey -v

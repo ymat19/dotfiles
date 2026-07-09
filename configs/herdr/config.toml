@@ -4,6 +4,10 @@ onboarding = false
 prefix = "ctrl+f"
 # 既定 goto(prefix+g) を prefix+f へ移し、prefix+g を lazygit に空ける
 goto = "prefix+f"
+# サイドバーの上下ワークスペースへ移動（prefix+shift+k=上, prefix+shift+j=下）
+# 小文字 prefix+j/k は既定で focus_pane_down/up に割当済みのため shift 付きにする
+previous_workspace = "prefix+shift+k"
+next_workspace = "prefix+shift+j"
 
 [[keys.command]]
 key = "prefix+g"

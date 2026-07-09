@@ -31,6 +31,14 @@
         "aws"
       ];
     };
+    # fish 風の abbr（入力時に展開される略語）。展開の実体は configs/zshrc で定義する
+    plugins = [
+      {
+        name = "zsh-abbr";
+        src = pkgs.zsh-abbr;
+        file = "share/zsh/zsh-abbr/zsh-abbr.zsh";
+      }
+    ];
   };
 
   programs.bash = {

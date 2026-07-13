@@ -9,6 +9,7 @@
 let
   jsonFormat = pkgs.formats.json { };
   codexPackage = inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.codex;
+  opencodePackage = inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.opencode;
 
   # ~/.config/claude-local-hooks.json が存在すれば読み込み、既存 hooks とリスト結合する
   # ファイル形式: { "PreToolUse": [{ "matcher": "...", "hooks": [...] }], ... }
@@ -464,6 +465,19 @@ in
         multi_agent = true;
         skills = true;
       };
+    };
+  };
+
+  programs.opencode = {
+    enable = true;
+    package = opencodePackage;
+    # programs.mcp.servers（context7 等）を ~/.config/opencode/opencode.json の mcp キーへ反映
+    enableMcpIntegration = true;
+    # 共通の agentContext を ~/.config/opencode/AGENTS.md として配置
+    context = agentContext;
+    settings = {
+      # パッケージは Nix 管理なので opencode 自身の自動更新は無効化
+      autoupdate = false;
     };
   };
 

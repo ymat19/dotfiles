@@ -7,8 +7,25 @@
   ...
 }:
 
+let
+  # xwayland-satellite 0.8.1 は出力(モニタ)が一時的に 0 個になると panic するバグがあり
+  # （画面ブランク/スリープで出力が一瞬消えた時など）、落ちると X(:0) ごと
+  # Steam 等の X11 アプリを巻き込んで落とす。nixpkgs は 0.8.1 が最新のため、
+  # 上流の修正コミット "avoid panic when no outputs are present" をパッチとして当てる。
+  # https://github.com/Supreeeme/xwayland-satellite/commit/10f985b8
+  xwayland-satellite-fixed = pkgs.xwayland-satellite.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [
+      (pkgs.fetchpatch {
+        name = "xwls-avoid-panic-no-outputs.patch";
+        url = "https://github.com/Supreeeme/xwayland-satellite/commit/10f985b84cdbcc3bbf35b3e7e43d1b2a84fa9ce2.patch";
+        hash = "sha256-caWdCnbD4Yf7U9mdeMwYP1/xDjGg1jNvL1y2pq/C2GM=";
+      })
+    ];
+  });
+in
 {
   home.packages = with pkgs; [
+    xwayland-satellite-fixed # niri 用 XWayland（0.8.1 の panic 修正パッチ適用）
     waypaper
     adwaita-qt
     adwaita-qt6

@@ -302,6 +302,16 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/sleep-guard.sh" = {
+    source = ../configs/claude-code/hooks/sleep-guard.sh;
+    executable = true;
+  };
+
+  home.file.".claude/hooks/command-error-gate.sh" = {
+    source = ../configs/claude-code/hooks/command-error-gate.sh;
+    executable = true;
+  };
+
   home.file.".claude/assets/claude-icon.png" = {
     source = ../configs/claude-code/assets/claude-icon.png;
   };
@@ -355,9 +365,25 @@ in
           {
             matcher = "Bash";
             hooks = [
+              # sleep-guard を先頭に置き、待機の却下を rewrite より前に確定させる。
+              {
+                type = "command";
+                command = "bash ~/.claude/hooks/sleep-guard.sh";
+              }
               {
                 type = "command";
                 command = "bash ~/.claude/hooks/rtk-rewrite.sh";
+              }
+            ];
+          }
+        ];
+        PostToolUseFailure = [
+          {
+            matcher = "Bash";
+            hooks = [
+              {
+                type = "command";
+                command = "bash ~/.claude/hooks/command-error-gate.sh";
               }
             ];
           }

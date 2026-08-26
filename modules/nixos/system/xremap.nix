@@ -76,7 +76,7 @@
   };
   systemd.services.xremap.serviceConfig = {
     Restart = lib.mkForce "on-failure";
-    RestartSec = "5s";
+    RestartSec = lib.mkForce "5s";
   };
 }
 

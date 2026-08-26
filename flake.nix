@@ -166,6 +166,7 @@
           dyna = nixpkgs.lib.nixosSystem {
             modules = (mkNixOSModules "dyna") ++ [
               ./modules/nixos/system/dotnet.nix
+              ./modules/nixos/system/no-sleep.nix
               { home-manager.extraSpecialArgs = nixpkgs.lib.mkForce (nixOSSpecialArgs // { envName = "dyna"; hasBattery = true; }); }
             ];
             specialArgs = nixOSSpecialArgs // {

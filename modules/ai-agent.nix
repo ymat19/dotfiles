@@ -585,6 +585,12 @@ in
       path = inputs.agent-browser;
       subdir = "skills";
     };
+    # herdr 本体に同梱の SKILL.md を直接参照する。
+    # 手元にコピーを置くとバージョン追従が手動になり、CLI 変更に追いつけなくなるため。
+    sources.herdr = {
+      path = inputs.herdr;
+      subdir = "skills";
+    };
     skills.enable = [
       "prompt-review"
       "agent-browser"

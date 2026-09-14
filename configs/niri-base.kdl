@@ -183,6 +183,13 @@ binds {
 
 spawn-at-startup "fcitx5"
 spawn-at-startup "alacritty" "--class" "alacritty-scratch"
+// XWayland を xwayland-satellite で提供（Steam 等の X11 アプリに必須）
+spawn-at-startup "xwayland-satellite" ":0"
+
+// X11 アプリが XWayland(:0) に接続できるよう DISPLAY を設定
+environment {
+    DISPLAY ":0"
+}
 
 // Monitor configuration
 output "DP-3" {

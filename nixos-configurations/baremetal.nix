@@ -42,6 +42,20 @@
     nssmdns4 = true;
   };
 
+  # nixpkgs の slack は更新が滞りがちで、かつ Slack は deb 版の自動アップデートを持たない。
+  # nixpkgs 側の追従を待つとバージョンが古いまま固定されるため、公式配布 deb を直接指定する。
+  nixpkgs.overlays = [
+    (final: prev: {
+      slack = prev.slack.overrideAttrs (_: rec {
+        version = "4.52.155";
+        src = prev.fetchurl {
+          url = "https://downloads.slack-edge.com/desktop-releases/linux/x64/${version}/slack-desktop-${version}-amd64.deb";
+          hash = "sha256-lmU2Am9a/NHHWjld3dh7lZZYCTH2WbQM67Ias63XGy8=";
+        };
+      });
+    })
+  ];
+
   environment.systemPackages = lib.mkAfter (
     with pkgs;
     [

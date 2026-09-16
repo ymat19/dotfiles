@@ -117,6 +117,7 @@
         ];
         monospace = [
           "FiraCode Nerd Font"
+          "Noto Sans Mono CJK JP"
           "Unifont Upper"
           "Noto Color Emoji"
         ];

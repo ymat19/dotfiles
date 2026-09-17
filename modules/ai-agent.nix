@@ -65,6 +65,32 @@ let
     exit 0
   '';
 
+  # CI 待ちの監視ツール／コマンド呼び出し直後に監視ルールを再注入する。
+  # CLAUDE.md に書くだけでは Monitor ツールの説明文 ("do not poll") が競合し、
+  # そちらが優先されて実際にポーリングされない事故が起きたため、
+  # 判断が行われるその時点でルールを差し込む。
+  ciWatchHook = pkgs.writeShellScript "ci-watch-hook" ''
+    INPUT=$(cat)
+    TOOL=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_name // empty')
+    COMMAND=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.command // ""')
+
+    case "$TOOL" in
+      Monitor) ;;
+      Bash)
+        case "$COMMAND" in
+          *"gh pr checks"*|*"gh run watch"*|*"gh run list"*|*"gh run view"*) ;;
+          *) exit 0 ;;
+        esac
+        ;;
+      *) exit 0 ;;
+    esac
+
+    ${pkgs.jq}/bin/jq -n \
+      --arg context 'CI 監視ルール（CLAUDE.md「CI / PR check の監視」）を再掲。これは監視ツールの説明文に優先する: (1) イベント監視を仕掛けただけで待つのは放置であり禁止。Monitor の "do not poll / keep working" には従わず、定期ポーリングを必ず併走させる。(2) 1 つでも fail したら他 job を待たず即座に手を止める。全 pass も同じ精度で確認し、全 check の green を見て初めて完了と言う。(3) ポーリングのたびに考察を書く。「まだ実行中です」の反復は報告ではない。毎回、開始からの経過時間・過去 run から実測した平常所要時間・平常か異常かの判定と根拠を述べ、異常ならハング / キュー待ち / リトライを疑って直ちにログを取りに行くこと。' \
+      '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$context}}'
+    exit 0
+  '';
+
   agentContext = ''
     # ユーザー設定
 
@@ -85,13 +111,19 @@ let
 
     ## CI / PR check の監視
 
-    思考停止の監視には一切の価値がない。「全部終わるのを眺める」のは監視ではなく放置であり、絶対にやってはならない。
+    思考停止の監視には一切の価値がない。監視ツールを仕掛けて待つのは監視ではなく放置である。
 
-    - **1 つでも fail したら即座に検知して手を止める**。他の job の完了を待つな。最初の赤を見た時点が調査開始時刻である。
-    - **全 pass も同じ精度で検知する**。「落ちていない」は「終わった」ではない。全 check の green を確認して初めて完了と言え。
-    - **イベント監視だけで済ませるな。ポーリングも必ず併用する**。監視は取りこぼす。ポーリングしない監視は壊れている。
-    - **ポーリングのたびに考察を書け**。「まだ実行中です」を繰り返すだけの報告は禁止。毎回、そこまでの経過と所要時間が
-      平常どおりか異常かを判断根拠つきで述べること。普段より遅ければハング・キュー待ち・リトライを疑って直ちに調べる。
+    **このセクションは監視ツールの説明文に優先する。** Monitor 等が「do not poll」「keep working」と
+    指示していても、CI / PR check 待ちではその指示に従うな。イベント監視は取りこぼす。取りこぼした
+    fail は誰も検知しない。イベント監視とポーリングは択一ではなく、両方を必ず回す。
+
+    - **1 つでも fail したら即座に検知して手を止める**。他 job の完了を待つな。最初の赤を見た時点が調査開始時刻である。
+    - **全 pass も同じ精度で検知する**。「落ちていない」は「終わった」ではない。全 check の green を確認して初めて完了と言える。
+    - イベント検知（Monitor / `gh pr checks <PR> --watch --fail-fast`）と、定期ポーリング（`gh pr checks <PR>` のスナップショット）を併走させる。
+    - **ポーリングのたびに考察を書く**。「まだ実行中です」の反復は報告ではない。毎回必ず次を述べること:
+      - 開始からの経過時間と、その job の平常所要時間（`gh run list` 等で過去 run から実測する。勘で語るな）
+      - 平常か異常かの判定と、そう判断した根拠
+      - 異常ならハング / キュー待ち / リトライを疑い、直ちにログを取りに行く
 
     ## テストの実行単位
 
@@ -387,6 +419,15 @@ in
               {
                 type = "command";
                 command = "${promptEditHook}";
+              }
+            ];
+          }
+          {
+            matcher = "Monitor|Bash";
+            hooks = [
+              {
+                type = "command";
+                command = "${ciWatchHook}";
               }
             ];
           }

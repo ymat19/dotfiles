@@ -54,6 +54,10 @@
       url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    i-have-adhd = {
+      url = "github:ayghri/i-have-adhd";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

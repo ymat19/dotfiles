@@ -363,6 +363,22 @@
         "type": "github"
       }
     },
+    "i-have-adhd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789828195,
+        "narHash": "sha256-G5NG2WkPLALu0Fy64g6z26vKPAhODk5tJJfyLj2aGjI=",
+        "owner": "ayghri",
+        "repo": "i-have-adhd",
+        "rev": "ef1a07df87cefee1195397d197815813941caa2f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ayghri",
+        "repo": "i-have-adhd",
+        "type": "github"
+      }
+    },
     "llm-agents-nix": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -545,6 +561,7 @@
         "flake-utils": "flake-utils",
         "herdr": "herdr",
         "home-manager": "home-manager_2",
+        "i-have-adhd": "i-have-adhd",
         "llm-agents-nix": "llm-agents-nix",
         "mcp-servers-nix": "mcp-servers-nix",
         "niri-scratchpad": "niri-scratchpad",

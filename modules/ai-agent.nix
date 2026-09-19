@@ -91,6 +91,30 @@ let
     exit 0
   '';
 
+  # i-have-adhd skill を全セッション開始時に自動発火させる。
+  #
+  # この skill は frontmatter の disable-model-invocation により Skill ツールから起動できず
+  # (ランタイムが "reserved for explicit user invocation" として弾く)、UserPromptSubmit
+  # フックの出力スキーマにもプロンプト書き換えは無いため additionalContext では発火しない。
+  # ルール本文を CLAUDE.md 側へ複製すれば発火自体が不要になるが、それは上流 SKILL.md の
+  # 二重管理になり追従が壊れるので採らない。
+  #
+  # SessionStart の initialUserMessage は 2.1.278 では受理はされるが TUI に適用されない
+  # (debug ログに "provided initialUserMessage" は出るのに実セッションでは発火しない)。
+  # 起動時の位置引数 (`claude "/i-have-adhd"`) なら発火するが、それはプロセス起動時だけで
+  # /clear には効かない。
+  #
+  # よって上流 SKILL.md を store パスから直接読んで additionalContext に流す。
+  # 本文をこのリポジトリへコピーせず出所を上流ひとつに保つため、ファイルの内容ではなく
+  # パスだけを Nix で解決している (nix flake update i-have-adhd で追従する)。
+  # SessionStart は startup / resume / clear / compact / fork の全ソースで発火するので、
+  # /clear 後も同じ内容が入り直す。
+  adhdSkillHook = pkgs.writeShellScript "adhd-skill-hook" ''
+    ${pkgs.jq}/bin/jq -Rs \
+      '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:.}}' \
+      < ${inputs.i-have-adhd}/skills/i-have-adhd/SKILL.md
+  '';
+
   agentContext = ''
     # ユーザー設定
 
@@ -432,6 +456,16 @@ in
             ];
           }
         ];
+        SessionStart = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "${adhdSkillHook}";
+              }
+            ];
+          }
+        ];
         TeammateIdle = [
           {
             hooks = [
@@ -650,10 +684,15 @@ in
       path = inputs.herdr;
       subdir = "skills";
     };
+    sources.i-have-adhd = {
+      path = inputs.i-have-adhd;
+      subdir = "skills";
+    };
     skills.enable = [
       "prompt-review"
       "agent-browser"
       "herdr"
+      "i-have-adhd"
     ];
     targets.claude.enable = true;
     targets.codex = {

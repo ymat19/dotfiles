@@ -376,6 +376,11 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/user-scope-guard.sh" = {
+    source = ../configs/claude-code/hooks/user-scope-guard.sh;
+    executable = true;
+  };
+
   home.file.".claude/assets/claude-icon.png" = {
     source = ../configs/claude-code/assets/claude-icon.png;
   };
@@ -432,6 +437,15 @@ in
               {
                 type = "command";
                 command = "bash ~/.claude/hooks/rtk-rewrite.sh";
+              }
+            ];
+          }
+          {
+            matcher = "Write|Edit|NotebookEdit|Bash";
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/user-scope-guard.sh";
               }
             ];
           }

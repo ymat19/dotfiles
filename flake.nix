@@ -111,14 +111,26 @@
         mkNixOSModules = envName: [
           ./configuration.nix
           home-manager.nixosModules.home-manager
-          {
+          ({ pkgs, ... }: {
             nixpkgs.hostPlatform = hostPlatforms.${envName};
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${nixOSUserName} = import ./home.nix;
             home-manager.extraSpecialArgs = nixOSSpecialArgs // { inherit envName; };
-            home-manager.backupFileExtension = "backup";
-          }
+
+            # 管理外の実ファイルを退避する方法。backupFileExtension（固定拡張子）は使わない。
+            # Claude Code のように自分の設定ファイルを実行時に書き換えるツールがあると、
+            # home-manager の store symlink が実ファイルに化けて毎回この退避が走る。
+            # 固定拡張子だと 2 回目に前回の退避先と衝突し、activation ごと失敗する
+            # （実際に ~/.claude/settings.json.backup で switch が落ちた）。
+            # タイムスタンプで一意にして、衝突そのものを起こさない。
+            home-manager.backupCommand = pkgs.writeShellScript "hm-backup" ''
+              set -euo pipefail
+              target=$1
+              ${pkgs.coreutils}/bin/mv -f -- \
+                "$target" "$target.backup-$(${pkgs.coreutils}/bin/date +%Y%m%d-%H%M%S)"
+            '';
+          })
         ] ++ (if onWSL then [ ] else
         ([
           inputs.xremap.nixosModules.default

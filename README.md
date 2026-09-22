@@ -146,6 +146,7 @@ graph TD
 - **steam.nix**: Steam ゲーミングプラットフォーム
 - **dotnet.nix**: .NET 8.0 SDK
 - **dolphin.nix**: KDE Dolphin ファイルマネージャ
+- **wispr-flow.nix**: Wispr Flow 音声ディクテーション (非公式 Linux ビルド)。uinput / AT-SPI 設定と、録音インジケータの layer-shell オーバーレイ
 
 ### Neovim 構成
 
@@ -273,6 +274,7 @@ touch ~/.gitconfig
   - Tmux: `configs/tmux.conf`
   - Zsh: `configs/zshrc`
   - Neovim: `configs/nvim/`
+  - Wispr Flow インジケータ: `configs/wispr-indicator/shell.qml`
 
 ## Claude Code 統合
 

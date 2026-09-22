@@ -81,6 +81,20 @@ window-rule {
     default-window-height { proportion 0.6; }
 }
 
+// Wispr Flow の本体ステータスウィンドウ。透明オーバーレイだが矩形全体でポインタ
+// 入力を食い、アプリ側では直せない（modules/nixos/system/wispr-flow.nix のコメント参照）。
+// 実用ワークスペースから死角を排除するため専用ワークスペースへ隔離する。見た目は
+// quickshell の自前オーバーレイ（configs/wispr-indicator/shell.qml）が担う。
+// title は open 時点で "Flow Status Indicator"、レンダラ読み込み後に "Status" へ
+// 変わる。open-* 系は open 時に一度しか評価されないので両方を拾う。
+window-rule {
+    match app-id="^wispr-flow$" title="^(Flow Status Indicator|Status)$"
+    open-on-workspace "wispr"
+    open-focused false
+    border { off; }
+    shadow { off; }
+}
+
 binds {
     // Terminal
     Mod+Q { spawn-sh "USE_HERDR=1 alacritty"; }
@@ -94,6 +108,12 @@ binds {
 
     // Clipboard History (DMS)
     Mod+V { spawn-sh "dms ipc call clipboard toggle"; }
+
+    // Wispr Flow の push-to-talk (Mod+N) を niri 側で握り潰すためだけのバインド。
+    // Wispr は /dev/input/event* を直読みするので、niri が消費しても検知は効く。
+    // バインドが無いとキーがフォーカス中のアプリへ素通しされ、押しっぱなしで
+    // "n" が連打される。niri に no-op アクションが無いので true を spawn する。
+    Mod+N repeat=false { spawn "true"; }
 
     // Window management
     Mod+C { close-window; }
@@ -125,28 +145,30 @@ binds {
     Mod+Ctrl+J { move-window-down-or-to-workspace-down; }
 
     // Workspaces
-    Mod+1 { focus-workspace 1; }
-    Mod+2 { focus-workspace 2; }
-    Mod+3 { focus-workspace 3; }
-    Mod+4 { focus-workspace 4; }
-    Mod+5 { focus-workspace 5; }
-    Mod+6 { focus-workspace 6; }
-    Mod+7 { focus-workspace 7; }
-    Mod+8 { focus-workspace 8; }
-    Mod+9 { focus-workspace 9; }
-    Mod+0 { focus-workspace 10; }
+    // 引数はクォートして名前で解決させる。裸の数値は index 解決なので、
+    // ワークスペースを1つ増やすだけで飛び先がずれる。
+    Mod+1 { focus-workspace "1"; }
+    Mod+2 { focus-workspace "2"; }
+    Mod+3 { focus-workspace "3"; }
+    Mod+4 { focus-workspace "4"; }
+    Mod+5 { focus-workspace "5"; }
+    Mod+6 { focus-workspace "6"; }
+    Mod+7 { focus-workspace "7"; }
+    Mod+8 { focus-workspace "8"; }
+    Mod+9 { focus-workspace "9"; }
+    Mod+0 { focus-workspace "10"; }
 
     // Move to workspace
-    Mod+Shift+1 { move-column-to-workspace 1; }
-    Mod+Shift+2 { move-column-to-workspace 2; }
-    Mod+Shift+3 { move-column-to-workspace 3; }
-    Mod+Shift+4 { move-column-to-workspace 4; }
-    Mod+Shift+5 { move-column-to-workspace 5; }
-    Mod+Shift+6 { move-column-to-workspace 6; }
-    Mod+Shift+7 { move-column-to-workspace 7; }
-    Mod+Shift+8 { move-column-to-workspace 8; }
-    Mod+Shift+9 { move-column-to-workspace 9; }
-    Mod+Shift+0 { move-column-to-workspace 10; }
+    Mod+Shift+1 { move-column-to-workspace "1"; }
+    Mod+Shift+2 { move-column-to-workspace "2"; }
+    Mod+Shift+3 { move-column-to-workspace "3"; }
+    Mod+Shift+4 { move-column-to-workspace "4"; }
+    Mod+Shift+5 { move-column-to-workspace "5"; }
+    Mod+Shift+6 { move-column-to-workspace "6"; }
+    Mod+Shift+7 { move-column-to-workspace "7"; }
+    Mod+Shift+8 { move-column-to-workspace "8"; }
+    Mod+Shift+9 { move-column-to-workspace "9"; }
+    Mod+Shift+0 { move-column-to-workspace "10"; }
 
     // Workspace navigation (scrolling style)
     Mod+Page_Down { focus-workspace-down; }
@@ -206,3 +228,4 @@ workspace "8"
 workspace "9"
 workspace "10"
 workspace "scratch"
+workspace "wispr"

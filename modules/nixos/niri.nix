@@ -9,6 +9,7 @@
 
 {
   home.packages = with pkgs; [
+    xwayland-satellite # niri が PATH から自動起動し DISPLAY も設定するため spawn-at-startup 不要（0.8.2 で no-outputs panic 修正済み）
     waypaper
     adwaita-qt
     adwaita-qt6

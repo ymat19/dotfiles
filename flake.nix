@@ -137,6 +137,7 @@
           ./modules/nixos/system/xremap.nix
           ./modules/nixos/system/thunar.nix
           ./modules/nixos/system/poiter-util.nix
+          ./modules/nixos/system/wispr-flow.nix
         ]));
       in
       { } // (if requireStandalone then {

@@ -1,0 +1,152 @@
+{
+  pkgs,
+  lib,
+  username,
+  ...
+}:
+
+let
+  # Wispr Flow は公式には macOS/Windows のみ。非公式 Linux ポート
+  # (wispr-flow-linux/wispr-flow-linux) のリリース成果物を使う。
+  appVersion = "1.6.7";
+  pkgRelease = "1.0.3";
+  version = "${appVersion}-${pkgRelease}";
+  # リリースタグに '+' が含まれるため URL では %2B のままにする
+  releaseTag = "v${pkgRelease}%2Bwispr${appVersion}";
+
+  arch = if pkgs.stdenv.hostPlatform.isAarch64 then "aarch64" else "x86_64";
+  hashes = {
+    x86_64 = "sha256-T9/evAykYnc20TVc7sX3Bwf8aTkTkxEtDr8FNavIMfA=";
+    aarch64 = "sha256-oGiM2poO701pPh9MtZaXbdMcEN+U99BGHi/mJ9ypIO4=";
+  };
+
+  pname = "wispr-flow";
+
+  src = pkgs.fetchurl {
+    url = "https://github.com/wispr-flow-linux/wispr-flow-linux/releases/download/${releaseTag}/wispr-flow-${version}-${arch}.AppImage";
+    hash = hashes.${arch};
+  };
+
+  extracted = pkgs.appimageTools.extract { inherit pname version src; };
+
+  # 上流の flake (packages.wispr-flow-fhs) は使わない。
+  # helper の fetchFromGitHub が lib.fakeHash のまま、独自入手した Windows
+  # インストーラ .exe を WISPR_FLOW_EXE で渡す --impure 前提、かつ
+  # better-sqlite3 のネイティブモジュールを再ビルドしないため DB 機能が壊れる、
+  # と上流自身が明記している。リリースの AppImage は CI で
+  # rebuild-native-modules.sh を通った検証済みバイナリなのでこちらを包む。
+  #
+  # 副作用として chrome-sandbox が setuid root にならず（nix store に setuid は
+  # 置けない）、AppRun が --no-sandbox で起動する。`--doctor` はここを FAIL と
+  # 報告するが、setuid sandbox に切り替える道はない: AppRun の 'appimage' モード
+  # が --no-sandbox を固定で付けており、外すと Electron が起動拒否に倒れる。
+  wispr-flow = pkgs.appimageTools.wrapAppImage {
+    inherit pname version;
+    src = extracted;
+
+    # helper が直接叩く外部コマンド。クリップボード系は Wayland では必須依存。
+    extraPkgs =
+      p: with p; [
+        wl-clipboard
+        xclip
+        xsel
+        dbus
+        at-spi2-core
+        systemd # udevadm
+        glib # gsettings
+      ];
+
+    extraInstallCommands = ''
+      install -Dm444 ${extracted}/ai.wisprflow.WisprFlow.desktop \
+        -t $out/share/applications
+      # AppImage 内の Exec=AppRun は AppDir 前提のパス。ラッパー名に差し替える。
+      substituteInPlace $out/share/applications/ai.wisprflow.WisprFlow.desktop \
+        --replace-fail 'Exec=AppRun' 'Exec=${pname}'
+      cp -r ${extracted}/usr/share/icons $out/share/
+
+      # 上流の 70-wispr-flow-uinput.rules と同内容。services.udev.packages で
+      # 拾わせる。services.udev.extraRules には書かない: hardware.uinput.enable
+      # が同じオプションに GROUP="uinput" の行を足すため、マージ順で GROUP が
+      # どちらに倒れるか決まらない。ファイル名でソート順が確定する 70- に置く。
+      mkdir -p $out/lib/udev/rules.d
+      cat > $out/lib/udev/rules.d/70-wispr-flow-uinput.rules <<'UDEV'
+      KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess", GROUP="input", MODE="0660"
+      SUBSYSTEM=="input", KERNEL=="event*", TAG+="uaccess", GROUP="input", MODE="0660"
+      UDEV
+    '';
+
+    meta = {
+      description = "Wispr Flow voice dictation for Linux (unofficial build)";
+      homepage = "https://github.com/wispr-flow-linux/wispr-flow-linux";
+      license = lib.licenses.unfree;
+      platforms = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      mainProgram = pname;
+    };
+  };
+in
+{
+  environment.systemPackages = [ wispr-flow ];
+
+  # /dev/uinput への write（キーストローク注入）と /dev/input/event* の read
+  # （push-to-talk のグローバルキー監視）が helper の動作要件。AppImage は root
+  # の postinst を持てないので、パッケージが同梱した rule を udev に読ませる。
+  boot.kernelModules = [ "uinput" ];
+  services.udev.packages = [ wispr-flow ];
+
+  # niri は wlroots 系の汎用 Wayland バックエンド扱いで、アクティブアプリの
+  # 判定と選択テキストの取得に AT-SPI を使う。D-Bus サービスが無いと常に空になる。
+  services.gnome.at-spi2-core.enable = true;
+
+  home-manager.users.${username} = {
+    # helper も起動時に toolkit-accessibility を立てようとするが best-effort で、
+    # 失敗すると選択テキストが黙って空になる。GTK 側の既定が false なので
+    # 明示的に有効化して、取得できるかどうかを運任せにしない。
+    dconf.settings."org/gnome/desktop/interface".toolkit-accessibility = true;
+
+    # 録音インジケータ（自前実装）。
+    #
+    # 本体の Status ウィンドウ（透明オーバーレイ）は、矩形全体でポインタ入力を
+    # 食う。以下を実測して全て効果が無いことを確認済み:
+    #   - αしきい値の引き上げ（上流 PR #73）
+    #   - 判定の常時真化（setIgnoreMouseEvents を無条件 true に）
+    #   - override-redirect の解除
+    #   - X の input shape を外部から 1x1 に設定
+    # アプリが「入力を受けない」と宣言してもコンポジタがポインタを渡しており、
+    # 壊れているのはアプリより下（Electron/Xwayland の input region 伝播）。
+    # Electron PR #51769 と xwayland-satellite #429 待ちで、今は直せない。
+    #
+    # そこで本体ウィンドウは niri の window-rule で専用ワークスペースへ隔離し
+    # （configs/niri-base.kdl）、見た目だけをここで描く。layer-shell の mask を
+    # 空にすると入力領域が空になり、仕様上クリックを一切受けない。
+    xdg.configFile."wispr-indicator/shell.qml".source = ../../../configs/wispr-indicator/shell.qml;
+
+    systemd.user.services.wispr-indicator = {
+      Unit = {
+        Description = "Wispr Flow recording indicator (layer-shell overlay)";
+        PartOf = [ "graphical-session.target" ];
+        After = [ "graphical-session.target" ];
+      };
+      Service = {
+        ExecStart = "${pkgs.quickshell}/bin/quickshell -p %h/.config/wispr-indicator/shell.qml";
+        # 録音判定に pw-dump / jq / grep を使う
+        Environment = [
+          "PATH=${
+            lib.makeBinPath [
+              pkgs.bash
+              pkgs.pipewire
+              pkgs.jq
+              pkgs.gnugrep
+              pkgs.coreutils
+            ]
+          }"
+        ];
+        Restart = "on-failure";
+        RestartSec = 3;
+      };
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+  };
+}

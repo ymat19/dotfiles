@@ -100,6 +100,19 @@ in
   # 判定と選択テキストの取得に AT-SPI を使う。D-Bus サービスが無いと常に空になる。
   services.gnome.at-spi2-core.enable = true;
 
+  # Wispr は押下のたびにマイクを開き直すが、WirePlumber は未使用 5 秒で入力を
+  # suspend する。USB マイク（PowerConf で実測）は suspend 復帰後の約 1.8 秒間
+  # 無音(0)しか返さず、話し始めが毎回欠落する。Wispr 側に常時オープンの設定は
+  # 無いので、入力デバイスを suspend させないことで復帰待ちそのものを無くす。
+  services.pipewire.wireplumber.extraConfig."51-wispr-no-input-suspend" = {
+    "monitor.alsa.rules" = [
+      {
+        matches = [ { "node.name" = "~alsa_input.*"; } ];
+        actions.update-props."session.suspend-timeout-seconds" = 0;
+      }
+    ];
+  };
+
   home-manager.users.${username} = {
     # helper も起動時に toolkit-accessibility を立てようとするが best-effort で、
     # 失敗すると選択テキストが黙って空になる。GTK 側の既定が false なので

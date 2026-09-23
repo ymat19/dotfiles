@@ -123,6 +123,16 @@ in
   # F20 以降は xkb が XF86AudioMicMute 等に割り当てており niri のバインドを誤爆する
   # ので F19。右 Ctrl は CapsLock→左 Ctrl と区別でき、既存ショートカットと衝突しない。
   services.xremap.mouse = true;
+
+  # xremap が物理キーボード/マウスを grab するので、helper に届く入力は xremap の
+  # 仮想デバイス経由だけになる。helper は起動時にしかデバイスを列挙しないため、
+  # rebuild 等で xremap が再起動して仮想デバイスが作り直されると入力を失う。
+  # 上流 helper に再スキャン機構が無いので、仮想デバイスの出現時に helper を
+  # kill し、本体の自動 relaunch で列挙し直させる。
+  services.udev.extraRules = ''
+    ACTION=="add", SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="xremap", RUN+="${pkgs.procps}/bin/pkill -f wispr-flow-linux-helper"
+  '';
+
   services.xremap.config.modmap = [
     {
       name = "Mouse side button to Ctrl_R+F19 (Wispr Flow push-to-talk)";
@@ -130,6 +140,13 @@ in
         "Ctrl_R"
         "F19"
       ];
+    }
+    # 口述後の送信をマウスだけで完結させる。Wispr の "Press Enter" 機能は使わない:
+    # helper は入力デバイスを grab しないので元のキーも素通しされ、しかも同じく
+    # マウスボタンを検知できない。
+    {
+      name = "Mouse extra button to Enter (send after dictation)";
+      remap."BTN_EXTRA" = "Enter";
     }
   ];
 

@@ -6,6 +6,9 @@
     userName = username;
     serviceMode = "system";
     withNiri = true;
+    # 既定では起動時に列挙したデバイスしか掴まず、スリープ復帰で USB が
+    # 再列挙されると以降のリマップが黙って止まる。
+    watch = true;
     config = {
       virtual_modifiers = [ "F24" ];
       modmap = [

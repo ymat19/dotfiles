@@ -113,6 +113,26 @@ in
     ];
   };
 
+  # helper は KEY_A..KEY_Z を持つデバイスしか監視せず、evdev→VK の変換表にも
+  # BTN_* が無い。アプリ側でマウスボタン(4099 等)をショートカットに登録できても
+  # helper からイベントが届かず反応しない。xremap にマウスも掴ませてサイドボタンを
+  # キーに変換し、xremap の仮想キーボード経由で helper に見せる。
+  #
+  # 単独キーにしないのは、Wispr が修飾キーを含まないショートカットも、修飾キー
+  # 単独のショートカットも登録拒否するため。修飾キー＋空きキーを同時に押下させる。
+  # F20 以降は xkb が XF86AudioMicMute 等に割り当てており niri のバインドを誤爆する
+  # ので F19。右 Ctrl は CapsLock→左 Ctrl と区別でき、既存ショートカットと衝突しない。
+  services.xremap.mouse = true;
+  services.xremap.config.modmap = [
+    {
+      name = "Mouse side button to Ctrl_R+F19 (Wispr Flow push-to-talk)";
+      remap."BTN_SIDE" = [
+        "Ctrl_R"
+        "F19"
+      ];
+    }
+  ];
+
   home-manager.users.${username} = {
     # helper も起動時に toolkit-accessibility を立てようとするが best-effort で、
     # 失敗すると選択テキストが黙って空になる。GTK 側の既定が false なので

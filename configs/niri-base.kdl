@@ -114,6 +114,9 @@ binds {
     // バインドが無いとキーがフォーカス中のアプリへ素通しされ、押しっぱなしで
     // "n" が連打される。niri に no-op アクションが無いので true を spawn する。
     Mod+N repeat=false { spawn "true"; }
+    // マウスのサイドボタン（xremap で Ctrl+F19 に変換、modules/nixos/system/wispr-flow.nix）
+    // も同じ理由で握り潰す。
+    Ctrl+F19 repeat=false { spawn "true"; }
 
     // Window management
     Mod+C { close-window; }

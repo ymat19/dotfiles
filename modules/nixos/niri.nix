@@ -210,7 +210,8 @@
         }
         {
           timeout = 5400;
-          on-timeout = "systemctl suspend";
+          on-timeout = "niri msg action power-off-monitors";
+          on-resume = "niri msg action power-on-monitors";
         }
       ];
     };

@@ -6,7 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # NixOS ホストの再構築（`hostname` でホスト名を確認してから実行）
-sudo nixos-rebuild switch --flake .#$(hostname) --impure
+# configuration.nix の security.sudo.extraRules で nixos-rebuild と
+# `systemctl restart xremap` は NOPASSWD 許可済み。Claude も自分で実行してよい。
+# sudoers はフルパスで照合されるため、次の形で呼ぶ（`sudo -n true` の失敗は許可の有無と無関係）
+sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#$(hostname) --impure
 # ホスト名: main, mini, dyna, air, ymat19
 
 # スタンドアロン（非NixOS）環境

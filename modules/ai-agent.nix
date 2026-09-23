@@ -426,6 +426,7 @@ in
     context = agentContext;
     settings = {
       effortLevel = "high";
+      promptSuggestionEnabled = false;
       editorMode = "normal";
       autoMemoryEnabled = true;
       skipDangerousModePermissionPrompt = true;

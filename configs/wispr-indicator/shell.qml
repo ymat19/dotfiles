@@ -45,50 +45,59 @@ ShellRoot {
         onTriggered: probe.running = true
     }
 
-    PanelWindow {
-        anchors.bottom: true
-        margins.bottom: 40
-        implicitWidth: 140
-        implicitHeight: 36
-        color: "transparent"
-        exclusionMode: ExclusionMode.Ignore
-        // 全画面ウィンドウにも覆われないよう Overlay レイヤーに置く
-        WlrLayershell.layer: WlrLayer.Overlay
+    // 画面の抜き差し（ドック切断など）で出力が消えると、特定の screen に紐づいた
+    // PanelWindow はプレースホルダ画面に移ったまま戻らない。screens を model にして
+    // 出力の出現ごとに作り直させる。
+    Variants {
+        model: Quickshell.screens
 
-        // 空マスク = 入力領域なし。クリックを食わないことの保証。
-        mask: Region {}
-
-        Rectangle {
-            anchors.centerIn: parent
-            width: 104
-            height: 28
-            radius: height / 2
-            visible: root.recording
-            color: "#cc1f2430"
-            border.color: "#7aa2f7"
-            border.width: 1
-
-            Row {
+        PanelWindow {
+            required property var modelData
+            screen: modelData
+            anchors.bottom: true
+            margins.bottom: 40
+            implicitWidth: 140
+            implicitHeight: 36
+            color: "transparent"
+            exclusionMode: ExclusionMode.Ignore
+            // 全画面ウィンドウにも覆われないよう Overlay レイヤーに置く
+            WlrLayershell.layer: WlrLayer.Overlay
+    
+            // 空マスク = 入力領域なし。クリックを食わないことの保証。
+            mask: Region {}
+    
+            Rectangle {
                 anchors.centerIn: parent
-                spacing: 8
-                Rectangle {
-                    width: 10
-                    height: 10
-                    radius: 5
-                    anchors.verticalCenter: parent.verticalCenter
-                    color: "#f7768e"
-                    SequentialAnimation on opacity {
-                        running: root.recording
-                        loops: Animation.Infinite
-                        NumberAnimation { to: 0.25; duration: 600 }
-                        NumberAnimation { to: 1.0; duration: 600 }
+                width: 104
+                height: 28
+                radius: height / 2
+                visible: root.recording
+                color: "#cc1f2430"
+                border.color: "#7aa2f7"
+                border.width: 1
+    
+                Row {
+                    anchors.centerIn: parent
+                    spacing: 8
+                    Rectangle {
+                        width: 10
+                        height: 10
+                        radius: 5
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: "#f7768e"
+                        SequentialAnimation on opacity {
+                            running: root.recording
+                            loops: Animation.Infinite
+                            NumberAnimation { to: 0.25; duration: 600 }
+                            NumberAnimation { to: 1.0; duration: 600 }
+                        }
                     }
-                }
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "Flow"
-                    color: "#c0caf5"
-                    font.pixelSize: 13
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Flow"
+                        color: "#c0caf5"
+                        font.pixelSize: 13
+                    }
                 }
             }
         }

@@ -161,6 +161,21 @@ in
     }
   ];
 
+  # helper は貼り付けを常に Ctrl+V で注入するが、Alacritty は Ctrl+V を ^V(0x16)
+  # として中のアプリへ渡すだけなので、Vim/zsh では quoted-insert の "^" しか出ない
+  # （Claude Code は ^V を受けて自前でクリップボードを読むので動いていた）。
+  # Alacritty 側で Ctrl+V を Paste に割り当てると Vim の矩形選択等を失うため、
+  # xremap が helper の仮想デバイスも掴んでいることを利用し、helper 由来の
+  # Ctrl+V だけをターミナルでは Ctrl+Shift+V に差し替える。
+  services.xremap.config.keymap = [
+    {
+      name = "Wispr Flow paste into terminals as Ctrl+Shift+V";
+      device.only = [ "Wispr Flow Linux Helper" ];
+      application.only = [ "/^(Alacritty|alacritty-scratch)$/" ];
+      remap."C-v" = "C-Shift-v";
+    }
+  ];
+
   home-manager.users.${username} = {
     # helper も起動時に toolkit-accessibility を立てようとするが best-effort で、
     # 失敗すると選択テキストが黙って空になる。GTK 側の既定が false なので

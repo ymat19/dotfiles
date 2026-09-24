@@ -27,13 +27,14 @@ let
         printf '%s\n' "$1" | socat -t2 - "UNIX-CONNECT:$HERDR_SOCKET_PATH"
       }
 
-      # 押されたキーを up/down に変換して返す。それ以外のキー・Esc・2 秒放置では失敗を返す
+      # 押されたキーを up/down に変換して返す。それ以外のキーでは失敗を返す。
+      # 連打の途中で考えている間に popup が消えると、次のキーがペインへ誤入力されるためタイムアウトは設けない
       read_step() {
         local saved key
         saved=$(stty -g)
         # -icrnl: Enter(CR) を C-j(LF) と区別するため
         stty -icanon -echo -icrnl
-        IFS= read -rsn1 -d "" -t 2 key || key=""
+        IFS= read -rsn1 -d "" key || key=""
         stty "$saved"
         case $key in
           $'\n' | j | J) echo down ;;

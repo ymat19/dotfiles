@@ -48,7 +48,7 @@ width = 40
 height = 3
 
 # サイドバーの上下ワークスペースへ移動。続けて J/K (j/k) を連打すると prefix なしで移動し続ける
-# （workspace-nav plugin の popup が開いている 2 秒間）。組み込みの previous/next_workspace は連打できないため置き換える
+# （workspace-nav plugin の popup が開いている間。j/k 以外のキーで閉じる）。組み込みの previous/next_workspace は連打できないため置き換える
 # 小文字 prefix+j/k は既定で focus_pane_down/up に割当済みのため shift 付きにする
 [[keys.command]]
 key = "prefix+shift+j"

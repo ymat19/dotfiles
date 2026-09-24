@@ -4,10 +4,6 @@ onboarding = false
 prefix = "ctrl+f"
 # 既定 goto(prefix+g) を prefix+f へ移し、prefix+g を lazygit に空ける
 goto = "prefix+f"
-# サイドバーの上下ワークスペースへ移動（prefix+shift+k=上, prefix+shift+j=下）
-# 小文字 prefix+j/k は既定で focus_pane_down/up に割当済みのため shift 付きにする
-previous_workspace = "prefix+shift+k"
-next_workspace = "prefix+shift+j"
 
 [[keys.command]]
 key = "prefix+g"
@@ -34,22 +30,37 @@ type = "shell"
 command = "\"$HERDR_BIN_PATH\" pane move \"$HERDR_ACTIVE_PANE_ID\" --new-workspace --focus"
 description = "カレントペインを新しいワークスペースへ切り出す"
 
-# カレントワークスペースをサイドバー一覧内で下/上へ移動する。popup が開いている間は C-j/C-k の連打で続けて移動できる
+# カレントワークスペースをサイドバー一覧内で下/上へ移動する。popup が開いている間は C-j/C-k (j/k) の連打で続けて移動できる
 [[keys.command]]
 key = "prefix+ctrl+j"
 type = "popup"
-command = "herdr-workspace-move down"
+command = "herdr-workspace-move reorder down"
 description = "カレントワークスペースを一覧の下へ移動"
-width = 50
+width = 40
 height = 3
 
 [[keys.command]]
 key = "prefix+ctrl+k"
 type = "popup"
-command = "herdr-workspace-move up"
+command = "herdr-workspace-move reorder up"
 description = "カレントワークスペースを一覧の上へ移動"
-width = 50
+width = 40
 height = 3
+
+# サイドバーの上下ワークスペースへ移動。続けて J/K (j/k) を連打すると prefix なしで移動し続ける
+# （workspace-nav plugin の popup が開いている 2 秒間）。組み込みの previous/next_workspace は連打できないため置き換える
+# 小文字 prefix+j/k は既定で focus_pane_down/up に割当済みのため shift 付きにする
+[[keys.command]]
+key = "prefix+shift+j"
+type = "shell"
+command = "herdr-workspace-move focus down"
+description = "下のワークスペースへ移動"
+
+[[keys.command]]
+key = "prefix+shift+k"
+type = "shell"
+command = "herdr-workspace-move focus up"
+description = "上のワークスペースへ移動"
 
 [theme]
 name = "tokyo-night"

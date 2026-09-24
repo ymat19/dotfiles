@@ -1,0 +1,16 @@
+id = "ymat19.workspace-nav"
+name = "Workspace Nav"
+version = "0.1.0"
+min_herdr_version = "0.9.0"
+description = "prefix+J/K のワークスペース切り替えを prefix なしで連打できるようにする"
+platforms = ["linux", "macos"]
+
+# keys.command の popup を開いたまま focus を移すと入力を受けなくなるため、
+# 切り替えのたびに移動先で開き直せる plugin pane を使う
+[[panes]]
+id = "wait"
+title = "Workspace Nav"
+placement = "popup"
+width = 40
+height = 3
+command = ["herdr-workspace-move", "focus-wait"]

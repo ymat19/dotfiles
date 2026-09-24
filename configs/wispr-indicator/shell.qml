@@ -27,21 +27,38 @@ ShellRoot {
 
     // wispr-flow がマイクを掴んでいるかを PipeWire から判定する。
     // ログ形式に依存しないので上流の更新で壊れない。
+    //
+    // pw-dump を定期実行しない: 毎回グラフ全体（数百 KB）を JSON 化するので、
+    // 0.4 秒間隔で CPU 1 コアの 1 割前後を常時食っていた。監視モードで差分だけ
+    // 受け取り、入力ストリームの一覧を jq 側で保持する（削除は info: null で届く）。
     Process {
         id: probe
-        command: ["/bin/sh", "-c",
-            "pw-dump | jq -r '[.[] | select(.info.props[\"media.class\"]==\"Stream/Input/Audio\") | ((.info.props[\"application.process.binary\"] // \"\") + \" \" + (.info.props[\"application.name\"] // \"\"))] | join(\" \")' | grep -qi wispr && echo 1 || echo 0"]
-        running: false
+        running: true
+        command: ["/bin/sh", "-c", "pw-dump -m -N | jq -n --unbuffered -r \"$0\"", `
+            foreach inputs as $batch ({};
+              reduce $batch[] as $o (.;
+                if $o.info == null then del(.[$o.id | tostring])
+                elif $o.info.props then
+                  .[$o.id | tostring] = (
+                    $o.info.props["media.class"] == "Stream/Input/Audio"
+                    and ((($o.info.props["application.process.binary"] // "")
+                          + " " + ($o.info.props["application.name"] // ""))
+                         | test("wispr"; "i")))
+                else . end);
+              if any(.[]; .) then 1 else 0 end)`]
         stdout: SplitParser {
             onRead: data => root.recording = (data.trim() === "1")
+        }
+        // PipeWire の再起動などで監視が切れたら張り直す
+        onExited: {
+            root.recording = false;
+            restart.start();
         }
     }
 
     Timer {
-        interval: 400
-        running: true
-        repeat: true
-        triggeredOnStart: true
+        id: restart
+        interval: 2000
         onTriggered: probe.running = true
     }
 

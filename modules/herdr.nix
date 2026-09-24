@@ -14,6 +14,7 @@ let
   herdr-workspace-move = pkgs.writeShellApplication {
     name = "herdr-workspace-move";
     runtimeInputs = with pkgs; [
+      coreutils
       jq
       socat
       util-linux
@@ -32,13 +33,15 @@ let
       read_step() {
         local saved key
         saved=$(stty -g)
-        # -icrnl: Enter(CR) を C-j(LF) と区別するため
-        stty -icanon -echo -icrnl
-        IFS= read -rsn1 -d "" key || key=""
+        # -icrnl: Enter(CR) を C-j(LF) と区別するため。
+        # bash の read -n は自前で ICRNL を立て直して CR を LF に化けさせるため、dd で 1 バイト読む
+        stty -icanon -echo -icrnl min 1 time 0
+        key=$(dd bs=1 count=1 2>/dev/null | od -An -tx1 | tr -d ' \n')
         stty "$saved"
+        # 0a=C-j 6a=j 4a=J / 0b=C-k 6b=k 4b=K
         case $key in
-          $'\n' | j | J) echo down ;;
-          $'\v' | k | K) echo up ;;
+          0a | 6a | 4a) echo down ;;
+          0b | 6b | 4b) echo up ;;
           *) return 1 ;;
         esac
       }

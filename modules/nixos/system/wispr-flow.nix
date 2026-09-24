@@ -73,6 +73,17 @@ let
       KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess", GROUP="input", MODE="0660"
       SUBSYSTEM=="input", KERNEL=="event*", TAG+="uaccess", GROUP="input", MODE="0660"
       UDEV
+
+      # helper 自身の注入用仮想デバイスだけは helper から読めなくする。
+      # helper は注入の前後で「物理的に押されている修飾キー」を全 event* への
+      # EVIOCGKEY で調べて離し→押し直すが、自分の仮想デバイスも対象に含めてしまう。
+      # 一度でも修飾キーを押し直すと、それを次回「押されている」と読んで再び押し直す
+      # 自己ラッチになり、音声入力のたびに Super/Ctrl/Shift が押しっぱなしになる。
+      # 上流 helper に除外処理が無いので、読めないデバイスはスキップされる挙動を使う。
+      # uaccess の ACL 付与（73-seat-late）より前でタグを外す必要があるので 71-。
+      cat > $out/lib/udev/rules.d/71-wispr-flow-helper-private.rules <<'UDEV'
+      SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="Wispr Flow Linux Helper", TAG-="uaccess", GROUP="root", MODE="0600"
+      UDEV
     '';
 
     meta = {

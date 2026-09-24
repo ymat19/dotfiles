@@ -91,6 +91,35 @@ let
     exit 0
   '';
 
+  # herdr の Agents パネルに作業内容の要約を出す。
+  #
+  # Claude Code が自動生成する端末タイトルは初回プロンプトから作られ、以後更新されない。
+  # 「Issue 219 に着手」のような指示だと中身の無いタイトルになるため、Issue 等を読んで
+  # 作業内容を把握した Claude 自身に要約させて herdr の $task トークンへ書かせる。
+  # 1 セッション 1 回しか要らない指示を CLAUDE.md に常駐させたくないので、
+  # session_id ごとのマーカーで初回プロンプトにだけ差し込む。
+  # Claude が報告するまでの間も空欄にならないよう、プロンプト本文を仮の値として先に入れる。
+  herdrTaskHook = pkgs.writeShellScript "herdr-task-hook" ''
+    [ -n "$HERDR_PANE_ID" ] && [ -n "$HERDR_BIN_PATH" ] || exit 0
+    INPUT=$(cat)
+    SESSION=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.session_id // empty')
+    [ -n "$SESSION" ] || exit 0
+
+    MARKER_DIR="''${XDG_RUNTIME_DIR:-/tmp}/claude-herdr-task"
+    mkdir -p "$MARKER_DIR"
+    [ -e "$MARKER_DIR/$SESSION" ] && exit 0
+    touch "$MARKER_DIR/$SESSION"
+
+    PROMPT=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.prompt // ""' | tr '\n' ' ')
+    "$HERDR_BIN_PATH" pane report-metadata "$HERDR_PANE_ID" \
+      --source claude-task --token "task=$PROMPT" >/dev/null 2>&1 || true
+
+    ${pkgs.jq}/bin/jq -n \
+      --arg context "herdr のサイドバーに表示する作業内容の要約を登録すること。作業内容を把握した時点で（Issue 番号や URL だけの指示なら、それを読んで中身を理解した後に）、何をするセッションかが一目で分かる 30 字程度の日本語の要約を作り、Bash で次を 1 回だけ実行する: \"\$HERDR_BIN_PATH\" pane report-metadata \"\$HERDR_PANE_ID\" --source claude-task --token 'task=<要約>'。Issue 番号があれば要約の先頭に #番号 を付ける。ユーザーへの報告は不要。" \
+      '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$context}}'
+    exit 0
+  '';
+
   # i-have-adhd skill を全セッション開始時に自動発火させる。
   #
   # この skill は frontmatter の disable-model-invocation により Skill ツールから起動できず
@@ -467,6 +496,16 @@ in
               {
                 type = "command";
                 command = "${ciWatchHook}";
+              }
+            ];
+          }
+        ];
+        UserPromptSubmit = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "${herdrTaskHook}";
               }
             ];
           }

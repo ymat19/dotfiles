@@ -34,6 +34,23 @@ type = "shell"
 command = "\"$HERDR_BIN_PATH\" pane move \"$HERDR_ACTIVE_PANE_ID\" --new-workspace --focus"
 description = "カレントペインを新しいワークスペースへ切り出す"
 
+# カレントワークスペースをサイドバー一覧内で下/上へ移動する。popup が開いている間は C-j/C-k の連打で続けて移動できる
+[[keys.command]]
+key = "prefix+ctrl+j"
+type = "popup"
+command = "herdr-workspace-move down"
+description = "カレントワークスペースを一覧の下へ移動"
+width = 50
+height = 3
+
+[[keys.command]]
+key = "prefix+ctrl+k"
+type = "popup"
+command = "herdr-workspace-move up"
+description = "カレントワークスペースを一覧の上へ移動"
+width = 50
+height = 3
+
 [theme]
 name = "tokyo-night"
 

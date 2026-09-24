@@ -27,6 +27,13 @@ type = "pane"
 command = "zsh -c 'source ~/.zshrc && hwt'"
 description = "ghq repo を fzf 選択して worktree+ワークスペース作成"
 
+# ペイン移動は組み込みアクションに無いため CLI を呼ぶ
+[[keys.command]]
+key = "prefix+o"
+type = "shell"
+command = "\"$HERDR_BIN_PATH\" pane move \"$HERDR_ACTIVE_PANE_ID\" --new-workspace --focus"
+description = "カレントペインを新しいワークスペースへ切り出す"
+
 [theme]
 name = "tokyo-night"
 

@@ -120,23 +120,33 @@ let
     exit 0
   '';
 
-  # herdr サーバー再起動時に Claude Code ペインを `claude --resume` で復帰させる公式 integration。
+  # herdr サーバー再起動時にエージェントのペインを各自の resume コマンドで復帰させる公式 integration。
   #
-  # `herdr integration install claude` は settings.json を直接書き換えるため、Nix 管理の
-  # settings.json とは共存できない。スクリプトだけをビルド時に herdr 自身に生成させ、
-  # フック登録は下の hooks で行う。本文をリポジトリへ複製しないのは、herdr の flake 更新で
+  # `herdr integration install <agent>` は settings.json / hooks.json / tui.json を直接書き換えるため、
+  # Nix 管理の設定とは共存できない。スクリプトだけをビルド時に herdr 自身に生成させ、
+  # 登録は各エージェントの Nix 設定で行う。本文をリポジトリへ複製しないのは、herdr の flake 更新で
   # integration version が上がったとき自動で追従させるため。
   herdrPackage = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  herdrAgentStateScript = pkgs.runCommand "herdr-claude-agent-state.sh" { } ''
-    mkdir "$TMPDIR/.claude"
-    HOME="$TMPDIR" ${herdrPackage}/bin/herdr integration install claude >/dev/null
-    cp "$TMPDIR/.claude/hooks/herdr-agent-state.sh" "$out"
+  herdrIntegrations = pkgs.runCommand "herdr-integrations" { } ''
+    export HOME="$TMPDIR"
+    # インストーラはエージェントの設定ディレクトリが無いと拒否する
+    mkdir -p "$HOME/.claude" "$HOME/.codex" "$HOME/.config/opencode"
+    for agent in claude codex opencode; do
+      ${herdrPackage}/bin/herdr integration install "$agent" >/dev/null
+    done
+    mkdir -p "$out/opencode/plugins"
+    cp "$HOME/.claude/hooks/herdr-agent-state.sh" "$out/claude-agent-state.sh"
+    cp "$HOME/.codex/herdr-agent-state.sh" "$out/codex-agent-state.sh"
+    cp "$HOME/.config/opencode/herdr-tui-session.js" "$out/opencode/"
+    cp "$HOME/.config/opencode/plugins/herdr-agent-state.js" "$out/opencode/plugins/"
   '';
   # 生成スクリプトは python3 を PATH から探し、無ければ黙って exit 0 する。
   # 環境に python3 を常駐させたくないので、フック実行時だけ PATH に足す。
-  herdrAgentStateHook = pkgs.writeShellScript "herdr-agent-state-hook" ''
-    PATH=${pkgs.python3}/bin:$PATH exec ${pkgs.bash}/bin/bash ~/.claude/hooks/herdr-agent-state.sh session
-  '';
+  herdrAgentStateHook =
+    script:
+    pkgs.writeShellScript "herdr-agent-state-hook" ''
+      PATH=${pkgs.python3}/bin:$PATH exec ${pkgs.bash}/bin/bash ${script} session
+    '';
 
   # i-have-adhd skill を全セッション開始時に自動発火させる。
   #
@@ -430,7 +440,7 @@ in
 
   # `herdr integration status` はこのパスで導入有無と version を判定するため、生成物をここへ置く
   home.file.".claude/hooks/herdr-agent-state.sh" = {
-    source = herdrAgentStateScript;
+    source = "${herdrIntegrations}/claude-agent-state.sh";
     executable = true;
   };
 
@@ -547,7 +557,7 @@ in
             hooks = [
               {
                 type = "command";
-                command = "${herdrAgentStateHook}";
+                command = "${herdrAgentStateHook "~/.claude/hooks/herdr-agent-state.sh"}";
                 timeout = 10;
               }
             ];
@@ -661,6 +671,22 @@ in
     };
   };
 
+  # herdr の integration。サーバー再起動後に `opencode --session <id>` で復帰させる。
+  # programs.opencode.tui は tui.json に書くが、herdr は tui.jsonc しか見ずに needs repair と判定するため直接置く
+  xdg.configFile."opencode/tui.jsonc".text = builtins.toJSON {
+    plugin = [ "./herdr-tui-session.js" ];
+  };
+
+  # `herdr integration status` は各エージェントの設定ディレクトリ内のこのパスで導入有無と version を判定する
+  home.file.".codex/herdr-agent-state.sh" = {
+    source = "${herdrIntegrations}/codex-agent-state.sh";
+    executable = true;
+  };
+  xdg.configFile."opencode/herdr-tui-session.js".source =
+    "${herdrIntegrations}/opencode/herdr-tui-session.js";
+  xdg.configFile."opencode/plugins/herdr-agent-state.js".source =
+    "${herdrIntegrations}/opencode/plugins/herdr-agent-state.js";
+
   # programs.codex は ~/.codex/config.toml を read-only な nix store symlink (0444) として管理するが、
   # omnigent の codex-native harness は config.toml を shutil.copy2 でコピー (権限も複製) してから
   # MCP 設定を write_text で追記するため、0444 のコピーへの書き込みが PermissionError で失敗する。
@@ -698,6 +724,17 @@ in
               command = "${codexUserPromptHook}";
               timeout = 5;
               statusMessage = "Loading Codex turn guidance";
+            }
+          ];
+        }
+      ];
+      SessionStart = [
+        {
+          hooks = [
+            {
+              type = "command";
+              command = "${herdrAgentStateHook "~/.codex/herdr-agent-state.sh"}";
+              timeout = 10;
             }
           ];
         }

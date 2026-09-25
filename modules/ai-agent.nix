@@ -120,6 +120,24 @@ let
     exit 0
   '';
 
+  # herdr サーバー再起動時に Claude Code ペインを `claude --resume` で復帰させる公式 integration。
+  #
+  # `herdr integration install claude` は settings.json を直接書き換えるため、Nix 管理の
+  # settings.json とは共存できない。スクリプトだけをビルド時に herdr 自身に生成させ、
+  # フック登録は下の hooks で行う。本文をリポジトリへ複製しないのは、herdr の flake 更新で
+  # integration version が上がったとき自動で追従させるため。
+  herdrPackage = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  herdrAgentStateScript = pkgs.runCommand "herdr-claude-agent-state.sh" { } ''
+    mkdir "$TMPDIR/.claude"
+    HOME="$TMPDIR" ${herdrPackage}/bin/herdr integration install claude >/dev/null
+    cp "$TMPDIR/.claude/hooks/herdr-agent-state.sh" "$out"
+  '';
+  # 生成スクリプトは python3 を PATH から探し、無ければ黙って exit 0 する。
+  # 環境に python3 を常駐させたくないので、フック実行時だけ PATH に足す。
+  herdrAgentStateHook = pkgs.writeShellScript "herdr-agent-state-hook" ''
+    PATH=${pkgs.python3}/bin:$PATH exec ${pkgs.bash}/bin/bash ~/.claude/hooks/herdr-agent-state.sh session
+  '';
+
   # i-have-adhd skill を全セッション開始時に自動発火させる。
   #
   # この skill は frontmatter の disable-model-invocation により Skill ツールから起動できず
@@ -410,6 +428,12 @@ in
     executable = true;
   };
 
+  # `herdr integration status` はこのパスで導入有無と version を判定するため、生成物をここへ置く
+  home.file.".claude/hooks/herdr-agent-state.sh" = {
+    source = herdrAgentStateScript;
+    executable = true;
+  };
+
   home.file.".claude/assets/claude-icon.png" = {
     source = ../configs/claude-code/assets/claude-icon.png;
   };
@@ -516,6 +540,15 @@ in
               {
                 type = "command";
                 command = "${adhdSkillHook}";
+              }
+            ];
+          }
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "${herdrAgentStateHook}";
+                timeout = 10;
               }
             ];
           }

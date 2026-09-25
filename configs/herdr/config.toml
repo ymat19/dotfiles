@@ -4,6 +4,8 @@ onboarding = false
 prefix = "ctrl+f"
 # 既定 goto(prefix+g) を prefix+f へ移し、prefix+g を lazygit に空ける
 goto = "prefix+f"
+# 既定の close_tab(prefix+X) を外し、サーバー停止に使う
+close_tab = []
 
 [[keys.command]]
 key = "prefix+g"
@@ -29,6 +31,13 @@ key = "prefix+o"
 type = "shell"
 command = "\"$HERDR_BIN_PATH\" pane move \"$HERDR_ACTIVE_PANE_ID\" --new-workspace --focus"
 description = "カレントペインを新しいワークスペースへ切り出す"
+
+# サーバー停止は組み込みアクションに無いため CLI を呼ぶ（detach の prefix+q はサーバーを残す）
+[[keys.command]]
+key = "prefix+shift+x"
+type = "shell"
+command = "\"$HERDR_BIN_PATH\" server stop"
+description = "herdr サーバーを停止（全ペインのプロセスが終了する）"
 
 # カレントワークスペースをサイドバー一覧内で下/上へ移動する。popup が開いている間は C-j/C-k (j/k) の連打で続けて移動できる
 [[keys.command]]

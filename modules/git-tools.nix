@@ -16,7 +16,7 @@
     settings = {
       user = {
         name = "ymat19";
-        email = "ymat19@example.com";
+        email = "45934497+ymat19@users.noreply.github.com";
       };
       ghq = {
         root = "/home/ymat19/repos";

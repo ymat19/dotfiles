@@ -59,4 +59,10 @@
       fi
     }
   '';
+
+  programs.tmux.extraConfig = lib.mkAfter ''
+    # https://www.m3tech.blog/entry/dotfiles-bonsai#Tmux%E7%B7%A8
+    bind g popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && lazygit"
+    bind q popup -d '#{pane_current_path}' -w90% -h90% -E zsh -c "source ~/.zshrc && lazydocker"
+  '';
 }

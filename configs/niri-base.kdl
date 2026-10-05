@@ -97,7 +97,11 @@ window-rule {
 
 binds {
     // Terminal
-    Mod+Q { spawn-sh "USE_HERDR=1 alacritty"; }
+    // herdr（エージェントが並んで走る端末）は専用の scope に入れ、メモリの上限と OOM の扱いを付ける。
+    // niri が素で作る scope は上限なし・OOMPolicy=stop で、中の試験 1 本が OOM で殺されただけで
+    // systemd が scope ごと止め、herdr の全セッションが道連れになった（2026-10-04 04:44）。
+    // MemoryHigh で先に絞って遅くし、MemoryMax を越えたら中の 1 本だけを殺して端末は残す。
+    Mod+Q { spawn-sh "USE_HERDR=1 systemd-run --user --scope --unit=herdr-$$ -p OOMPolicy=continue -p MemoryHigh=10G -p MemoryMax=12G alacritty"; }
     Mod+Shift+Q { spawn "alacritty"; }
 
     // Scratchpad terminal (alacritty; 永続化は WM のトグルに委譲)

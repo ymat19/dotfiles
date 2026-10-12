@@ -29,6 +29,20 @@
     enableGitIntegration = true;
   };
 
+  programs.jujutsu = {
+    enable = true;
+    settings = {
+      user = {
+        inherit (config.programs.git.settings.user) name email;
+      };
+      ui = {
+        # delta は git 形式の diff しか解釈できないため、jj 独自形式ではなく :git で出す
+        pager = "delta";
+        diff-formatter = ":git";
+      };
+    };
+  };
+
   home.packages = lib.mkAfter (
     with pkgs;
     [

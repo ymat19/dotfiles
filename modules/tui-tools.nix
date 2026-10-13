@@ -26,6 +26,7 @@
   home.packages = lib.mkAfter (
     with pkgs;
     [
+      jjui
       lazydocker
       posting
     ]

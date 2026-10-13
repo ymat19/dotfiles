@@ -328,7 +328,6 @@ touch ~/.gitconfig
 
 | イベント | マッチャー | 処理内容 |
 |----------|-----------|----------|
-| **PreToolUse** | `Bash` | **rtk-rewrite**: Bash コマンドを自動的に [rtk](https://github.com/numtide/rtk) 経由に書き換え。git, cargo, npm, docker, kubectl, curl 等の主要コマンドをラップし、出力のトークン節約・レート制限を実現 |
 | **TeammateIdle** | — | 未コミットの変更があるチームメイトのアイドル遷移をブロック |
 | **TaskCompleted** | — | 未コミットの変更がある場合タスク完了を拒否 |
 
@@ -342,7 +341,6 @@ touch ~/.gitconfig
 | **codex** | OpenAI Codex CLI エージェント |
 | **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
 | **ccusage** | Claude Code の使用量トラッキング |
-| **rtk** | コマンド出力のトークン節約ラッパー（フックと連携） |
 
 ### Neovim 連携
 

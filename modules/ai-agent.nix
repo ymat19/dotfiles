@@ -46,12 +46,6 @@ let
     exit 0
   '';
 
-  codexUserPromptHook = pkgs.writeShellScript "codex-user-prompt-hook" ''
-    ${pkgs.jq}/bin/jq -n \
-      --arg context 'Codex setup note: prefer rtk wrappers for high-volume shell output when an equivalent exists (for example: rtk git, rtk grep, rtk read, rtk test, rtk npm, rtk cargo). Codex hooks cannot rewrite tool input yet; PreToolUse updatedInput currently fails open, so choose rtk directly when running commands.' \
-      '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$context}}'
-  '';
-
   codexPromptEditHook = pkgs.writeShellScript "codex-prompt-edit-hook" ''
     INPUT=$(cat)
     COMMAND=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.command // ""')
@@ -429,7 +423,6 @@ in
       (llmPkg "ccusage")
       (llmPkg "codex-acp")
       (llmPkg "oh-my-codex")
-      (llmPkg "rtk")
     ];
 
   home.file.".agent-browser/config.json".source = jsonFormat.generate "agent-browser-config.json" {
@@ -474,11 +467,6 @@ in
 
   home.file.".claude/hooks/task-completed-gate.sh" = {
     source = ../configs/claude-code/hooks/task-completed-gate.sh;
-    executable = true;
-  };
-
-  home.file.".claude/hooks/rtk-rewrite.sh" = {
-    source = ../configs/claude-code/hooks/rtk-rewrite.sh;
     executable = true;
   };
 
@@ -544,15 +532,6 @@ in
       skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [
-          {
-            matcher = "Bash";
-            hooks = [
-              {
-                type = "command";
-                command = "bash ~/.claude/hooks/rtk-rewrite.sh";
-              }
-            ];
-          }
           {
             matcher = "Write|Edit|NotebookEdit|Bash";
             hooks = [
@@ -775,18 +754,6 @@ in
 
   home.file.".codex/hooks.json".source = jsonFormat.generate "codex-hooks.json" {
     hooks = mergeCodexHooks {
-      UserPromptSubmit = [
-        {
-          hooks = [
-            {
-              type = "command";
-              command = "${codexUserPromptHook}";
-              timeout = 5;
-              statusMessage = "Loading Codex turn guidance";
-            }
-          ];
-        }
-      ];
       SessionStart = [
         {
           hooks = [

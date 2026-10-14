@@ -6,7 +6,9 @@ prefix = "ctrl+f"
 goto = "prefix+f"
 # 既定の close_tab(prefix+X) を外し、サーバー停止に使う
 close_tab = []
-# prefix なしにする理由は下の ctrl+shift+j/k と同じ
+# prefix なしにする理由は下の ctrl+shift+j/k と同じ。
+# Windows Terminal は ctrl+enter も ctrl+j と同じ LF で送るため、settings.json の sendInput で
+# kitty 形式の "\u001b[13;5u" を送らせている（このリポジトリでは管理していない）
 next_agent = "ctrl+j"
 previous_agent = "ctrl+k"
 

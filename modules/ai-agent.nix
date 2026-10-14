@@ -538,6 +538,11 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/shared-checkout-guard.sh" = {
+    source = ../configs/claude-code/hooks/shared-checkout-guard.sh;
+    executable = true;
+  };
+
   # `herdr integration status` はこのパスで導入有無と version を判定するため、生成物をここへ置く
   home.file.".claude/hooks/herdr-agent-state.sh" = {
     source = "${herdrIntegrations}/claude-agent-state.sh";
@@ -601,6 +606,10 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/user-scope-guard.sh";
+              }
+              {
+                type = "command";
+                command = "~/.claude/hooks/shared-checkout-guard.sh";
               }
             ];
           }

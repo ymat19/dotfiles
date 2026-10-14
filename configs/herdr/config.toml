@@ -43,7 +43,10 @@ command = "\"$HERDR_BIN_PATH\" server stop"
 description = "herdr サーバーを停止（全ペインのプロセスが終了する）"
 
 # agents 一覧の上下の agent へ移動する。prefix 付きだと連打のたびに prefix を押し直すことになり、
-# popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする
+# popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする。
+# Windows Terminal は ctrl+shift+j/k を ctrl+j/k と同じコードで送り、ctrl+shift+k は既定で画面消去に
+# 割り当てているため、Windows Terminal の settings.json で sendInput により kitty 形式の
+# "\u001b[106;6u" / "\u001b[107;6u" を送らせている（このリポジトリでは管理していない）
 [[keys.command]]
 key = "ctrl+shift+j"
 type = "shell"

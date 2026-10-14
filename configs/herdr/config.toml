@@ -6,6 +6,9 @@ prefix = "ctrl+f"
 goto = "prefix+f"
 # 既定の close_tab(prefix+X) を外し、サーバー停止に使う
 close_tab = []
+# prefix なしにする理由は下の ctrl+shift+j/k と同じ
+next_agent = "ctrl+j"
+previous_agent = "ctrl+k"
 
 [[keys.command]]
 key = "prefix+g"
@@ -39,39 +42,19 @@ type = "shell"
 command = "\"$HERDR_BIN_PATH\" server stop"
 description = "herdr サーバーを停止（全ペインのプロセスが終了する）"
 
-# カレント agent を agents 一覧内で下/上へ移動する。隣の agent が別ワークスペースならワークスペースごと、
-# 同じワークスペースの別タブならタブごと動かし、同じタブならペインを入れ替える。
-# popup が開いている間は C-j/C-k (j/k) の連打で続けて移動できる
+# agents 一覧の上下の agent へ移動する。prefix 付きだと連打のたびに prefix を押し直すことになり、
+# popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする
 [[keys.command]]
-key = "prefix+ctrl+j"
-type = "popup"
-command = "herdr-workspace-move reorder down"
+key = "ctrl+shift+j"
+type = "shell"
+command = "herdr-agent-move down"
 description = "カレント agent を agents 一覧の下へ移動"
-width = 60
-height = 3
 
 [[keys.command]]
-key = "prefix+ctrl+k"
-type = "popup"
-command = "herdr-workspace-move reorder up"
+key = "ctrl+shift+k"
+type = "shell"
+command = "herdr-agent-move up"
 description = "カレント agent を agents 一覧の上へ移動"
-width = 60
-height = 3
-
-# サイドバーの agents 一覧の上下の agent へ移動。続けて J/K (j/k) を連打すると prefix なしで移動し続ける
-# （workspace-nav plugin の popup が開いている間。j/k 以外のキーで閉じる）。組み込みの previous/next_agent は連打できないため置き換える
-# 小文字 prefix+j/k は既定で focus_pane_down/up に割当済みのため shift 付きにする
-[[keys.command]]
-key = "prefix+shift+j"
-type = "shell"
-command = "herdr-workspace-move focus down"
-description = "agents 一覧の下の agent へ移動"
-
-[[keys.command]]
-key = "prefix+shift+k"
-type = "shell"
-command = "herdr-workspace-move focus up"
-description = "agents 一覧の上の agent へ移動"
 
 [theme]
 name = "tokyo-night"

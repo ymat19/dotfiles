@@ -110,11 +110,56 @@ let
     }'
   '';
 
+  # herdr のサイドバーは行を折り返さず 1 行に切り詰めるため、要約を表示幅で切って
+  # $task1..$task3 の複数トークンに分け、rows 側で 1 トークン 1 行に並べる。
+  # 幅はサイドバー既定幅 26 から右境界線 1・2 行目以降のインデント 3・スクロールバー 1 を引いた値。
+  # 前回より短い要約で古い行が残らないよう、使わなかったトークンは消す
+  herdrTask = pkgs.writeShellApplication {
+    name = "herdr-task";
+    text = ''
+      # usage: herdr-task <要約>
+      [[ -n ''${HERDR_PANE_ID:-} && -n ''${HERDR_BIN_PATH:-} ]] || exit 0
+      # hook から呼ばれると locale が未設定のことがあり、その場合は文字数ではなくバイト数で数えてしまう
+      export LC_ALL=C.UTF-8
+      width=21
+      max_lines=3
+      text=$1
+      lines=()
+      line=""
+      w=0
+      for ((i = 0; i < ''${#text}; i++)); do
+        c=''${text:i:1}
+        printf -v cp '%d' "'$c"
+        # East Asian Wide の厳密な判定はせず、ASCII 以外を全角とみなす（日本語の要約が前提）
+        cw=$((cp < 128 ? 1 : 2))
+        if ((w + cw > width)); then
+          lines+=("$line")
+          ((''${#lines[@]} < max_lines)) || break
+          line=""
+          w=0
+        fi
+        line+=$c
+        w=$((w + cw))
+      done
+      if [[ -n $line ]] && ((''${#lines[@]} < max_lines)); then lines+=("$line"); fi
+
+      args=(--clear-token task)
+      for ((n = 1; n <= max_lines; n++)); do
+        if ((n <= ''${#lines[@]})); then
+          args+=(--token "task$n=''${lines[n - 1]}")
+        else
+          args+=(--clear-token "task$n")
+        fi
+      done
+      "$HERDR_BIN_PATH" pane report-metadata "$HERDR_PANE_ID" --source claude-task "''${args[@]}" >/dev/null
+    '';
+  };
+
   # herdr の Agents パネルに作業内容の要約を出す。
   #
   # Claude Code が自動生成する端末タイトルは初回プロンプトから作られ、以後更新されない。
   # 「Issue 219 に着手」のような指示だと中身の無いタイトルになるため、Issue 等を読んで
-  # 作業内容を把握した Claude 自身に要約させて herdr の $task トークンへ書かせる。
+  # 作業内容を把握した Claude 自身に要約させて herdr の $task1..$task3 トークンへ書かせる。
   # 1 セッション 1 回しか要らない指示を CLAUDE.md に常駐させたくないので、
   # session_id ごとのマーカーで初回プロンプトにだけ差し込む。
   # Claude が報告するまでの間も空欄にならないよう、プロンプト本文を仮の値として先に入れる。
@@ -130,11 +175,10 @@ let
     touch "$MARKER_DIR/$SESSION"
 
     PROMPT=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.prompt // ""' | tr '\n' ' ')
-    "$HERDR_BIN_PATH" pane report-metadata "$HERDR_PANE_ID" \
-      --source claude-task --token "task=$PROMPT" >/dev/null 2>&1 || true
+    ${herdrTask}/bin/herdr-task "$PROMPT" >/dev/null 2>&1 || true
 
     ${pkgs.jq}/bin/jq -n \
-      --arg context "herdr のサイドバーに表示する作業内容の要約を登録すること。作業内容を把握した時点で（Issue 番号や URL だけの指示なら、それを読んで中身を理解した後に）、何をするセッションかが一目で分かる 30 字程度の日本語の要約を作り、Bash で次を 1 回だけ実行する: \"\$HERDR_BIN_PATH\" pane report-metadata \"\$HERDR_PANE_ID\" --source claude-task --token 'task=<要約>'。Issue 番号があれば要約の先頭に #番号 を付ける。ユーザーへの報告は不要。" \
+      --arg context "herdr のサイドバーに表示する作業内容の要約を登録すること。作業内容を把握した時点で（Issue 番号や URL だけの指示なら、それを読んで中身を理解した後に）、何をするセッションかが一目で分かる 30 字程度の日本語の要約を作り、Bash で次を 1 回だけ実行する: herdr-task '<要約>'。Issue 番号があれば要約の先頭に #番号 を付ける。ユーザーへの報告は不要。" \
       '{hookSpecificOutput:{hookEventName:"UserPromptSubmit",additionalContext:$context}}'
     exit 0
   '';
@@ -420,6 +464,7 @@ in
     in
     [
       agentBrowserPkg
+      herdrTask
       (llmPkg "ccusage")
       (llmPkg "codex-acp")
       (llmPkg "oh-my-codex")

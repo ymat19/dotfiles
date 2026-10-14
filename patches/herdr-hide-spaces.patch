@@ -1,0 +1,89 @@
+diff --git a/src/client/shell/sidebar.rs b/src/client/shell/sidebar.rs
+index 0aaa0d5..92690a0 100644
+--- a/src/client/shell/sidebar.rs
++++ b/src/client/shell/sidebar.rs
+@@ -199,6 +199,19 @@ pub(crate) fn render_sidebar(
+         crate::ui::expanded_sidebar_sections(area, state.sidebar_section_split);
+     hits.sidebar_section_divider =
+         crate::ui::sidebar_section_divider_rect(area, state.sidebar_section_split);
++    // dotfiles patch: 高さ 0 の spaces 区画を描くと見出しやフッターが agents に重なるため、描かずに抜ける
++    if workspace_area.height == 0 {
++        super::render_agent_panel(
++            buffer,
++            detail_area,
++            snapshot,
++            config,
++            state.agent_scroll,
++            hits,
++        );
++        render_sidebar_toggle(buffer, area, palette, hits);
++        return;
++    }
+     put_text(
+         buffer,
+         workspace_area.x,
+@@ -429,6 +442,15 @@ pub(crate) fn render_sidebar(
+         hits,
+     );
+ 
++    render_sidebar_toggle(buffer, area, palette, hits);
++}
++
++fn render_sidebar_toggle(
++    buffer: &mut Buffer,
++    area: Rect,
++    palette: &Palette,
++    hits: &mut ShellHitMap,
++) {
+     hits.sidebar_toggle = Rect::new(
+         area.right().saturating_sub(2),
+         area.bottom().saturating_sub(1),
+diff --git a/src/ui/sidebar.rs b/src/ui/sidebar.rs
+index 178bdb1..bd22d35 100644
+--- a/src/ui/sidebar.rs
++++ b/src/ui/sidebar.rs
+@@ -27,24 +27,10 @@ pub(crate) struct AgentPanelEntry {
+     pub tokens: std::collections::HashMap<String, String>,
+ }
+ 
+-fn sidebar_section_heights(total_height: u16, split_ratio: f32) -> (u16, u16) {
+-    if total_height == 0 {
+-        return (0, 0);
+-    }
+-    if total_height < 6 {
+-        let workspace_height = total_height.div_ceil(2);
+-        return (
+-            workspace_height,
+-            total_height.saturating_sub(workspace_height),
+-        );
+-    }
+-
+-    let workspace_height = ((total_height as f32) * split_ratio.clamp(0.1, 0.9)).round() as u16;
+-    let workspace_height = workspace_height.clamp(3, total_height.saturating_sub(3));
+-    (
+-        workspace_height,
+-        total_height.saturating_sub(workspace_height),
+-    )
++// dotfiles patch: spaces 区画を常に隠し、agents に全高を渡す。
++// 上流は spaces に最小 10% / 3 行を確保するため、設定やドラッグでは 0 にできない
++fn sidebar_section_heights(total_height: u16, _split_ratio: f32) -> (u16, u16) {
++    (0, total_height)
+ }
+ 
+ pub(crate) fn expanded_sidebar_sections(area: Rect, split_ratio: f32) -> (Rect, Rect) {
+@@ -67,12 +53,9 @@ pub(crate) fn expanded_sidebar_sections(area: Rect, split_ratio: f32) -> (Rect,
+ 
+ pub(crate) fn sidebar_section_divider_rect(area: Rect, split_ratio: f32) -> Rect {
+     let content = Rect::new(area.x, area.y, area.width.saturating_sub(1), area.height);
+-    if content.width == 0 || content.height < 6 {
+-        return Rect::default();
+-    }
+-
+-    let (workspace_height, _) = sidebar_section_heights(content.height, split_ratio);
+-    Rect::new(content.x, content.y + workspace_height, content.width, 1)
++    // dotfiles patch: spaces を隠すので、分割位置を動かす境界線のドラッグ領域も無くす
++    let _ = (content, split_ratio);
++    Rect::default()
+ }
+ 
+ pub(crate) fn agent_panel_entries_from(

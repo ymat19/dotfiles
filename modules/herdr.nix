@@ -6,7 +6,11 @@
 }:
 
 let
-  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # サイドバーの spaces 区画は設定でも境界線のドラッグでも消せず、agents と同じ一覧が二重に出るため、
+  # 描画しないパッチを当てる（上流に区画の表示・並び順の設定は無い: herdrdev/herdr discussions #2466, #1408）
+  herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ../patches/herdr-hide-spaces.patch ];
+  });
 
   # 組み込みのキーバインドにワークスペース並べ替えが無く、CLI にも無いため socket API を直接叩く。
   # 組み込みの previous/next_agent も含め herdr には連打の仕組みが無いため、

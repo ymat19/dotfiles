@@ -6,11 +6,14 @@ prefix = "ctrl+f"
 goto = "prefix+f"
 # 既定の close_tab(prefix+X) を外し、サーバー停止に使う
 close_tab = []
-# prefix なしにする理由は下の ctrl+shift+j/k と同じ。
-# Windows Terminal は ctrl+enter も ctrl+j と同じ LF で送るため、settings.json の sendInput で
-# kitty 形式の "\u001b[13;5u" を送らせている（このリポジトリでは管理していない）
-next_agent = "ctrl+j"
-previous_agent = "ctrl+k"
+# agents 一覧の上下の agent へ移動する。prefix 付きだと連打のたびに prefix を押し直すことになり、
+# popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする。
+# shift なしの ctrl+j は ctrl+enter と同じ LF で届き、アプリの改行操作と衝突するため shift 付きにする。
+# Windows Terminal は ctrl+shift+j/k を ctrl+j/k と同じコードで送り、ctrl+shift+k は既定で画面消去に
+# 割り当てているため、Windows Terminal の settings.json で sendInput により kitty 形式の
+# "\u001b[106;6u" / "\u001b[107;6u" を送らせている（このリポジトリでは管理していない）
+next_agent = "ctrl+shift+j"
+previous_agent = "ctrl+shift+k"
 
 [[keys.command]]
 key = "prefix+g"
@@ -44,19 +47,15 @@ type = "shell"
 command = "\"$HERDR_BIN_PATH\" server stop"
 description = "herdr サーバーを停止（全ペインのプロセスが終了する）"
 
-# agents 一覧の上下の agent へ移動する。prefix 付きだと連打のたびに prefix を押し直すことになり、
-# popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする。
-# Windows Terminal は ctrl+shift+j/k を ctrl+j/k と同じコードで送り、ctrl+shift+k は既定で画面消去に
-# 割り当てているため、Windows Terminal の settings.json で sendInput により kitty 形式の
-# "\u001b[106;6u" / "\u001b[107;6u" を送らせている（このリポジトリでは管理していない）
+# カレント agent を agents 一覧の上下へ動かす。prefix なしにする理由は next_agent と同じ
 [[keys.command]]
-key = "ctrl+shift+j"
+key = "ctrl+down"
 type = "shell"
 command = "herdr-agent-move down"
 description = "カレント agent を agents 一覧の下へ移動"
 
 [[keys.command]]
-key = "ctrl+shift+k"
+key = "ctrl+up"
 type = "shell"
 command = "herdr-agent-move up"
 description = "カレント agent を agents 一覧の上へ移動"

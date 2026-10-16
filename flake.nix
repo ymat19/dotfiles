@@ -58,6 +58,10 @@
       url = "github:ayghri/i-have-adhd";
       flake = false;
     };
+    stop-describing-ui = {
+      url = "github:artouc/stop-describing-ui";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

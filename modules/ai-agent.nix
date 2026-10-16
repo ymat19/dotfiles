@@ -910,11 +910,16 @@ in
       path = inputs.i-have-adhd;
       subdir = "skills";
     };
+    sources.stop-describing-ui = {
+      path = inputs.stop-describing-ui;
+      subdir = "skills";
+    };
     skills.enable = [
       "prompt-review"
       "agent-browser"
       "herdr"
       "i-have-adhd"
+      "stop-describing-ui"
     ];
     targets.claude.enable = true;
     targets.codex = {

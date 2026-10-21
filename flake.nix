@@ -54,10 +54,6 @@
       url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    i-have-adhd = {
-      url = "github:ayghri/i-have-adhd";
-      flake = false;
-    };
     stop-describing-ui = {
       url = "github:artouc/stop-describing-ui";
       flake = false;

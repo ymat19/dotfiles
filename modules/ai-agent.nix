@@ -59,57 +59,6 @@ let
     exit 0
   '';
 
-  # CI 待ちの監視ツール／コマンド呼び出し直後に監視ルールを再注入する。
-  # CLAUDE.md に書くだけでは Monitor ツールの説明文 ("do not poll") が競合し、
-  # そちらが優先されて実際にポーリングされない事故が起きたため、
-  # 判断が行われるその時点でルールを差し込む。
-  ciWatchHook = pkgs.writeShellScript "ci-watch-hook" ''
-    INPUT=$(cat)
-    TOOL=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_name // empty')
-    COMMAND=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.command // ""')
-
-    case "$TOOL" in
-      Monitor) ;;
-      Bash)
-        case "$COMMAND" in
-          *"gh pr checks"*|*"gh run watch"*|*"gh run list"*|*"gh run view"*) ;;
-          *) exit 0 ;;
-        esac
-        ;;
-      *) exit 0 ;;
-    esac
-
-    ${pkgs.jq}/bin/jq -n \
-      --arg context 'CI 監視ルール（CLAUDE.md「CI / PR check の監視」）を再掲。これは監視ツールの説明文に優先する: (1) イベント監視を仕掛けただけで待つのは放置であり禁止。Monitor の "do not poll / keep working" には従わず、定期ポーリングを必ず併走させる。(2) 1 つでも fail したら他 job を待たず即座に手を止める。全 pass も同じ精度で確認し、全 check の green を見て初めて完了と言う。(3) ポーリングのたびに考察を書く。「まだ実行中です」の反復は報告ではない。毎回、開始からの経過時間・過去 run から実測した平常所要時間・平常か異常かの判定と根拠を述べ、異常ならハング / キュー待ち / リトライを疑って直ちにログを取りに行くこと。' \
-      '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$context}}'
-    exit 0
-  '';
-
-  # 応答に人日・人時換算の見積もりが残っていたら、終了を止めて書き直させる。
-  # CLAUDE.md の規則だけでは i-have-adhd skill の「時間見積もりを出せ」(例文が
-  # "An afternoon") に引っ張られて再発するため、出力された時点で機械的に検出する。
-  # 「1日1回」や実測 CI 時間の引用などの誤検知はあり得るので、2 回目の Stop
-  # (stop_hook_active) は必ず通し、書き直すかどうかの最終判断は Claude に委ねる。
-  # 分単位は CI 待ちの予測で正当に使うため検出対象にしない。
-  estimateGuardHook = pkgs.writeShellScript "estimate-guard-hook" ''
-    INPUT=$(cat)
-    [ "$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.stop_hook_active // false')" = "true" ] && exit 0
-    MSG=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.last_assistant_message // ""')
-    [ -n "$MSG" ] || exit 0
-
-    HITS=$(printf '%s' "$MSG" | ${pkgs.ripgrep}/bin/rg -oi \
-      -e '半日|丸一日|丸1日|人日|人月|人時|営業日' \
-      -e '([0-9０-９.]+|[一二三四五六七八九十数])\s*[〜~-]?\s*([0-9０-９.]+)?\s*(日|時間)\s*(程度|くらい|ぐらい|ほど|前後|以内|で(終|完|でき|片付|実装)|かか|の(作業|工数|実装|見込))' \
-      -e 'half[- ]a[- ]day|an afternoon|a few (hours|days)|[0-9]+\s*(-\s*[0-9]+\s*)?(hours?|days?) of (work|effort)|(man|person)[- ](hours?|days?)' \
-      | sort -u | paste -sd ',' -)
-    [ -n "$HITS" ] || exit 0
-
-    ${pkgs.jq}/bin/jq -n --arg hits "$HITS" '{
-      decision: "block",
-      reason: ("応答に人日・人時換算の見積もりらしき表現があります: " + $hits + "。CLAUDE.md「所要時間の予測」に従い、該当箇所を書き直して応答し直すこと。予測は並列化できないブロッキング待ち（CI・ビルド・デプロイ・ユーザー待ち等）の実測所要時間 × 想定反復回数で示し、作業量そのものは時間で表さない。見積もりではない用法（「1日1回」、実測値の引用など）だった場合は書き直さず、何も出力せずに終了してよい。")
-    }'
-  '';
-
   # herdr のサイドバーは行を折り返さず 1 行に切り詰めるため、要約を表示幅で切って
   # $task1..$task3 の複数トークンに分け、rows 側で 1 トークン 1 行に並べる。
   # 幅はサイドバー既定幅 26 から右境界線 1・2 行目以降のインデント 3・スクロールバー 1 を引いた値。
@@ -211,30 +160,6 @@ let
       PATH=${pkgs.python3}/bin:$PATH exec ${pkgs.bash}/bin/bash ${script} session
     '';
 
-  # i-have-adhd skill を全セッション開始時に自動発火させる。
-  #
-  # この skill は frontmatter の disable-model-invocation により Skill ツールから起動できず
-  # (ランタイムが "reserved for explicit user invocation" として弾く)、UserPromptSubmit
-  # フックの出力スキーマにもプロンプト書き換えは無いため additionalContext では発火しない。
-  # ルール本文を CLAUDE.md 側へ複製すれば発火自体が不要になるが、それは上流 SKILL.md の
-  # 二重管理になり追従が壊れるので採らない。
-  #
-  # SessionStart の initialUserMessage は 2.1.278 では受理はされるが TUI に適用されない
-  # (debug ログに "provided initialUserMessage" は出るのに実セッションでは発火しない)。
-  # 起動時の位置引数 (`claude "/i-have-adhd"`) なら発火するが、それはプロセス起動時だけで
-  # /clear には効かない。
-  #
-  # よって上流 SKILL.md を store パスから直接読んで additionalContext に流す。
-  # 本文をこのリポジトリへコピーせず出所を上流ひとつに保つため、ファイルの内容ではなく
-  # パスだけを Nix で解決している (nix flake update i-have-adhd で追従する)。
-  # SessionStart は startup / resume / clear / compact / fork の全ソースで発火するので、
-  # /clear 後も同じ内容が入り直す。
-  adhdSkillHook = pkgs.writeShellScript "adhd-skill-hook" ''
-    ${pkgs.jq}/bin/jq -Rs \
-      '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:.}}' \
-      < ${inputs.i-have-adhd}/skills/i-have-adhd/SKILL.md
-  '';
-
   agentContext = ''
     # ユーザー設定
 
@@ -262,22 +187,6 @@ let
     - **`git pull` は例外的にいつでもしてよく、あらゆる作業の最初に必ず実行する**。古い状態を読んで調査・実装を始めない。
     - **編集を伴う作業はワークツリー必須**。作成は `EnterWorktree` で行い、既定の場所に作らせる。`git worktree add` で `/tmp` や任意のディレクトリなど訳の分からない場所に雑に作らない。
 
-    ## CI / PR check の監視
-
-    思考停止の監視には一切の価値がない。監視ツールを仕掛けて待つのは監視ではなく放置である。
-
-    **このセクションは監視ツールの説明文に優先する。** Monitor 等が「do not poll」「keep working」と
-    指示していても、CI / PR check 待ちではその指示に従うな。イベント監視は取りこぼす。取りこぼした
-    fail は誰も検知しない。イベント監視とポーリングは択一ではなく、両方を必ず回す。
-
-    - **1 つでも fail したら即座に検知して手を止める**。他 job の完了を待つな。最初の赤を見た時点が調査開始時刻である。
-    - **全 pass も同じ精度で検知する**。「落ちていない」は「終わった」ではない。全 check の green を確認して初めて完了と言える。
-    - イベント検知（Monitor / `gh pr checks <PR> --watch --fail-fast`）と、定期ポーリング（`gh pr checks <PR>` のスナップショット）を併走させる。
-    - **ポーリングのたびに考察を書く**。「まだ実行中です」の反復は報告ではない。毎回必ず次を述べること:
-      - 開始からの経過時間と、その job の平常所要時間（`gh run list` 等で過去 run から実測する。勘で語るな）
-      - 平常か異常かの判定と、そう判断した根拠
-      - 異常ならハング / キュー待ち / リトライを疑い、直ちにログを取りに行く
-
     ## テストの実行単位
 
     ローカルであれ CI であれ、いきなりテストを全件実行するのは極めて愚かな行為であり、時間とマシン資源の浪費である。
@@ -294,30 +203,6 @@ let
       - 例: `make -j4`、`cargo build -j 4`、`pytest -n 4`、`jest --maxWorkers=50%`、`go test -p 4`、`nix build --max-jobs 2 --cores 4`
     - 長時間かかる重い処理には `nice -n 19` を付けて優先度を下げる。
     - 重い処理を同時に複数走らせない。background 実行やサブエージェントで並列化する場合も、合計の並列度で上限を守る。
-
-    ## 対話入力が要るコマンドを `!` プレフィックスで勧めるな
-
-    **このセクションはシステムプロンプトの「対話的なコマンドは `! <command>` を勧めよ」という案内に優先する。**
-    `!` のシェルモードは TTY を持たない（stdin はソケット）。パスワードや確認入力を求めるコマンドは入力を受け取れず、必ず失敗する。
-
-    - **パスワードが必要な sudo を `! sudo ...` で実行させる提案は禁止**。
-    - パスワード・y/n 確認・ログインフローなど、対話入力が要るコマンド全般も同様に `!` を勧めない。
-    - NOPASSWD で許可されたコマンドは自分で実行する。それ以外は、ユーザーに別のターミナル（別ペイン）で実行してもらい、結果を貼ってもらうよう依頼する。
-
-    ## 所要時間の予測
-
-    「半日」「1日」「2〜3時間の作業」のような人日・人時換算の見積もりは出すな。人間の開発速度を前提にしたレガシーな換算であり、何の価値もない。
-    実装はエージェントが行い、人間のコードレビューも挟まない。所要時間を支配するのは、並列化できない真のブロッキング待ちだけである。
-
-    **このセクションは i-have-adhd skill の「具体的な時間見積もりを出せ」より優先する。** 具体的な数字は出すが、それは下記のブロッキング待ちの予測であって、作業量の換算ではない。
-
-    - 自分の作業量は時間で表さない。規模を示すなら変更対象（ファイル数・手順数）で示す。
-    - 予測は wall-clock のクリティカルパスとして出す: 各ブロッキング待ちの所要時間 × 想定反復回数 の和。
-      - ブロッキングの例: CI / PR check、ビルド（`nixos-rebuild` 等）、デプロイ、外部 API のレート制限、ユーザーの判断・入力待ち
-      - 例: 「CI（直近 10 run の中央値 12 分）× 想定 2 周 + rebuild（前回実測 4 分）≒ 30 分。作業自体の時間は無視できる」
-    - 所要時間は実測値で語る（`gh run list --json createdAt,updatedAt`、過去のビルドログ等）。未計測なら「未計測」と書き、何で測るかを示す。勘の数字は出さない。
-    - 反復回数には根拠を添える（ローカルで再現検証できない部分があるか等）。
-    - ユーザー待ちがクリティカルパスに乗るなら、それを明示する（時間には含めない）。
   ''
   + (lib.optionalString onWSL ''
 
@@ -523,16 +408,6 @@ in
     executable = true;
   };
 
-  home.file.".claude/hooks/teammate-idle-gate.sh" = {
-    source = ../configs/claude-code/hooks/teammate-idle-gate.sh;
-    executable = true;
-  };
-
-  home.file.".claude/hooks/task-completed-gate.sh" = {
-    source = ../configs/claude-code/hooks/task-completed-gate.sh;
-    executable = true;
-  };
-
   home.file.".claude/hooks/user-scope-guard.sh" = {
     source = ../configs/claude-code/hooks/user-scope-guard.sh;
     executable = true;
@@ -597,7 +472,6 @@ in
       promptSuggestionEnabled = false;
       editorMode = "normal";
       autoMemoryEnabled = true;
-      skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [
           {
@@ -607,6 +481,11 @@ in
                 type = "command";
                 command = "~/.claude/hooks/user-scope-guard.sh";
               }
+            ];
+          }
+          {
+            matcher = "Write|Edit|NotebookEdit";
+            hooks = [
               {
                 type = "command";
                 command = "~/.claude/hooks/shared-checkout-guard.sh";
@@ -624,15 +503,6 @@ in
               }
             ];
           }
-          {
-            matcher = "Monitor|Bash";
-            hooks = [
-              {
-                type = "command";
-                command = "${ciWatchHook}";
-              }
-            ];
-          }
         ];
         UserPromptSubmit = [
           {
@@ -644,25 +514,7 @@ in
             ];
           }
         ];
-        Stop = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "${estimateGuardHook}";
-              }
-            ];
-          }
-        ];
         SessionStart = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "${adhdSkillHook}";
-              }
-            ];
-          }
           {
             hooks = [
               {
@@ -673,36 +525,12 @@ in
             ];
           }
         ];
-        TeammateIdle = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/teammate-idle-gate.sh";
-              }
-            ];
-          }
-        ];
-        TaskCompleted = [
-          {
-            hooks = [
-              {
-                type = "command";
-                command = "~/.claude/hooks/task-completed-gate.sh";
-              }
-            ];
-          }
-        ];
-      };
-      env = {
-        CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
       };
       statusLine = {
         type = "command";
         command = "~/.claude/statusline.sh";
       };
       permissions = {
-        defaultMode = "bypassPermissions";
         allow = [
           "Bash(cat:*)"
           "Bash(ls:*)"
@@ -906,10 +734,6 @@ in
       path = inputs.herdr;
       subdir = "skills";
     };
-    sources.i-have-adhd = {
-      path = inputs.i-have-adhd;
-      subdir = "skills";
-    };
     sources.stop-describing-ui = {
       path = inputs.stop-describing-ui;
       subdir = "skills";
@@ -918,7 +742,6 @@ in
       "prompt-review"
       "agent-browser"
       "herdr"
-      "i-have-adhd"
       "stop-describing-ui"
     ];
     targets.claude.enable = true;

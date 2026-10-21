@@ -328,8 +328,11 @@ touch ~/.gitconfig
 
 | イベント | マッチャー | 処理内容 |
 |----------|-----------|----------|
-| **TeammateIdle** | — | 未コミットの変更があるチームメイトのアイドル遷移をブロック |
-| **TaskCompleted** | — | 未コミットの変更がある場合タスク完了を拒否 |
+| **PreToolUse** | Write/Edit/NotebookEdit/Bash | `~/.claude` のユーザスコープ設定の書き換えを拒否 |
+| **PreToolUse** | Write/Edit/NotebookEdit | 共有チェックアウト内のファイル編集を拒否 |
+| **PostToolUse** | Write/Edit | プロンプトファイル編集時に自己レビュー基準を注入 |
+| **UserPromptSubmit** | — | herdr サイドバーへの作業要約の登録を指示 |
+| **SessionStart** | — | herdr の agent-state 連携 |
 
 ### サードパーティ CLI ツール
 
@@ -361,8 +364,7 @@ touch ~/.gitconfig
 ### その他の設定
 
 - **ステータスライン**: モデル名、コンテキスト使用率バー、コスト、API 時間を表示（`configs/claude-code/statusline.sh`）
-- **パーミッション**: `bypassPermissions` モード（読み取り系コマンド、git、WebSearch 等は自動許可）
-- **環境変数**: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（チーム機能の有効化）
+- **パーミッション**: 既定モード（読み取り系コマンド、git、WebSearch 等は自動許可）
 
 ## 参考リンク
 

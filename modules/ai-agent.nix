@@ -445,17 +445,12 @@ in
       hooks = mergeHooks {
         PreToolUse = [
           {
-            matcher = "Write|Edit|NotebookEdit|Bash";
+            matcher = "Write|Edit|NotebookEdit";
             hooks = [
               {
                 type = "command";
                 command = "~/.claude/hooks/user-scope-guard.sh";
               }
-            ];
-          }
-          {
-            matcher = "Write|Edit|NotebookEdit";
-            hooks = [
               {
                 type = "command";
                 command = "~/.claude/hooks/shared-checkout-guard.sh";

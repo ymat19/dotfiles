@@ -328,7 +328,7 @@ touch ~/.gitconfig
 
 | イベント | マッチャー | 処理内容 |
 |----------|-----------|----------|
-| **PreToolUse** | Write/Edit/NotebookEdit/Bash | `~/.claude` のユーザスコープ設定の書き換えを拒否 |
+| **PreToolUse** | Write/Edit/NotebookEdit | `~/.claude` のユーザスコープ設定の書き換えを拒否 |
 | **PreToolUse** | Write/Edit/NotebookEdit | 共有チェックアウト内のファイル編集を拒否 |
 | **UserPromptSubmit** | — | herdr サイドバーへの作業要約の登録を指示 |
 | **SessionStart** | — | herdr の agent-state 連携 |

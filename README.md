@@ -363,7 +363,7 @@ touch ~/.gitconfig
 ### その他の設定
 
 - **ステータスライン**: モデル名、コンテキスト使用率バー、コスト、API 時間を表示（`configs/claude-code/statusline.sh`）
-- **パーミッション**: 既定モード（読み取り系コマンド、git、WebSearch 等は自動許可）
+- **パーミッション**: `bypassPermissions` モード（読み取り系コマンド、git、WebSearch 等は自動許可）
 
 ## 参考リンク
 

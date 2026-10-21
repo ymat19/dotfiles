@@ -442,6 +442,7 @@ in
       promptSuggestionEnabled = false;
       editorMode = "normal";
       autoMemoryEnabled = true;
+      skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [
           {
@@ -485,6 +486,7 @@ in
         command = "~/.claude/statusline.sh";
       };
       permissions = {
+        defaultMode = "bypassPermissions";
         allow = [
           "Bash(cat:*)"
           "Bash(ls:*)"

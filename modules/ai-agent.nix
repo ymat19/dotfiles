@@ -30,35 +30,6 @@ let
   mergeHooks = mergeHookSets extraHooks;
   mergeCodexHooks = mergeHookSets codexExtraHooks;
 
-  promptEditHook = pkgs.writeShellScript "prompt-edit-hook" ''
-    INPUT=$(cat)
-    FILE_PATH=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.file_path // empty')
-    if [ -z "$FILE_PATH" ]; then
-      exit 0
-    fi
-    case "$FILE_PATH" in
-      *SKILL.md*|*CLAUDE.md*|*AGENT.md*)
-        cat <<'HOOK_JSON'
-    {"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"⚠️ プロンプトファイルの編集を検出。以下の基準で記述内容を自己レビューすること:\n1. Altitude: 具体的すぎず曖昧すぎない適切な抽象度か\n2. Signal Density: 削除しても効果が変わらないトークンがないか\n3. Structure: ヘッダー分割・論理順序・スキャン容易性\n4. Context Budget: インライン展開を避け、参照ベースの設計か\n5. Compaction Resilience: 各セクションが独立して意味を成すか\n6. Actionability: 具体例・コマンド・完了条件があるか\n根拠: \"Effective Context Engineering for AI Agents\" (Anthropic)\nあなた自身の判断ではなく、上記の原則のみに基づいて記述すること。"}}
-    HOOK_JSON
-        ;;
-    esac
-    exit 0
-  '';
-
-  codexPromptEditHook = pkgs.writeShellScript "codex-prompt-edit-hook" ''
-    INPUT=$(cat)
-    COMMAND=$(echo "$INPUT" | ${pkgs.jq}/bin/jq -r '.tool_input.command // ""')
-    case "$COMMAND" in
-      *SKILL.md*|*CLAUDE.md*|*AGENTS.md*|*AGENT.md*)
-        ${pkgs.jq}/bin/jq -n \
-          --arg context 'プロンプトファイルの編集を検出。以下の基準で記述内容を自己レビューすること: 1. Altitude: 具体的すぎず曖昧すぎない適切な抽象度か 2. Signal Density: 削除しても効果が変わらないトークンがないか 3. Structure: ヘッダー分割・論理順序・スキャン容易性 4. Context Budget: インライン展開を避け、参照ベースの設計か 5. Compaction Resilience: 各セクションが独立して意味を成すか 6. Actionability: 具体例・コマンド・完了条件があるか。根拠: "Effective Context Engineering for AI Agents" (Anthropic)。あなた自身の判断ではなく、上記の原則のみに基づいて記述すること。' \
-          '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$context}}'
-        ;;
-    esac
-    exit 0
-  '';
-
   # herdr のサイドバーは行を折り返さず 1 行に切り詰めるため、要約を表示幅で切って
   # $task1..$task3 の複数トークンに分け、rows 側で 1 トークン 1 行に並べる。
   # 幅はサイドバー既定幅 26 から右境界線 1・2 行目以降のインデント 3・スクロールバー 1 を引いた値。
@@ -468,7 +439,6 @@ in
     enableMcpIntegration = true;
     context = agentContext;
     settings = {
-      effortLevel = "high";
       promptSuggestionEnabled = false;
       editorMode = "normal";
       autoMemoryEnabled = true;
@@ -489,17 +459,6 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/shared-checkout-guard.sh";
-              }
-            ];
-          }
-        ];
-        PostToolUse = [
-          {
-            matcher = "Write|Edit";
-            hooks = [
-              {
-                type = "command";
-                command = "${promptEditHook}";
               }
             ];
           }
@@ -661,19 +620,6 @@ in
               type = "command";
               command = "${herdrAgentStateHook "~/.codex/herdr-agent-state.sh"}";
               timeout = 10;
-            }
-          ];
-        }
-      ];
-      PostToolUse = [
-        {
-          matcher = "Edit|Write|apply_patch";
-          hooks = [
-            {
-              type = "command";
-              command = "${codexPromptEditHook}";
-              timeout = 10;
-              statusMessage = "Reviewing prompt-file edits";
             }
           ];
         }

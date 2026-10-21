@@ -330,7 +330,6 @@ touch ~/.gitconfig
 |----------|-----------|----------|
 | **PreToolUse** | Write/Edit/NotebookEdit/Bash | `~/.claude` のユーザスコープ設定の書き換えを拒否 |
 | **PreToolUse** | Write/Edit/NotebookEdit | 共有チェックアウト内のファイル編集を拒否 |
-| **PostToolUse** | Write/Edit | プロンプトファイル編集時に自己レビュー基準を注入 |
 | **UserPromptSubmit** | — | herdr サイドバーへの作業要約の登録を指示 |
 | **SessionStart** | — | herdr の agent-state 連携 |
 

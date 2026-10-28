@@ -1,0 +1,84 @@
+diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.rs
+--- a/src/client/shell/agent_sidebar.rs
++++ b/src/client/shell/agent_sidebar.rs
+@@ -67,7 +67,19 @@
+         return;
+     }
+ 
+-    let rows = agent_rows(snapshot, config, None);
++    let mut rows = agent_rows(snapshot, config, None)
++        .into_iter()
++        .map(|row| (row, None))
++        .collect::<Vec<_>>();
++    // dotfiles patch: spaces 区画を隠しているため、agent の居ないワークスペースは
++    // ここに出さないとサイドバーから辿れなくなる。絞り込みビューは agent の検索結果なので足さない
++    if snapshot.agent_view_label.is_none() {
++        rows.extend(
++            agentless_workspace_rows(snapshot)
++                .into_iter()
++                .map(|(row, workspace_id)| (row, Some(workspace_id))),
++        );
++    }
+     render_agent_list(
+         buffer,
+         area,
+@@ -79,14 +91,56 @@
+         config,
+         agent_scroll,
+         hits,
+-        |row| row.rows.len(),
+-        |buffer, rect, row, hits| {
+-            hits.agents.push((rect, row.pane_id.clone()));
++        |(row, _)| row.rows.len(),
++        |buffer, rect, (row, workspace_id), hits| {
++            // pane へ focus するとワークスペース内の focus 位置が動くため、
++            // spaces 区画の行と同じくワークスペース単位で移る
++            match workspace_id {
++                Some(workspace_id) => hits.workspaces.push(WorkspaceHit {
++                    rect,
++                    endpoint_id: ClientEndpointId::Local,
++                    workspace_id: workspace_id.clone(),
++                    indented: false,
++                    group_toggle: None,
++                }),
++                None => hits.agents.push((rect, row.pane_id.clone())),
++            }
+             render_agent_row(buffer, rect, row, config);
+         },
+     );
+ }
+ 
++fn agentless_workspace_rows(snapshot: &ClientShellSnapshot) -> Vec<(AgentRow, String)> {
++    snapshot
++        .workspaces
++        .iter()
++        .filter(|workspace| {
++            !snapshot
++                .agents
++                .iter()
++                .any(|agent| agent.workspace_id == workspace.workspace_id)
++        })
++        .map(|workspace| {
++            let row = AgentRow {
++                pane_id: String::new(),
++                status: workspace.agent_status,
++                focused: workspace.focused,
++                rows: vec![vec![
++                    crate::ui::ResolvedToken {
++                        kind: crate::ui::ResolvedTokenKind::StateIcon,
++                        style: Default::default(),
++                    },
++                    crate::ui::ResolvedToken {
++                        kind: crate::ui::ResolvedTokenKind::Workspace(workspace.label.clone()),
++                        style: Default::default(),
++                    },
++                ]],
++            };
++            (row, workspace.workspace_id.clone())
++        })
++        .collect()
++}
++
+ pub(super) fn render_agent_panel_header(
+     buffer: &mut Buffer,
+     area: Rect,

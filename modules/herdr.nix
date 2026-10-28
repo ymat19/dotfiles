@@ -9,7 +9,11 @@ let
   # サイドバーの spaces 区画は設定でも境界線のドラッグでも消せず、agents と同じ一覧が二重に出るため、
   # 描画しないパッチを当てる（上流に区画の表示・並び順の設定は無い: herdrdev/herdr discussions #2466, #1408）
   herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-    patches = (old.patches or [ ]) ++ [ ../patches/herdr-hide-spaces.patch ];
+    patches = (old.patches or [ ]) ++ [
+      ../patches/herdr-hide-spaces.patch
+      # spaces を隠すと agent の居ないワークスペースへ辿れなくなるため、agents 一覧の末尾に補う
+      ../patches/herdr-agentless-workspaces.patch
+    ];
   });
 
   # 組み込みのキーバインドにも CLI にも agent の並べ替えが無いため socket API を直接叩く。

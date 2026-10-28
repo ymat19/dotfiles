@@ -30,6 +30,14 @@ let
     };
     sourceRoot = "source/linux/fcitx5";
 
+    # 上流はターミナルの入力欄をコード入力 (コメント・文字列の外は英数のまま通す) にするが、
+    # Linux 版にはコードの行を日本語へ切り替える手段が無く、ターミナル上の AI エージェントへ
+    # 日本語の文章を打てない。英単語は Meltype が見分けて英字のまま出すので、常に通常の入力にする。
+    postPatch = ''
+      substituteInPlace meltype.cpp \
+        --replace-fail 'ic->capabilityFlags().test(fcitx::CapabilityFlag::Terminal) ? 1 : 0' '0'
+    '';
+
     nativeBuildInputs = with pkgs; [
       cmake
       autoPatchelfHook

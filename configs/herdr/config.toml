@@ -6,6 +6,10 @@ prefix = "ctrl+f"
 goto = "prefix+f"
 # 既定の close_tab(prefix+X) を外し、サーバー停止に使う
 close_tab = []
+# 既定の prefix+x に加え、prefix なしでも閉じられるようにする。shift なしの ctrl+x はシェルや
+# エディタが使うため shift 付きにする。Windows Terminal では next_agent と同様に sendInput で
+# kitty 形式の "\u001b[120;6u" を送らせる必要がある
+close_pane = ["prefix+x", "ctrl+shift+x"]
 # agents 一覧の上下の agent へ移動する。prefix 付きだと連打のたびに prefix を押し直すことになり、
 # popup で連打を受け付けると popup の開き直しの隙間に打ったキーがペインへ漏れるため、prefix なしにする。
 # shift なしの ctrl+j は ctrl+enter と同じ LF で届き、アプリの改行操作と衝突するため shift 付きにする。

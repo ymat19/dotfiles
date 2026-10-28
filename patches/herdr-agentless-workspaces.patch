@@ -22,7 +22,7 @@ diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.
      render_agent_list(
          buffer,
          area,
-@@ -79,14 +91,56 @@
+@@ -79,14 +91,69 @@
          config,
          agent_scroll,
          hits,
@@ -48,16 +48,29 @@ diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.
      );
  }
  
++fn agentless_workspaces(
++    snapshot: &ClientShellSnapshot,
++) -> impl Iterator<Item = &crate::protocol::ClientShellWorkspace> {
++    snapshot.workspaces.iter().filter(|workspace| {
++        !snapshot
++            .agents
++            .iter()
++            .any(|agent| agent.workspace_id == workspace.workspace_id)
++    })
++}
++
++// dotfiles patch: next_agent / previous_agent でも agents 一覧に足した行へ辿れるようにする
++pub(super) fn agentless_workspace_ids(snapshot: &ClientShellSnapshot) -> Vec<String> {
++    if snapshot.agent_view_label.is_some() {
++        return Vec::new();
++    }
++    agentless_workspaces(snapshot)
++        .map(|workspace| workspace.workspace_id.clone())
++        .collect()
++}
++
 +fn agentless_workspace_rows(snapshot: &ClientShellSnapshot) -> Vec<(AgentRow, String)> {
-+    snapshot
-+        .workspaces
-+        .iter()
-+        .filter(|workspace| {
-+            !snapshot
-+                .agents
-+                .iter()
-+                .any(|agent| agent.workspace_id == workspace.workspace_id)
-+        })
++    agentless_workspaces(snapshot)
 +        .map(|workspace| {
 +            let row = AgentRow {
 +                pane_id: String::new(),
@@ -82,3 +95,90 @@ diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.
  pub(super) fn render_agent_panel_header(
      buffer: &mut Buffer,
      area: Rect,
+diff --git a/src/client/shell/actions.rs b/src/client/shell/actions.rs
+--- a/src/client/shell/actions.rs
++++ b/src/client/shell/actions.rs
+@@ -939,35 +939,68 @@
+                 }))
+             }
+             KeybindAction::PreviousAgent | KeybindAction::NextAgent => {
+-                let agents = super::agent_sidebar::ordered_agent_pane_ids(
++                // dotfiles patch: サイドバーの agents 一覧と同じく、末尾に agent の居ない
++                // ワークスペースを並べて巡回する。pane ではなくワークスペース単位で移るのは
++                // サイドバーのクリックと揃え、ワークスペース内の focus 位置を保つため
++                enum Target {
++                    Pane(String),
++                    Workspace(String),
++                }
++                let mut targets = super::agent_sidebar::ordered_agent_pane_ids(
+                     snapshot,
+                     self.config.agent_panel_sort,
++                )
++                .into_iter()
++                .map(Target::Pane)
++                .collect::<Vec<_>>();
++                targets.extend(
++                    super::agent_sidebar::agentless_workspace_ids(snapshot)
++                        .into_iter()
++                        .map(Target::Workspace),
+                 );
+-                if agents.is_empty() {
++                if targets.is_empty() {
+                     return None;
+                 }
+-                let current = agents.iter().position(|pane_id| {
+-                    Some(pane_id.as_str()) == snapshot.focused_pane_id.as_deref()
++                let current = targets.iter().position(|target| match target {
++                    Target::Pane(pane_id) => {
++                        Some(pane_id.as_str()) == snapshot.focused_pane_id.as_deref()
++                    }
++                    Target::Workspace(workspace_id) => *workspace_id == focused_workspace,
+                 });
+                 let next = match (current, action) {
+                     (Some(current), KeybindAction::PreviousAgent) => {
+-                        (current + agents.len() - 1) % agents.len()
++                        (current + targets.len() - 1) % targets.len()
+                     }
+-                    (Some(current), KeybindAction::NextAgent) => (current + 1) % agents.len(),
+-                    (None, KeybindAction::PreviousAgent) => agents.len() - 1,
++                    (Some(current), KeybindAction::NextAgent) => (current + 1) % targets.len(),
++                    (None, KeybindAction::PreviousAgent) => targets.len() - 1,
+                     (None, KeybindAction::NextAgent) => 0,
+                     _ => unreachable!("relative agent action"),
+                 };
+-                let pane_id = agents[next].clone();
+-                if !self
+-                    .hits
+-                    .agents
+-                    .iter()
+-                    .any(|(_, visible_pane_id)| visible_pane_id == &pane_id)
+-                {
++                let visible = match &targets[next] {
++                    Target::Pane(pane_id) => self
++                        .hits
++                        .agents
++                        .iter()
++                        .any(|(_, visible_pane_id)| visible_pane_id == pane_id),
++                    Target::Workspace(workspace_id) => self
++                        .hits
++                        .workspaces
++                        .iter()
++                        .any(|hit| &hit.workspace_id == workspace_id),
++                };
++                if !visible {
+                     self.agent_scroll = next.min(self.hits.agent_max_scroll);
+                 }
+-                Some(Method::PaneFocus(PaneTarget { pane_id }))
++                match &targets[next] {
++                    Target::Pane(pane_id) => Some(Method::PaneFocus(PaneTarget {
++                        pane_id: pane_id.clone(),
++                    })),
++                    Target::Workspace(workspace_id) => {
++                        Some(Method::WorkspaceFocus(WorkspaceTarget {
++                            workspace_id: workspace_id.clone(),
++                        }))
++                    }
++                }
+             }
+             KeybindAction::SwitchWorkspace(index) => {
+                 let entries = self.navigation_workspace_entries(snapshot);

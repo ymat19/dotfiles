@@ -79,5 +79,22 @@ let
   };
 in
 {
-  i18n.inputMethod.fcitx5.addons = [ meltype ];
+  i18n.inputMethod.fcitx5 = {
+    addons = [ meltype ];
+
+    # 設定すると ~/.config/fcitx5 全体が store への symlink になり、fcitx5-configtool での
+    # 変更は保存されなくなる。入力メソッドの一覧はここで管理する。
+    # mozc は Meltype がプレビュー版のうちの逃げ道として残す。
+    settings.inputMethod = {
+      GroupOrder."0" = "Default";
+      "Groups/0" = {
+        Name = "Default";
+        "Default Layout" = "us";
+        DefaultIM = "meltype";
+      };
+      "Groups/0/Items/0".Name = "keyboard-us";
+      "Groups/0/Items/1".Name = "meltype";
+      "Groups/0/Items/2".Name = "mozc";
+    };
+  };
 }

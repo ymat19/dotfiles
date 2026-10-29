@@ -18,5 +18,10 @@ while [[ ! -d $d ]]; do d=$(dirname "$d"); done
 mapfile -t dirs < <(git -C "$d" rev-parse --path-format=absolute --git-dir --git-common-dir --show-toplevel 2>/dev/null) || exit 0
 ((${#dirs[@]} == 3)) && [[ ${dirs[0]} == "${dirs[1]}" ]] || exit 0
 
+# git が無視するファイルは止めない。作業ツリーにも HEAD にも載らず、他の作業とぶつからない。
+# Why not 一律に止める: リポジトリごとのローカルの設定（git が無視するファイル）は本体にしか置けない。
+# 無視されない新しいファイル（ソースの追加）は今までどおり止める。
+git -C "${dirs[2]}" check-ignore -q -- "$path" 2>/dev/null && exit 0
+
 jq -cn --arg r "${dirs[2]} は共有チェックアウトなので編集できない。EnterWorktree でワークツリーを作ってそこで編集せよ。" \
   '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'

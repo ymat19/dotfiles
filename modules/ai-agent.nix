@@ -174,6 +174,14 @@ let
       - 例: `make -j4`、`cargo build -j 4`、`pytest -n 4`、`jest --maxWorkers=50%`、`go test -p 4`、`nix build --max-jobs 2 --cores 4`
     - 長時間かかる重い処理には `nice -n 19` を付けて優先度を下げる。
     - 重い処理を同時に複数走らせない。background 実行やサブエージェントで並列化する場合も、合計の並列度で上限を守る。
+
+    ## パブリックリポジトリへの書き込み
+
+    パブリックリポジトリへの書き込みは全世界に公開され、取り消しても複製やキャッシュが残る。
+
+    - **ユーザーの明示的な許可なしに、パブリックリポジトリへ書き込む操作をしない**。push、PR 作成、issue 作成、コメント投稿、release 作成など、リモートに痕跡を残す操作すべてが対象。
+    - 許可はその都度・その操作に限る。過去に一度許可されたことを根拠に別の操作へ広げない。
+    - clone、fetch、pull、issue や PR の閲覧など読み取りだけの操作は許可不要。
   ''
   + (lib.optionalString onWSL ''
 
@@ -384,11 +392,6 @@ in
     executable = true;
   };
 
-  home.file.".claude/hooks/shared-checkout-guard.sh" = {
-    source = ../configs/claude-code/hooks/shared-checkout-guard.sh;
-    executable = true;
-  };
-
   # `herdr integration status` はこのパスで導入有無と version を判定するため、生成物をここへ置く
   home.file.".claude/hooks/herdr-agent-state.sh" = {
     source = "${herdrIntegrations}/claude-agent-state.sh";
@@ -452,10 +455,6 @@ in
               {
                 type = "command";
                 command = "~/.claude/hooks/user-scope-guard.sh";
-              }
-              {
-                type = "command";
-                command = "~/.claude/hooks/shared-checkout-guard.sh";
               }
             ];
           }

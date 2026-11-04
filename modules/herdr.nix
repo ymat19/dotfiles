@@ -7,7 +7,7 @@
 
 let
   # サイドバーの spaces 区画は設定でも境界線のドラッグでも消せず、agents と同じ一覧が二重に出るため、
-  # 描画しないパッチを当てる（上流に区画の表示・並び順の設定は無い: herdrdev/herdr discussions #2466, #1408）
+  # 描画しないパッチを当てる。machine を登録すると spaces の代わりに出る machines 区画も同様に隠す（上流に区画の表示・並び順の設定は無い: herdrdev/herdr discussions #2466, #1408）
   herdr = inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [
       ../patches/herdr-hide-spaces.patch

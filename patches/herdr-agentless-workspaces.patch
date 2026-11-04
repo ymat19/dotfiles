@@ -1,4 +1,3 @@
-diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.rs
 --- a/src/client/shell/agent_sidebar.rs
 +++ b/src/client/shell/agent_sidebar.rs
 @@ -67,7 +67,19 @@
@@ -69,7 +68,7 @@ diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.
 +        .collect()
 +}
 +
-+fn agentless_workspace_rows(snapshot: &ClientShellSnapshot) -> Vec<(AgentRow, String)> {
++pub(super) fn agentless_workspace_rows(snapshot: &ClientShellSnapshot) -> Vec<(AgentRow, String)> {
 +    agentless_workspaces(snapshot)
 +        .map(|workspace| {
 +            let row = AgentRow {
@@ -95,7 +94,6 @@ diff --git a/src/client/shell/agent_sidebar.rs b/src/client/shell/agent_sidebar.
  pub(super) fn render_agent_panel_header(
      buffer: &mut Buffer,
      area: Rect,
-diff --git a/src/client/shell/actions.rs b/src/client/shell/actions.rs
 --- a/src/client/shell/actions.rs
 +++ b/src/client/shell/actions.rs
 @@ -939,35 +939,68 @@
@@ -182,3 +180,165 @@ diff --git a/src/client/shell/actions.rs b/src/client/shell/actions.rs
              }
              KeybindAction::SwitchWorkspace(index) => {
                  let entries = self.navigation_workspace_entries(snapshot);
+--- a/src/client/shell/endpoint_agents.rs
++++ b/src/client/shell/endpoint_agents.rs
+@@ -61,7 +61,15 @@
+     ) {
+         return;
+     }
+-    let rows = agent_rows(endpoints, active_endpoint_id, config);
++    let mut rows = agent_rows(endpoints, active_endpoint_id, config)
++        .into_iter()
++        .map(|row| (row, None))
++        .collect::<Vec<_>>();
++    // dotfiles patch: machines 区画を隠しているため、agent の居ないワークスペースは
++    // ここに出さないとサイドバーから辿れなくなる。絞り込みビューは agent の検索結果なので足さない
++    if agent_view_label.is_none() {
++        rows.extend(agentless_workspace_rows(endpoints, active_endpoint_id));
++    }
+     super::agent_sidebar::render_agent_list(
+         buffer,
+         area,
+@@ -70,8 +78,8 @@
+         config,
+         agent_scroll,
+         hits,
+-        |row| row.agent.rows.len(),
+-        |buffer, rect, row, hits| {
++        |(row, _)| row.agent.rows.len(),
++        |buffer, rect, (row, workspace_id), hits| {
+             super::agent_sidebar::render_agent_row(buffer, rect, &row.agent, config);
+             if row.stale {
+                 buffer.set_style(
+@@ -81,12 +89,49 @@
+                         .add_modifier(Modifier::DIM),
+                 );
+             }
+-            hits.endpoint_agents
+-                .push((rect, row.endpoint_id.clone(), row.agent.pane_id.clone()));
++            // machines 区画の行と同じくワークスペース単位で移り、ワークスペース内の focus 位置を保つ
++            match workspace_id {
++                Some(workspace_id) => hits.workspaces.push(WorkspaceHit {
++                    rect,
++                    endpoint_id: row.endpoint_id.clone(),
++                    workspace_id: workspace_id.clone(),
++                    indented: false,
++                    group_toggle: None,
++                }),
++                None => hits.endpoint_agents.push((
++                    rect,
++                    row.endpoint_id.clone(),
++                    row.agent.pane_id.clone(),
++                )),
++            }
+         },
+     );
+ }
+ 
++fn agentless_workspace_rows(
++    endpoints: &[ClientShellEndpoint],
++    active_endpoint_id: &ClientEndpointId,
++) -> Vec<(EndpointAgentRow, Option<String>)> {
++    super::aggregate_navigation::cached_endpoint_snapshots(endpoints)
++        .flat_map(|endpoint| {
++            super::agent_sidebar::agentless_workspace_rows(endpoint.snapshot)
++                .into_iter()
++                .map(move |(mut agent, workspace_id)| {
++                    agent.focused &= endpoint.endpoint_id == active_endpoint_id;
++                    (
++                        EndpointAgentRow {
++                            endpoint_id: endpoint.endpoint_id.clone(),
++                            machine_label: endpoint.label.to_owned(),
++                            stale: endpoint.stale(),
++                            agent,
++                        },
++                        Some(workspace_id),
++                    )
++                })
++        })
++        .collect()
++}
++
+ struct EndpointAgentRow {
+     endpoint_id: ClientEndpointId,
+     machine_label: String,
+--- a/src/client/shell/endpoint_navigation.rs
++++ b/src/client/shell/endpoint_navigation.rs
+@@ -185,9 +185,33 @@
+             action,
+             KeybindAction::PreviousAgent | KeybindAction::NextAgent | KeybindAction::FocusAgent(_)
+         ) {
+-            let agents = super::aggregate_navigation::online_agent_targets(
++            // dotfiles patch: サイドバーの agents 一覧と同じく、末尾に agent の居ない
++            // ワークスペースを並べて巡回する
++            let mut agents = super::aggregate_navigation::online_agent_targets(
+                 &self.endpoints,
+                 self.config.agent_panel_sort,
++            )
++            .into_iter()
++            .map(|target| {
++                (
++                    target.endpoint_id,
++                    ClientEndpointFocusTarget::Pane(target.pane_id),
++                )
++            })
++            .collect::<Vec<_>>();
++            agents.extend(
++                super::aggregate_navigation::cached_endpoint_snapshots(&self.endpoints)
++                    .filter(|endpoint| !endpoint.stale())
++                    .flat_map(|endpoint| {
++                        super::agent_sidebar::agentless_workspace_ids(endpoint.snapshot)
++                            .into_iter()
++                            .map(move |workspace_id| {
++                                (
++                                    endpoint.endpoint_id.clone(),
++                                    ClientEndpointFocusTarget::Workspace(workspace_id),
++                                )
++                            })
++                    }),
+             );
+             if agents.is_empty() {
+                 return true;
+@@ -204,9 +228,24 @@
+                         .snapshot
+                         .as_deref()
+                         .and_then(|snapshot| snapshot.focused_pane_id.as_deref());
+-                    let current = agents.iter().position(|target| {
+-                        target.endpoint_id == self.active_endpoint_id
+-                            && Some(target.pane_id.as_str()) == focused
++                    let focused_workspace = self.snapshot.as_deref().and_then(|snapshot| {
++                        snapshot
++                            .workspaces
++                            .iter()
++                            .find(|workspace| workspace.focused)
++                            .map(|workspace| workspace.workspace_id.as_str())
++                    });
++                    let current = agents.iter().position(|(endpoint_id, target)| {
++                        *endpoint_id == self.active_endpoint_id
++                            && match target {
++                                ClientEndpointFocusTarget::Pane(pane_id) => {
++                                    Some(pane_id.as_str()) == focused
++                                }
++                                ClientEndpointFocusTarget::Workspace(workspace_id) => {
++                                    Some(workspace_id.as_str()) == focused_workspace
++                                }
++                                ClientEndpointFocusTarget::Tab(_) => false,
++                            }
+                     });
+                     match (current, action) {
+                         (Some(index), KeybindAction::PreviousAgent) => {
+@@ -219,12 +258,8 @@
+                 }
+                 _ => unreachable!("endpoint agent navigation"),
+             };
+-            let target = &agents[next];
+-            self.focus_or_activate(
+-                target.endpoint_id.clone(),
+-                ClientEndpointFocusTarget::Pane(target.pane_id.clone()),
+-                outcome,
+-            );
++            let (endpoint_id, target) = agents.swap_remove(next);
++            self.focus_or_activate(endpoint_id, target, outcome);
+             return true;
+         }
+         false

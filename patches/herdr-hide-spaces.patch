@@ -1,8 +1,6 @@
-diff --git a/src/client/shell/sidebar.rs b/src/client/shell/sidebar.rs
-index 0aaa0d5..92690a0 100644
 --- a/src/client/shell/sidebar.rs
 +++ b/src/client/shell/sidebar.rs
-@@ -199,6 +199,19 @@ pub(crate) fn render_sidebar(
+@@ -199,6 +199,19 @@
          crate::ui::expanded_sidebar_sections(area, state.sidebar_section_split);
      hits.sidebar_section_divider =
          crate::ui::sidebar_section_divider_rect(area, state.sidebar_section_split);
@@ -22,7 +20,7 @@ index 0aaa0d5..92690a0 100644
      put_text(
          buffer,
          workspace_area.x,
-@@ -429,6 +442,15 @@ pub(crate) fn render_sidebar(
+@@ -429,6 +442,15 @@
          hits,
      );
  
@@ -38,11 +36,51 @@ index 0aaa0d5..92690a0 100644
      hits.sidebar_toggle = Rect::new(
          area.right().saturating_sub(2),
          area.bottom().saturating_sub(1),
-diff --git a/src/ui/sidebar.rs b/src/ui/sidebar.rs
-index 178bdb1..bd22d35 100644
+--- a/src/client/shell/endpoint_sidebar.rs
++++ b/src/client/shell/endpoint_sidebar.rs
+@@ -167,6 +167,11 @@
+         crate::ui::expanded_sidebar_sections(area, state.sidebar_section_split);
+     hits.sidebar_section_divider =
+         crate::ui::sidebar_section_divider_rect(area, state.sidebar_section_split);
++    // dotfiles patch: 高さ 0 の machines 区画を描くと見出しやフッターが agents に重なるため、描かずに抜ける
++    if workspace_area.height == 0 {
++        render_expanded_agents(buffer, area, detail_area, active_snapshot, config, state, hits);
++        return;
++    }
+     put_text(
+         buffer,
+         workspace_area.x,
+@@ -373,6 +378,18 @@
+             }),
+         );
+     }
++    render_expanded_agents(buffer, area, detail_area, active_snapshot, config, state, hits);
++}
++
++fn render_expanded_agents(
++    buffer: &mut Buffer,
++    area: Rect,
++    detail_area: Rect,
++    active_snapshot: Option<&ClientShellSnapshot>,
++    config: &ClientShellConfig,
++    state: &mut ShellRenderState<'_>,
++    hits: &mut ShellHitMap,
++) {
+     super::endpoint_agents::render_expanded(
+         buffer,
+         detail_area,
+@@ -395,7 +412,7 @@
+         hits.sidebar_toggle.y,
+         hits.sidebar_toggle.width,
+         "«",
+-        Style::default().fg(palette.overlay0),
++        Style::default().fg(config.palette.overlay0),
+     );
+ }
+ 
 --- a/src/ui/sidebar.rs
 +++ b/src/ui/sidebar.rs
-@@ -27,24 +27,10 @@ pub(crate) struct AgentPanelEntry {
+@@ -27,24 +27,10 @@
      pub tokens: std::collections::HashMap<String, String>,
  }
  
@@ -71,7 +109,7 @@ index 178bdb1..bd22d35 100644
  }
  
  pub(crate) fn expanded_sidebar_sections(area: Rect, split_ratio: f32) -> (Rect, Rect) {
-@@ -67,12 +53,9 @@ pub(crate) fn expanded_sidebar_sections(area: Rect, split_ratio: f32) -> (Rect,
+@@ -67,12 +53,9 @@
  
  pub(crate) fn sidebar_section_divider_rect(area: Rect, split_ratio: f32) -> Rect {
      let content = Rect::new(area.x, area.y, area.width.saturating_sub(1), area.height);

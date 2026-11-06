@@ -385,6 +385,22 @@
         "type": "github"
       }
     },
+    "llmwiki": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792640842,
+        "narHash": "sha256-1sqBtS4KWkvOKLhyOClxGnPJsz78cC5s1xB3oKgXviY=",
+        "owner": "lucasastorian",
+        "repo": "llmwiki",
+        "rev": "9dc372f7970754b7d0f5cd0b5d1fa706fa738a78",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lucasastorian",
+        "repo": "llmwiki",
+        "type": "github"
+      }
+    },
     "mcp-servers-nix": {
       "inputs": {
         "nixpkgs": [
@@ -546,6 +562,7 @@
         "herdr": "herdr",
         "home-manager": "home-manager_2",
         "llm-agents-nix": "llm-agents-nix",
+        "llmwiki": "llmwiki",
         "mcp-servers-nix": "mcp-servers-nix",
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",

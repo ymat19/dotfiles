@@ -1,0 +1,17 @@
+--- a/.dockerignore
++++ b/.dockerignore
+@@ -15,3 +15,4 @@
+ **/.pytest_cache
+ **/.DS_Store
+ **/*.log
++!tests/fixtures/parity
+--- a/docker/local/Dockerfile
++++ b/docker/local/Dockerfile
+@@ -7,6 +7,7 @@
+ COPY web/package.json web/package-lock.json ./
+ RUN npm ci
+ COPY web/ ./
++COPY tests/fixtures/parity /build/tests/fixtures/parity
+ ENV NEXT_PUBLIC_MODE=local \
+     NEXT_PUBLIC_API_URL=/api \
+     NEXT_TELEMETRY_DISABLED=1

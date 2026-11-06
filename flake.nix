@@ -58,6 +58,10 @@
       url = "github:artouc/stop-describing-ui";
       flake = false;
     };
+    llmwiki = {
+      url = "github:lucasastorian/llmwiki";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

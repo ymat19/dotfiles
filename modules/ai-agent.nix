@@ -455,6 +455,8 @@ in
       promptSuggestionEnabled = false;
       editorMode = "normal";
       autoMemoryEnabled = true;
+      # セッション記録は LLM Wiki の夜間ジョブが読む素材。既定の 30 日では処理が追いつく前に消える
+      cleanupPeriodDays = 3650;
       skipDangerousModePermissionPrompt = true;
       hooks = mergeHooks {
         PreToolUse = [

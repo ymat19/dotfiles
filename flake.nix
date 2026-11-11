@@ -62,6 +62,11 @@
       url = "github:lucasastorian/llmwiki";
       flake = false;
     };
+    nixpkgs-node.url = "github:nixos/nixpkgs/nixos-unstable";
+    rea = {
+      url = "github:morluto/rea/rea-agents-6.8.0";
+      flake = false;
+    };
   };
 
   outputs = inputs @ { nixpkgs, home-manager, flake-utils, ... }:

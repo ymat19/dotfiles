@@ -89,7 +89,12 @@ in
       # 初回はイメージのビルドを含む
       TimeoutStartSec = "30min";
     };
-    Install.WantedBy = [ "default.target" ];
+    # Requires により docker の再起動で一緒に止まるが、default.target はログイン時にしか llmwiki を起こさず、
+    # 次の夜間ジョブまで MCP が落ちたままになる。Restart= では docker 起因の正常停止を拾えないので docker 側から起こす
+    Install.WantedBy = [
+      "default.target"
+      "docker.service"
+    ];
   };
 
   systemd.user.services.llmwiki-compile = {

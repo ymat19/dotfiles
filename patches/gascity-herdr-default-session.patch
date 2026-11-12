@@ -1,0 +1,170 @@
+diff --git a/cmd/gc/runtime_registry.go b/cmd/gc/runtime_registry.go
+index e12bf08..bb13f20 100644
+--- a/cmd/gc/runtime_registry.go
++++ b/cmd/gc/runtime_registry.go
+@@ -82,10 +82,9 @@ func buildRuntimeRegistry() *registry.Registry {
+ 	// tmux stays the default; select "herdr" per-agent/city to pilot it. See
+ 	// internal/runtime/herdr-provider-design.md.
+ 	must(r.Register("herdr", func(_ string, sc config.SessionConfig, cityName, cityPath string) (runtime.Provider, error) {
+-		session := cityName
+-		if session == "" {
+-			session = "default"
+-		}
++		// Run agents in the operator's own herdr so they show up in its sidebar.
++		_ = cityName
++		session := "default"
+ 		return sessionherdr.New(session, providerStateDir("herdr", cityPath), cityPath, sc.SetupTimeoutDuration(), sc.SetupMaxTimeoutDuration()), nil
+ 	}))
+ 	must(r.Register("hybrid", func(_ string, sc config.SessionConfig, cityName, cityPath string) (runtime.Provider, error) {
+diff --git a/internal/runtime/herdr/client.go b/internal/runtime/herdr/client.go
+index 709c3a7..33da151 100644
+--- a/internal/runtime/herdr/client.go
++++ b/internal/runtime/herdr/client.go
+@@ -280,7 +280,10 @@ func (c *client) runWithSecrets(ctx context.Context, declared []string, args ...
+ // the per-entry name field is emitted under the JSON key "agent", not "name"
+ // (`herdr agent list` → {"agents":[{"agent":"act-a","agent_status":"idle",...}]}).
+ type agentInfo struct {
+-	Name        string `json:"agent"`
++	// herdr 0.9 reports the agent kind ("claude") under "agent" and the name
++	// under "name". Reading "agent" made every claude pane look like one agent
++	// named "claude", which startup adoption drained as an orphan.
++	Name        string `json:"name"`
+ 	PaneID      string `json:"pane_id"`
+ 	WorkspaceID string `json:"workspace_id"`
+ 	TabID       string `json:"tab_id"`
+@@ -359,7 +362,50 @@ func (c *client) listAgents(ctx context.Context) ([]agentInfo, error) {
+ 	if err := json.Unmarshal(res, &wrap); err != nil {
+ 		return nil, fmt.Errorf("herdr agent list: decode: %w", err)
+ 	}
+-	return wrap.Agents, nil
++	if !c.sharedSession() {
++		return wrap.Agents, nil
++	}
++	owned, err := c.ownedWorkspaces(ctx)
++	if err != nil {
++		return nil, err
++	}
++	out := wrap.Agents[:0]
++	for _, a := range wrap.Agents {
++		if owned[a.WorkspaceID] {
++			out = append(out, a)
++		}
++	}
++	return out, nil
++}
++
++// sharedSession reports whether this client targets the operator's own herdr
++// session, where hand-run agents live alongside gc's.
++func (c *client) sharedSession() bool {
++	return c.session == "" || c.session == "default"
++}
++
++// ownedWorkspaces returns the ids of the workspaces gc placed (labelled "gc:…").
++// In the shared session every other agent is the operator's: startup adoption
++// otherwise lists them as running gc sessions, drains them as orphans and
++// closes their panes.
++func (c *client) ownedWorkspaces(ctx context.Context) (map[string]bool, error) {
++	res, err := c.run(ctx, "workspace", "list")
++	if err != nil {
++		return nil, err
++	}
++	var wrap struct {
++		Workspaces []workspaceInfo `json:"workspaces"`
++	}
++	if err := json.Unmarshal(res, &wrap); err != nil {
++		return nil, fmt.Errorf("herdr workspace list: decode: %w", err)
++	}
++	owned := make(map[string]bool)
++	for _, w := range wrap.Workspaces {
++		if strings.HasPrefix(w.Label, "gc:") {
++			owned[w.WorkspaceID] = true
++		}
++	}
++	return owned, nil
+ }
+ 
+ // paneRead → `herdr pane read <paneID> --source <source> [--lines n]`
+@@ -707,6 +753,18 @@ const submitSettleDelay = 1 * time.Second
+ 
+ // closePane → `herdr pane close <paneID>`.
+ func (c *client) closePane(ctx context.Context, paneID string) error {
++	// Every close path (stop, reaper, a taken agent name) funnels here, and a
++	// recycled pane id or a name collision can point at an operator pane.
++	if c.sharedSession() {
++		owned, err := c.ownedWorkspaces(ctx)
++		if err != nil {
++			return err
++		}
++		ws, _, _ := strings.Cut(paneID, ":")
++		if !owned[ws] {
++			return fmt.Errorf("herdr pane %q is outside gc's workspaces; not closing it", paneID)
++		}
++	}
+ 	_, err := c.run(ctx, "pane", "close", paneID)
+ 	return err
+ }
+@@ -727,6 +785,15 @@ func (c *client) getAgent(ctx context.Context, target string) (agentInfo, bool,
+ 		if err := json.Unmarshal(res, &wrap); err != nil {
+ 			return agentInfo{}, false, fmt.Errorf("herdr agent get: decode: %w", err)
+ 		}
++		if c.sharedSession() {
++			owned, oerr := c.ownedWorkspaces(ctx)
++			if oerr != nil {
++				return agentInfo{}, false, oerr
++			}
++			if !owned[wrap.Agent.WorkspaceID] {
++				return agentInfo{}, false, nil
++			}
++		}
+ 		return wrap.Agent, true, nil
+ 	}
+ 	if !strings.Contains(err.Error(), "not_found") && !strings.Contains(err.Error(), "not found") {
+@@ -965,6 +1032,12 @@ func (c *client) startServer() error {
+ 	if c.serverAlive() {
+ 		return nil
+ 	}
++	// The default session is the operator's own herdr. A server launched from
++	// here would live in the supervisor's cgroup and die with it, taking every
++	// hand-run agent along; wait for the operator to start herdr instead.
++	if c.session == "" || c.session == "default" {
++		return fmt.Errorf("herdr server for session %q is not running", c.session)
++	}
+ 	// A prior server may have died leaving a stale socket inode; serverAlive
+ 	// just confirmed nothing live owns it, so clear it before launch or herdr
+ 	// cannot bind — the exact failure that stranded provider swaps (agent list
+@@ -1000,6 +1073,10 @@ func (c *client) startServer() error {
+ // `session stop` targets the session by name and must bypass run() (which
+ // prepends --session).
+ func (c *client) stopServer() error {
++	// gc stop must not take down the operator's own herdr with it.
++	if c.session == "" || c.session == "default" {
++		return nil
++	}
+ 	_ = exec.Command(c.bin, "session", "stop", c.session).Run()
+ 	return nil
+ }
+diff --git a/internal/runtime/herdr/provider.go b/internal/runtime/herdr/provider.go
+index b8a4249..9aa8b17 100644
+--- a/internal/runtime/herdr/provider.go
++++ b/internal/runtime/herdr/provider.go
+@@ -1110,7 +1110,7 @@ func workspaceTabFor(name string) (workspace, tab string) {
+ func placementFor(name string, env map[string]string) (workspace, tab string) {
+ 	workspace, tab = workspaceTabFor(name)
+ 	if len(env) == 0 {
+-		return workspace, tab
++		return "gc:" + workspace, tab
+ 	}
+ 	// Group under the originating rig when known. Town-level agents (mayor,
+ 	// deacon, …) have no GC_RIG and keep their town workspace.
+@@ -1130,7 +1130,10 @@ func placementFor(name string, env map[string]string) (workspace, tab string) {
+ 			tab = tab[:i] + leaf
+ 		}
+ 	}
+-	return workspace, tab
++	// The operator's own workspaces share this herdr session and are often
++	// labelled after the same repos; a bare rig label would adopt one of them
++	// and close its tabs.
++	return "gc:" + workspace, tab
+ }
+ 
+ // wispIDStart reports the index where a wisp id begins inside s, or -1 when s

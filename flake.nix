@@ -58,6 +58,10 @@
       url = "github:artouc/stop-describing-ui";
       flake = false;
     };
+    modern-web-guidance = {
+      url = "github:GoogleChrome/modern-web-guidance";
+      flake = false;
+    };
     llmwiki = {
       url = "github:lucasastorian/llmwiki";
       flake = false;

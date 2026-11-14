@@ -376,6 +376,22 @@
         "type": "github"
       }
     },
+    "modern-web-guidance": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794280113,
+        "narHash": "sha256-bqsUEI1yaGy1sd8DBJzG5cOv4Yv0RSYac6e9egqYFJU=",
+        "owner": "GoogleChrome",
+        "repo": "modern-web-guidance",
+        "rev": "4dd968349e54ca45a05dd5c818fb035c9054b022",
+        "type": "github"
+      },
+      "original": {
+        "owner": "GoogleChrome",
+        "repo": "modern-web-guidance",
+        "type": "github"
+      }
+    },
     "niri-scratchpad": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -552,6 +568,7 @@
         "llm-agents-nix": "llm-agents-nix",
         "llmwiki": "llmwiki",
         "mcp-servers-nix": "mcp-servers-nix",
+        "modern-web-guidance": "modern-web-guidance",
         "niri-scratchpad": "niri-scratchpad",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-node": "nixpkgs-node",

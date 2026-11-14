@@ -675,6 +675,10 @@ in
     nickname_candidates = ["Builder", "Patch", "Implementer"]
   '';
 
+  # modern-web-guidance の CLI は検索クエリや取得した指針の ID を Google に送る。
+  # DISABLE_TELEMETRY=1 で止まる（Claude Code など同じ変数を見る他ツールも止まる）
+  home.sessionVariables.DISABLE_TELEMETRY = "1";
+
   programs.agent-skills = {
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
@@ -692,11 +696,19 @@ in
       path = inputs.stop-describing-ui;
       subdir = "skills";
     };
+    # Chrome / Edge / Firefox / MDN チームによる最新 Web プラットフォームの指針。
+    # SKILL.md は実行時に CLI（modern-web-guidance@latest）で指針を検索・取得する
+    sources.modern-web-guidance = {
+      path = inputs.modern-web-guidance;
+      subdir = "skills";
+    };
     skills.enable = [
       "prompt-review"
       "agent-browser"
       "herdr"
       "stop-describing-ui"
+      "modern-web-guidance"
+      "chrome-extensions"
     ];
     targets.claude.enable = true;
     targets.codex = {

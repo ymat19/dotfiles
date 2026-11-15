@@ -11,6 +11,33 @@
     nvidiaSettings = true; # nvidia-settings GUI を使うなら
   };
 
+  # ドライバ同梱プロファイルは Hyprland / kwin / mutter 等にしか GLVidHeapReuseRatio=0 を当てず、
+  # niri は対象外。未設定だと niri が解放済み VRAM を抱え込み、モニタ再接続時の
+  # スキャンアウトバッファ確保が "Failed to allocate NVKMS memory for GEM object" で失敗する
+  environment.etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json".text =
+    builtins.toJSON {
+      rules = [
+        {
+          pattern = {
+            feature = "procname";
+            matches = "niri";
+          };
+          profile = "Limit Free Buffer Pool On Wayland Compositors";
+        }
+      ];
+      profiles = [
+        {
+          name = "Limit Free Buffer Pool On Wayland Compositors";
+          settings = [
+            {
+              key = "GLVidHeapReuseRatio";
+              value = 0;
+            }
+          ];
+        }
+      ];
+    };
+
   # Wayland を有効にする（例: GDM + GNOME Wayland）
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;

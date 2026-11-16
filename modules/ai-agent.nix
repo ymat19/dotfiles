@@ -401,6 +401,16 @@ in
     executable = true;
   };
 
+  home.file.".claude/hooks/japanese-only-guard.sh" = {
+    source = ../configs/claude-code/hooks/japanese-only-guard.sh;
+    executable = true;
+  };
+
+  home.file.".claude/hooks/dotfiles-push-guard.sh" = {
+    source = ../configs/claude-code/hooks/dotfiles-push-guard.sh;
+    executable = true;
+  };
+
   # `herdr integration status` はこのパスで導入有無と version を判定するため、生成物をここへ置く
   home.file.".claude/hooks/herdr-agent-state.sh" = {
     source = "${herdrIntegrations}/claude-agent-state.sh";
@@ -476,6 +486,21 @@ in
               {
                 type = "command";
                 command = "${herdrTaskHook}";
+              }
+            ];
+          }
+        ];
+        # 英語で応答したまま終わらせない・dotfiles の commit を main に入れずに終わらせない
+        Stop = [
+          {
+            hooks = [
+              {
+                type = "command";
+                command = "~/.claude/hooks/japanese-only-guard.sh";
+              }
+              {
+                type = "command";
+                command = "~/.claude/hooks/dotfiles-push-guard.sh";
               }
             ];
           }

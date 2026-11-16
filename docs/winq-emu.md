@@ -1,7 +1,11 @@
 # winq-emu: Windows 上で niri を動かす VM
 
-Windows 上の [WINQ-EMU](https://github.com/cmspam/winq-emu)（WHPX と GPU 転送に対応した QEMU のビルド）で、
+Windows 上の WINQ-EMU（WHPX と GPU 転送に対応した QEMU のビルド）で、
 このリポジトリの NixOS（niri + DMS）を VM として動かす。ホスト名は `winq-emu`。
+
+WINQ-EMU 本家（[cmspam/winq-emu](https://github.com/cmspam/winq-emu)）は更新が止まっているので、
+[Try Omarchy for Windows](https://github.com/omacom/try-omarchy-windows) が単体で配っている
+WINQ-EMU ランタイム（本家 Alpha10 のソースにパッチを足して再ビルドしたもの）を使う。
 
 - CPU は WHPX（Windows Hypervisor Platform）で `-cpu host` のまま動く
 - 描画は virtio-gpu 経由で Windows の GPU に転送する（OpenGL は virgl、Vulkan は Venus）。単体 GPU が無くても CPU 内蔵 GPU で動く
@@ -28,8 +32,21 @@ Windows 上の [WINQ-EMU](https://github.com/cmspam/winq-emu)（WHPX と GPU 転
 
 ## 1. WINQ-EMU を入れる
 
-[リリース](https://github.com/cmspam/winq-emu/releases)の `WINQ-EMU-Alpha10-Setup.exe` を実行する（管理者権限が必要、署名なし）。
-既定の `C:\WINQ-EMU` に入る前提で書いている。
+Try Omarchy for Windows のリリース `runtime-v1-r27` にある `winq-emu-alpha10-portable.zip` を
+`C:\WINQ-EMU` に展開する（インストーラは無く、展開するだけ）。以下はこの場所に置いた前提で書いている。
+使う版は Try Omarchy 本体が `guest-build/runtime.lock.json` で固定している版に合わせる。
+
+```powershell
+$url  = 'https://github.com/omacom/try-omarchy-windows/releases/download/runtime-v1-r27/winq-emu-alpha10-portable.zip'
+$sha  = '835d3b16697aa60b257f233d2de95ced47ee866ddd6aeef97b302fa336e46d57'
+$zip  = "$env:TEMP\winq-emu-portable.zip"
+Invoke-WebRequest $url -OutFile $zip
+if ((Get-FileHash $zip -Algorithm SHA256).Hash -ne $sha) { throw 'SHA256 が一致しない' }
+Expand-Archive $zip C:\WINQ-EMU -Force   # C:\WINQ-EMU\bin\qemu-system-x86_64.exe ができる
+```
+
+本家のインストーラ（`WINQ-EMU-Alpha10-Setup.exe`）で入れたものが `C:\WINQ-EMU` にある場合は、
+先にアンインストールするか、別の場所に展開して起動スクリプトに `-WinqDir` で渡す。
 
 ## 2. WSL でイメージをビルドする
 

@@ -1,4 +1,5 @@
-# winq-emu ホスト: WINQ-EMU（cmspam/winq-emu）上で niri を動かす VM 固有の設定。
+# winq-emu ホスト: WINQ-EMU（omacom/try-omarchy-windows が単体配布しているランタイム）上で
+# niri を動かす VM 固有の設定。
 # 起動は scripts/winq/start-niri-vm.ps1、イメージは
 #   nix build .#nixosConfigurations.winq-emu.config.system.build.winqImage --impure
 {

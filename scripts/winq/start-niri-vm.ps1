@@ -3,8 +3,10 @@
   WINQ-EMU で winq-emu ホスト（niri）の VM を起動する。
 
 .DESCRIPTION
-  C:\WINQ-EMU\launch-vm.bat と同じ構成（WHPX + -cpu host、BIOS ブート、
-  Venus/virgl の virtio-vga-gl）に、niri 向けの調整を足したもの:
+  WINQ-EMU（Try Omarchy for Windows が配っている単体ランタイム
+  winq-emu-alpha10-portable.zip を -WinqDir に展開したもの）で、
+  WHPX + -cpu host、BIOS ブート、Venus/virgl の virtio-vga-gl の構成に
+  niri 向けの調整を足して起動する:
     - 解像度を virtio-gpu の既定モードとして渡す（-Width/-Height、既定 3440x1440）
     - virtio の keyboard/tablet（絶対座標なのでマウス捕獲が要らない）
     - ssh・QMP は 127.0.0.1 にだけ開く
@@ -42,7 +44,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $qemu = Join-Path $WinqDir 'bin\qemu-system-x86_64.exe'
-if (-not (Test-Path $qemu)) { throw "WINQ-EMU が見つからない: $qemu" }
+if (-not (Test-Path $qemu)) { throw "WINQ-EMU が見つからない: $qemu（docs/winq-emu.md の手順で winq-emu-alpha10-portable.zip を展開する）" }
 if (-not (Test-Path $Disk)) { throw "ディスクイメージが見つからない: $Disk" }
 
 $logDir = Join-Path (Split-Path $Disk -Parent) 'logs'

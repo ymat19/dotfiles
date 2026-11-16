@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # `systemctl restart xremap` は NOPASSWD 許可済み。Claude も自分で実行してよい。
 # sudoers はフルパスで照合されるため、次の形で呼ぶ（`sudo -n true` の失敗は許可の有無と無関係）
 sudo -n /run/current-system/sw/bin/nixos-rebuild switch --flake .#$(hostname) --impure
-# ホスト名: main, mini, dyna, air, ymat19
+# ホスト名: main, mini, dyna, air, ymat19, winq-emu
 
 # スタンドアロン（非NixOS）環境
 home-manager switch --flake . --impure
@@ -61,6 +61,7 @@ Nix Flake ベースのドットファイルリポジトリ。単一リポジト�
 | dyna | dotnet | x86_64 ノート |
 | air | apple-silicon | MacBook Air |
 | ymat19 | なし | WSL/基本設定 |
+| winq-emu | no-sleep, `nixos-configurations/winq-emu.nix` | Windows 上の WINQ-EMU で動く niri の VM（手順は `docs/winq-emu.md`） |
 
 ### 設定ファイル
 

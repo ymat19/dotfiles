@@ -30,6 +30,17 @@ in
             "Super_L" = "F24";
           };
         }
+      ] ++ lib.optionals (envName == "winq-emu") [
+        # Windows 側で右 Win を Menu キーに変換して VM に渡している（Win キーは
+        # Windows が先に取るため）。QEMU からは KEY_COMPOSE で届くので Super に戻す。
+        # niri の xkb ではなくここで戻すのは、evdev を直読みする Wispr の helper にも
+        # Super として見せるため（Mod+N の push-to-talk）。
+        {
+          name = "Compose (Windows Right Win) to Super";
+          remap = {
+            "KEY_COMPOSE" = "Super_L";
+          };
+        }
       ] ++ [
         # Alt_L → F24
         {

@@ -112,6 +112,7 @@
           mini = "x86_64-linux";
           dyna = "x86_64-linux";
           air = "aarch64-linux";
+          winq-emu = "x86_64-linux";
         };
         nixOSSpecialArgs = {
           inherit inputs;
@@ -121,7 +122,11 @@
           onNixOS = true;
           hasBattery = false;
         };
-        mkNixOSModules = envName: [
+        # winq-emu は WINQ-EMU（Windows 上の QEMU）で動く VM。イメージは WSL 上で
+        # ビルドすることがあるので、ビルド機の onWSL 判定に引きずられないよう固定する。
+        winqEmuSpecialArgs = nixOSSpecialArgs // { onWSL = false; };
+        mkNixOSModules = mkNixOSModulesWith nixOSSpecialArgs;
+        mkNixOSModulesWith = args: envName: [
           ./configuration.nix
           home-manager.nixosModules.home-manager
           ({ pkgs, ... }: {
@@ -129,7 +134,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${nixOSUserName} = import ./home.nix;
-            home-manager.extraSpecialArgs = nixOSSpecialArgs // { inherit envName; };
+            home-manager.extraSpecialArgs = args // { inherit envName; };
 
             # 管理外の実ファイルを退避する方法。backupFileExtension（固定拡張子）は使わない。
             # Claude Code のように自分の設定ファイルを実行時に書き換えるツールがあると、
@@ -144,7 +149,7 @@
                 "$target" "$target.backup-$(${pkgs.coreutils}/bin/date +%Y%m%d-%H%M%S)"
             '';
           })
-        ] ++ (if onWSL then [ ] else
+        ] ++ (if args.onWSL then [ ] else
         ([
           inputs.xremap.nixosModules.default
           ./modules/nixos/system/xremap.nix
@@ -152,8 +157,21 @@
           ./modules/nixos/system/poiter-util.nix
           ./modules/nixos/system/wispr-flow.nix
         ]));
+
+        # /etc/nixos の無い環境（WSL の Ubuntu、イメージから起動した直後の VM）でも
+        # ビルドできるよう、winq-emu だけは requireStandalone に関係なく出力する。
+        winqEmuSystem = nixpkgs.lib.nixosSystem {
+          modules = (mkNixOSModulesWith winqEmuSpecialArgs "winq-emu") ++ [
+            ./modules/nixos/system/no-sleep.nix
+            ./nixos-configurations/winq-emu.nix
+          ];
+          specialArgs = winqEmuSpecialArgs // {
+            envName = "winq-emu";
+          };
+        };
       in
       { } // (if requireStandalone then {
+        nixosConfigurations.winq-emu = winqEmuSystem;
         homeConfigurations.${envUsername} = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [ ./home.nix ];
@@ -211,6 +229,7 @@
               envName = "air";
             };
           };
+          winq-emu = winqEmuSystem;
         };
       })
     );

@@ -80,3 +80,4 @@ Nix Flake ベースのドットファイルリポジトリ。単一リポジト�
 - Neovim プラグイン追加時: `configs/nvim/lua/custom/plugins/` にファイルを作成
 - 新規モジュール追加: `modules/` に `.nix` ファイルを置くだけで自動インポートされる
 - NixOS 専用機能は `modules/nixos/` に配置する
+- 作業の反映: 変更を commit したら、トピックブランチや PR で止めずにデフォルトブランチ（`main`）へ直接 push して完了とする。作業用ブランチを作った場合は push 後に消す

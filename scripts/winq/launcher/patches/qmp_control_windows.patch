@@ -1,0 +1,25 @@
+改変点: QMP の unix ソケットを置くディレクトリ名を TryOmarchyIPC から NiriVMIPC に変えた。
+Try Omarchy 本体と同じ端末で使っても、prepareQMPControl が互いのソケットを
+「まだ使われている」と判定したり消したりしないようにするため。
+
+
+--- a/qmp_control_windows.go
++++ b/qmp_control_windows.go
+@@ -15,7 +15,7 @@
+ 	// hosts. The per-user Windows temporary directory does not have that
+ 	// limitation and keeps the control sockets outside guest-accessible TCP.
+ 	base := os.TempDir()
+-	if len([]byte(filepath.Join(base, "TryOmarchyIPC", "supervisor.sock"))) > 103 {
++	if len([]byte(filepath.Join(base, "NiriVMIPC", "supervisor.sock"))) > 103 {
+ 		name, err := syscall.UTF16PtrFromString(base)
+ 		if err != nil {
+ 			return "", err
+@@ -25,7 +25,7 @@
+ 			base = syscall.UTF16ToString(buffer[:n])
+ 		}
+ 	}
+-	return filepath.Join(base, "TryOmarchyIPC"), nil
++	return filepath.Join(base, "NiriVMIPC"), nil
+ }
+ 
+ func isQMPControlSocket(path string) bool {

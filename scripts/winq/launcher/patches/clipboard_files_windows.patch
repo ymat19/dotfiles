@@ -1,0 +1,16 @@
+改変点: clipboardFilesCache の置き場所を %LOCALAPPDATA%\TryOmarchy\Clipboard から
+%LOCALAPPDATA%\niri-vm\Clipboard に変えた。Try Omarchy 本体と同じ端末で使っても、
+起動時の孤児掃除（cleanClipboardTransferOrphans）が互いのキャッシュを消さないようにするため。
+
+
+--- a/clipboard_files_windows.go
++++ b/clipboard_files_windows.go
+@@ -24,7 +24,7 @@
+ 	if err != nil {
+ 		return "", err
+ 	}
+-	return filepath.Join(dir, "TryOmarchy", "Clipboard"), nil
++	return filepath.Join(dir, "niri-vm", "Clipboard"), nil
+ }
+ 
+ func clipboardGetFilePaths() ([]string, bool) {

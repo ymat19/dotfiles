@@ -1,0 +1,14 @@
+#!/bin/bash
+# 出典: https://github.com/omacom/try-omarchy-windows の guest-build/0004-Guest-reboot-notify-unit-report-reboot-intent-to-the.patch
+# が作り、guest-build/0131-Report-compositor-health-to-the-launcher.patch が更新した
+# guest/factory-overlay/usr/local/lib/try-omarchy/reboot-notify の、両方を当てた後の内容
+# （コミット 5b1617edaef21942de08c1c64575cd7638f4808a）。MIT License、全文は同じディレクトリの LICENSE。
+# 無改変で持ち込んでいる（この 5 行の見出しだけを足した）。
+# Runs at shutdown (ExecStop of try-omarchy-reboot-notify.service). When the
+# guest is REBOOTING (not powering off), tell the host shell on the lifecycle
+# port so it relaunches QEMU - a QEMU wedged during guest reset under stock
+# WHPX delivers no SHUTDOWN event, so QMP alone cannot tell the two apart.
+intent=shutdown
+systemctl list-jobs 2>/dev/null | grep -q 'reboot.target.*start' && intent=reboot
+printf '%s\n' "$intent" | socat -u - TCP:10.0.2.2:4450,connect-timeout=2 2>/dev/null || true
+exit 0

@@ -575,6 +575,7 @@
         "rea": "rea",
         "stop-describing-ui": "stop-describing-ui",
         "try": "try",
+        "try-omarchy-windows": "try-omarchy-windows",
         "xremap": "xremap",
         "zen-browser": "zen-browser"
       }
@@ -698,6 +699,23 @@
       "original": {
         "owner": "ymat19",
         "repo": "try",
+        "type": "github"
+      }
+    },
+    "try-omarchy-windows": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794850854,
+        "narHash": "sha256-rBxQ49SUiDyB6JCwO6TAJOxNV2LfNktuTxpfhu8gjf8=",
+        "owner": "omacom",
+        "repo": "try-omarchy-windows",
+        "rev": "5b1617edaef21942de08c1c64575cd7638f4808a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "omacom",
+        "repo": "try-omarchy-windows",
+        "rev": "5b1617edaef21942de08c1c64575cd7638f4808a",
         "type": "github"
       }
     },

@@ -1,17 +1,63 @@
 # winq-emu ホスト: WINQ-EMU（omacom/try-omarchy-windows が単体配布しているランタイム）上で
 # niri を動かす VM 固有の設定。
-# 起動は scripts/winq/start-niri-vm.ps1、イメージは
-#   nix build .#nixosConfigurations.winq-emu.config.system.build.winqImage --impure
+# 起動は Windows のランチャー niri-vm.exe（scripts/winq/launcher、nix build .#winq-launcher）、イメージは
+#   WINQ_INITIAL_PASSWORD_HASH=$(mkpasswd) nix build .#nixosConfigurations.winq-emu.config.system.build.winqImage --impure
 {
   config,
   lib,
   pkgs,
   modulesPath,
   username,
+  inputs,
   ...
 }:
 
+let
+  # ランチャーとつなぐゲスト側のスクリプト（Try Omarchy for Windows のもの。scripts/winq/guest を参照）
+  winqGuest = pkgs.callPackage ../scripts/winq/guest { tryOmarchy = inputs.try-omarchy-windows; };
+  # 初回ログイン用のパスワードのハッシュ（mkpasswd の出力）。リポジトリには書かず、イメージのビルド時に渡す。
+  initialPasswordHash = builtins.getEnv "WINQ_INITIAL_PASSWORD_HASH";
+in
 {
+  # クリップボード連携のゲスト側。ランチャーが 127.0.0.1 で待ち、ゲストからは QEMU の
+  # user ネットワーク越しに 10.0.2.2 で届く。Try Omarchy の clipboard-bridge.service と同じ
+  # グラフィカルセッションへのつなぎ方（ExecStart だけ Nix のパッケージに向けた）。
+  systemd.user.services.clipboard-bridge = {
+    description = "Clipboard bridge to the Windows host (Try Omarchy)";
+    after = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    wantedBy = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${winqGuest}/bin/clipboard-bridge";
+      Restart = "always";
+      RestartSec = 3;
+    };
+  };
+
+  # ランチャーは QEMU を -no-reboot で動かし、ゲストの再起動で QEMU が終わったら起動し直す。
+  # 再起動か電源オフかは QMP の SHUTDOWN イベントで決めるが、それが届かずに QEMU が
+  # 終わったときのために、シャットダウンの途中（ネットワークが落ちる前）でランチャーに知らせる。
+  # Try Omarchy の try-omarchy-reboot-notify.service と同じ定義。
+  systemd.services.winq-reboot-notify = {
+    description = "Tell the Windows launcher when a reboot (not poweroff) starts";
+    after = [
+      "network.target"
+      "NetworkManager.service"
+    ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.coreutils}/bin/true";
+      ExecStop = "${winqGuest}/bin/reboot-notify";
+      TimeoutStopSec = 5;
+    };
+  };
+
+  # ランチャーは対応するランタイムなら virtio-balloon の free page reporting を有効にする
+  # （ゲストが空けたページを Windows に返す）。必要な virtio_balloon は qemu-guest.nix が
+  # initrd に入れ、CONFIG_PAGE_REPORTING はカーネルの既定で有効なので、ゲスト側の設定は要らない。
+
   # BIOS ブート。WINQ-EMU は EFI（OVMF）だとタイマの都合で Venus(Vulkan) が
   # ~5fps まで落ちると明記しているため、baremetal.nix の systemd-boot を差し替える。
   boot.loader.systemd-boot.enable = lib.mkForce false;
@@ -28,23 +74,31 @@
     "console=tty0"
   ];
 
-  # WHPX の中ではネストした仮想化が使えないので libvirt 一式は外す
+  # Windows の VM はホストの Hyper-V で動かし、入れ子の仮想化はしない方針なので libvirt 一式は外す
   programs.virt-manager.enable = lib.mkForce false;
   virtualisation.libvirtd.enable = lib.mkForce false;
   virtualisation.spiceUSBRedirection.enable = lib.mkForce false;
   # Bluetooth アダプタは VM に見えない
   hardware.bluetooth.enable = lib.mkForce false;
 
-  # Windows からの ssh 用。launcher は 127.0.0.1 にだけ転送するので外には出ない。
+  # GNOME Keyring は使わない（niri のモジュールが既定で有効にする）。画面にログインするまで開かないため、
+  # 再起動後にログインしないまま動くもの（gh など）が保存した資格情報を読めない。
+  services.gnome.gnome-keyring.enable = false;
+  security.pam.services.greetd.enableGnomeKeyring = lib.mkForce false; # baremetal.nix が有効にしている
+
+  # Windows からの ssh 用。launcher は 127.0.0.1 にだけ転送するので外には出ない。鍵でだけ入れる。
   services.openssh = {
     enable = true;
-    settings.PasswordAuthentication = true;
+    settings = {
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
   };
 
-  # 新規イメージの初回ログイン用。ログインしたら passwd で変えること。
-  users.users.${username}.initialPassword = "changeme";
+  # 新規イメージの初回ログイン用。作成済みのユーザーには効かない（mutableUsers）。
+  users.users.${username}.initialHashedPassword = lib.mkIf (initialPasswordHash != "") initialPasswordHash;
 
-  # Windows の共有フォルダ（launcher の -Share、9p の mount_tag=hostshare）
+  # Windows の共有フォルダ（launcher の -share、9p の mount_tag=hostshare）
   fileSystems."/mnt/windows" = {
     device = "hostshare";
     fsType = "9p";
@@ -65,11 +119,14 @@
   ];
 
   # WINQ-EMU 用ディスクイメージ。中身ぎりぎりの大きさで作り、Windows 側で
-  #   C:\WINQ-EMU\bin\qemu-img.exe resize disk.qcow2 200G
+  #   %LOCALAPPDATA%\WINQ-EMU\bin\qemu-img.exe resize disk.qcow2 200G
   # のように広げる（起動時に growPartition と autoResize がパーティションと ext4 を追従させる）。
   # 最初から 200GiB で作ると、中身を書き込む cptofs（LKL）が途中で CPU 100% のまま
   # 書き込みが止まり、先に進まなかった。
-  system.build.winqImage = import (modulesPath + "/../lib/make-disk-image.nix") {
+  system.build.winqImage =
+    assert lib.assertMsg (initialPasswordHash != "")
+      "WINQ_INITIAL_PASSWORD_HASH に初回ログイン用のパスワードのハッシュ（mkpasswd の出力）を入れて --impure でビルドする";
+    import (modulesPath + "/../lib/make-disk-image.nix") {
     inherit config lib pkgs;
     name = "nixos-winq-emu";
     format = "qcow2";

@@ -257,6 +257,33 @@
         else
           baseConfig;
 
+      # winq-emu: 電源ボタンを niri に握らせず logind（既定は poweroff）に任せる。
+      # niri は既定で handle-power-key の inhibitor を取り、電源ボタンをスリープに割り当てる。
+      # VM では QMP の system_powerdown がこの電源ボタンとして届くが、no-sleep.nix で
+      # スリープを禁止しているため何も起きず、Windows 側から VM を正しく止められなかった。
+      configWithEnvInput =
+        if envName == "winq-emu" then
+          builtins.replaceStrings [ "input {\n" ] [ "input {\n    disable-power-key-handling\n\n" ] configWithEnvBinds
+        else
+          configWithEnvBinds;
+
+      # winq-emu: Mod+Tab（直近のウィンドウ切り替え）を niri に割り当てない。右 Win+Tab は
+      # Windows の仮想デスクトップ切り替えに使う（scripts/winq/launcher/vdesk_windows.go）。
+      # binds を書くと既定の割り当ては全部消えるので、Mod+Tab と Mod+Shift+Tab 以外の既定を書き直す。
+      winqRecentWindows = lib.optionalString (envName == "winq-emu") ''
+
+        recent-windows {
+            binds {
+                Alt+Tab         { next-window; }
+                Alt+Shift+Tab   { previous-window; }
+                Alt+grave       { next-window     filter="app-id"; }
+                Alt+Shift+grave { previous-window filter="app-id"; }
+                Mod+grave       { next-window     filter="app-id"; }
+                Mod+Shift+grave { previous-window filter="app-id"; }
+            }
+        }
+      '';
+
       # Air専用の出力設定を追加
       airOutput = lib.optionalString (envName == "air") ''
 
@@ -277,7 +304,7 @@
       '';
     in
     {
-      text = configWithEnvBinds + airOutput + dynaOutput;
+      text = configWithEnvInput + winqRecentWindows + airOutput + dynaOutput;
     };
 
   # Scratchpad resize script

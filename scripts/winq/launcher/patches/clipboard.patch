@@ -1,0 +1,38 @@
+改変点:
+  - Windows からのファイルのドラッグ＆ドロップ（file_drop*.go、ドロップ用の転送ウィンドウ）は
+    持ち込んでいないので、clipBridge の dropRequests・setDropPaths を設定せず、
+    ドロップ要求を処理するゴルーチンと desktopClipboard への登録を外した。
+    ゲストから drop-offer が来ても clipboard_transfer.go が setDropPaths=nil を見て捨てる。
+  - sessionStarted（起動画面を閉じる boot curtain の通知）は持ち込んでいないので設定しない。
+  - showTransfer は shim の showTransferProgress（進捗をログに出すだけ）につないでいる。
+  これ以外（キャッシュの場所の検査、転送サービス、単一起動の検査を兼ねたポートの確保、孤児の掃除）は元のまま。
+
+
+--- a/clipboard.go
++++ b/clipboard.go
+@@ -37,7 +37,8 @@
+ 			logf("file transfers: %v", err)
+ 		}
+ 	}()
+-	b := &clipBridge{dropRequests: make(chan droppedFiles, 8), setDropPaths: func(paths []string) bool { go runFileDropWindow(paths, false); return true }, transferError: reportTransferError, showTransfer: showTransferProgress, transfers: transfers, getPaths: clipboardGetFilePaths, setPaths: clipboardSetFilePaths, getHost: clipboardGetItem, setHost: clipboardSetItem, sequence: clipboardSequence, sessionStarted: desktopSessionStarted}
++	// 改変: dropRequests・setDropPaths・sessionStarted を設定しない（見出しを参照）。
++	b := &clipBridge{transferError: reportTransferError, showTransfer: showTransferProgress, transfers: transfers, getPaths: clipboardGetFilePaths, setPaths: clipboardSetFilePaths, getHost: clipboardGetItem, setHost: clipboardSetItem, sequence: clipboardSequence}
+ 	b.authorizePeer = connectionFromQEMU
+ 	b.readPaths = clipboardReadFilePaths
+ 	b.readHost = clipboardReadNonFileItem
+@@ -60,14 +61,7 @@
+ 	}
+ 	logf("clipboard: guest->host on %d, host->guest on %d", clipPushPort, clipPullPort)
+ 
+-	desktopClipboard.Store(b)
+-	go func() {
+-		for dropped := range b.dropRequests {
+-			if err := b.offerDroppedFiles(dropped); err != nil {
+-				b.transferError(err)
+-			}
+-		}
+-	}()
++	// 改変: ドロップ要求のゴルーチンと desktopClipboard.Store(b) を外した。
+ 	go b.acceptPush(push)
+ 	go b.acceptPull(pull)
+ 	go b.pollHost()

@@ -67,6 +67,12 @@
       flake = false;
     };
     nixpkgs-node.url = "github:nixos/nixpkgs/nixos-unstable";
+    # Try Omarchy for Windows。winq-emu のランチャーとゲスト側のスクリプトの上流。
+    # Windows で試験してから上げるので、URL にコミットを固定して自動更新で動かないようにしている。
+    try-omarchy-windows = {
+      url = "github:omacom/try-omarchy-windows/5b1617edaef21942de08c1c64575cd7638f4808a";
+      flake = false;
+    };
     rea = {
       url = "github:morluto/rea/rea-agents-6.8.0";
       flake = false;
@@ -86,6 +92,11 @@
             shellhook = ''
               $SHELL
             '';
+          };
+          # winq-emu を Windows で起動するランチャー（niri-vm.exe）。Go のクロスビルドなので
+          # Nix のある任意の Linux（winq-emu の VM 自身を含む）でビルドできる。docs/winq-emu.md を参照。
+          packages.winq-launcher = pkgs.callPackage ./scripts/winq/launcher {
+            tryOmarchy = inputs.try-omarchy-windows;
           };
         }
       ) // (

@@ -34,6 +34,49 @@ let
     src = guiSrc;
   };
 
+  # Orca が PATH に登録する `orca` は、store 内の Electron を node として直接実行するシムである。
+  # FHS 環境の外（Orca のターミナル以外）でも動くよう、Electron 本体と付属ライブラリだけを書き換える。
+  # 全体を autoPatchelf しないのは、resources/orcad-template 等が内容のハッシュを検査されるため
+  app = pkgs.stdenv.mkDerivation {
+    pname = "${pname}-app";
+    inherit version;
+    src = extracted;
+    nativeBuildInputs = [ pkgs.autoPatchelfHook ];
+    buildInputs = with pkgs; [
+      alsa-lib
+      at-spi2-atk
+      cairo
+      cups
+      dbus
+      expat
+      glib
+      gtk3
+      libdrm
+      libgbm
+      libxkbcommon
+      nspr
+      nss
+      pango
+      systemd
+      libx11
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxrandr
+      libxcb
+    ];
+    dontAutoPatchelf = true;
+    dontStrip = true;
+    dontPatchELF = true;
+    installPhase = ''
+      cp -r . $out
+    '';
+    postFixup = ''
+      autoPatchelf $out/${pname} $out/chrome_crashpad_handler $out/*.so $out/*.so.*
+    '';
+  };
+
   # ヘッドレス版。GUI と同じ hook 導入処理を持ち、ディスプレイ無しでビルド中に動かせる
   server = pkgs.stdenv.mkDerivation {
     pname = "orca-server";
@@ -59,19 +102,14 @@ in
   # nixpkgs の `orca` は GNOME のスクリーンリーダーなので `orca` の名前は使わない
   package =
     let
-      gui = pkgs.appimageTools.wrapType2 {
+      gui = pkgs.appimageTools.wrapAppImage {
         pname = "orca-ide-desktop";
         inherit version;
-        src = guiSrc;
+        src = app;
       };
-      # CLI は Electron を node として動かすので、GUI と同じ FHS 環境が要る
-      cli = pkgs.buildFHSEnv (
-        pkgs.appimageTools.defaultFhsEnvArgs
-        // {
-          name = pname;
-          runScript = "${extracted}/resources/bin/orca-ide";
-        }
-      );
+      cli = pkgs.writeShellScriptBin pname ''
+        exec ${app}/resources/bin/orca-ide "$@"
+      '';
     in
     pkgs.symlinkJoin {
       name = "${pname}-${version}";
@@ -87,12 +125,12 @@ in
       '';
     };
 
-  # GUI の「Agent 用の Orca スキル」が入れるもの。このビルドに同梱された版を取り出す
+  # このビルドに同梱された Agent 用スキル一式を取り出す
   skills = pkgs.runCommand "orca-skills-${version}" { } ''
     export HOME=$TMPDIR/home
     export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib
     mkdir -p $HOME
-    ${server}/bin/orca-ide skills install --skill orca-cli --agent universal
+    ${server}/bin/orca-ide skills install --all --agent universal
     cp -r $HOME/.agents/skills $out
   '';
 

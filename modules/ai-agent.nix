@@ -662,7 +662,8 @@ in
       "modern-web-guidance"
       "chrome-extensions"
     ]
-    ++ lib.optional onNixOS "orca-cli";
+    # 同梱スキルの増減に追従させるため、名前を列挙せずビルド結果から拾う
+    ++ lib.optionals onNixOS (builtins.attrNames (builtins.readDir orca.skills));
     targets.claude.enable = true;
     targets.codex = {
       enable = true;

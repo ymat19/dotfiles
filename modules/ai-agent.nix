@@ -379,6 +379,7 @@ in
       # セッション記録は LLM Wiki の夜間ジョブが読む素材。既定の 30 日では処理が追いつく前に消える
       cleanupPeriodDays = 3650;
       skipDangerousModePermissionPrompt = true;
+      env.SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
       hooks = mergeHooks {
         PreToolUse = [
           {

@@ -1,0 +1,26 @@
+改変点: rejectMoveStreams（上流の app/move_windows.go。tools/excerptgen が excerpt_move_windows.go に抜き出す）で、
+Zone.Identifier（ダウンロードしたファイルに Windows が付ける「インターネットから取得した」印）だけは拒否しない。
+元のままだと、ダウンロードしたファイルをクリップボードで VM に送れない。転送されるのは本体（::$DATA）だけで、
+この印は VM には渡らない。
+
+
+--- a/excerpt_move_windows.go	2026-11-18 10:36:42.749834578 +0900
++++ b/excerpt_move_windows.go	2026-11-18 10:36:42.751463898 +0900
+@@ -8,6 +8,7 @@
+ 	"errors"
+ 	"fmt"
+ 	"os"
++	"strings"
+ 	"syscall"
+ 	"unsafe"
+ )
+@@ -64,7 +65,8 @@
+ 	}
+ 	defer syscall.FindClose(syscall.Handle(h))
+ 	for {
+-		if name := syscall.UTF16ToString(data.Name[:]); name != "::$DATA" {
++		// 改変: Zone.Identifier を拒否しない（このパッチの見出しを参照）。
++		if name := syscall.UTF16ToString(data.Name[:]); name != "::$DATA" && !strings.EqualFold(name, ":Zone.Identifier:$DATA") {
+ 			return uiError(uiTextWith("error.move.data_stream", map[string]string{"path": path}), nil)
+ 		}
+ 		r, _, e := next.Call(h, uintptr(unsafe.Pointer(&data)))

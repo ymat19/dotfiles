@@ -4,12 +4,12 @@
 # Try Omarchy for Windows（flake の入力 try-omarchy-windows、MIT License）のランチャー（app/）を
 # 次の形で使う:
 #   - upstreamFiles は上流のファイルをそのまま使う
-#   - patches/ は上流のファイルに当てる改変（理由は各パッチの先頭）
-#   - excerpts*.go・winapi.go・supervise_windows.go・hook_windows.go は上流の大きなファイルから
-#     必要な宣言だけを抜き出したもの。ビルド時に tools/excerptcheck で上流と照合し、
-#     winq:modified / winq:new の印が無い宣言が上流と違えば失敗する
-#   - main.go・shim_windows.go・vdesk_windows.go は自分で書いたもの
-# 抜き出しに上流のコードを含むので、上流の LICENSE（MIT）をこのディレクトリに置いている。
+#   - 上流の大きなファイル（丸ごと入れると上流のほぼ全体が要るもの）からは、excerpts.txt に名前を書いた
+#     宣言だけを、ビルド時に tools/excerptgen で上流のまま抜き出す（excerpt_<上流のファイル名>）
+#   - patches/ は、上の 2 つに当てる改変（理由は各パッチの先頭）
+#   - supervise_windows.go・hook_windows.go は上流の関数を大きく削って書き直したもの（パッチに向かない規模）
+#   - main.go・shim_windows.go・vdesk_windows.go・fullscreen_windows.go は自分で書いたもの
+# 上流の LICENSE（MIT）はビルド時に上流から取り込む。
 # 外部の Go モジュールに依存しないので vendorHash は null。
 {
   lib,
@@ -46,13 +46,6 @@ let
     "clipboard_files_windows.go"
     "qmp_control_windows.go"
   ];
-  excerptFiles = [
-    "excerpts.go"
-    "excerpts_windows.go"
-    "winapi.go"
-    "supervise_windows.go"
-    "hook_windows.go"
-  ];
 in
 buildGoModule {
   pname = "niri-vm";
@@ -64,24 +57,25 @@ buildGoModule {
       (lib.fileset.fileFilter (file: file.hasExt "go") ./.)
       ./go.mod
       ./patches
-      ./LICENSE
+      ./excerpts.txt
     ];
   };
 
   postPatch = ''
     ${lib.concatMapStringsSep "\n" (f: "cp ${tryOmarchy}/app/${f} ${f}") upstreamFiles}
     chmod u+w ${lib.concatStringsSep " " upstreamFiles}
-    for p in patches/*.patch; do patch -p1 --no-backup-if-mismatch < "$p"; done
   '';
 
   vendorHash = null;
 
-  # 照合はビルド機向けに動かす。buildGoModule は GOOS / GOARCH をビルド機に合わせているので、
+  # 抜き出しはビルド機向けに動かす（go のキャッシュが用意される configurePhase の後なので buildPhase で）。
+  # パッチは抜き出しの後に当てる。buildGoModule は GOOS / GOARCH をビルド機に合わせているので、
   # その後で Windows 向けに上書きする。既定の go install だと bin/windows_amd64/ に入るので、名前を決めて自分でビルドする。
   # -H windowsgui: GUI サブシステム（起動してもコンソールの窓が出ない）。
   buildPhase = ''
     runHook preBuild
-    go run ./tools/excerptcheck ${tryOmarchy}/app ${lib.concatStringsSep " " excerptFiles}
+    go run ./tools/excerptgen ${tryOmarchy}/app excerpts.txt .
+    for p in patches/*.patch; do patch -p1 --no-backup-if-mismatch < "$p"; done
     export GOOS=windows GOARCH=amd64 CGO_ENABLED=0
     go build -trimpath -ldflags "-H=windowsgui -s -w" -o niri-vm.exe .
     runHook postBuild
@@ -96,7 +90,7 @@ buildGoModule {
   installPhase = ''
     runHook preInstall
     install -Dm644 niri-vm.exe $out/bin/niri-vm.exe
-    install -Dm644 LICENSE $out/share/licenses/niri-vm/LICENSE
+    install -Dm644 ${tryOmarchy}/LICENSE $out/share/licenses/niri-vm/LICENSE
     runHook postInstall
   '';
 

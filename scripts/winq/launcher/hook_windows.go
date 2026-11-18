@@ -1,7 +1,9 @@
 // 出典: https://github.com/omacom/try-omarchy-windows の app/winkey.go
-// （コミット 5b1617edaef21942de08c1c64575cd7638f4808a）。MIT License、全文は同じディレクトリの LICENSE。
-// 改変点: closeguard.go が × のクリックと Alt+F4 を捕まえるのに要る部分だけを抜き出した。
-//   - qemuPid・guestUp の宣言は元のまま。
+// （コミット 5b1617edaef21942de08c1c64575cd7638f4808a）。MIT License、全文は上流の LICENSE。
+// hookCallback と runWinKeyHook を、closeguard.go が × のクリックと Alt+F4 を捕まえるのに要る部分だけに
+// 削って書き直したもの。上流からの改変が大きくパッチに向かないので、ここで持つ。
+// 元のままの宣言（qemuPid・guestUp・hookChaining・rehookInterval）はビルド時に上流から抜き出す（excerpts.txt）。
+// 改変点:
 //   - hookCallback は Alt+F4 の分岐と、フックの連鎖（hookChaining・CallNextHookEx）だけを残した。
 //     Win キー・Print Screen・Alt+Tab・Ctrl+Alt+End・Super+G の転送と Ctrl+Alt+G の
 //     カーソル解放は持ち込まない（右 Win は Scancode Map で F13 にし、ゲストの xremap が
@@ -20,24 +22,11 @@ package main
 
 import (
 	"runtime"
-	"sync/atomic"
 	"syscall"
 	"time"
 	"unsafe"
 )
 
-var (
-	qemuPid      atomic.Uint32 // current QEMU child, set by the supervisor
-	guestUp      atomic.Bool   // supervisor handshake succeeded for this launch
-	hookChaining bool          // hook-thread only
-)
-
-const (
-	// rehookInterval paces the keyboard rehook in runWinKeyHook.
-	rehookInterval = 800 * time.Millisecond
-)
-
-// winq:modified（このファイルの先頭の改変点を参照）
 func hookCallback(nCode, wParam, lParam uintptr) uintptr {
 	// While runWinKeyHook swaps hooks, both are briefly installed and this
 	// one's CallNextHookEx can reach the other. Route each event once.
@@ -69,7 +58,6 @@ func hookCallback(nCode, wParam, lParam uintptr) uintptr {
 // and QEMU re-installs its own on every grab toggle, so the keyboard hook is
 // re-installed every rehookInterval to stay at the front of the chain. The new
 // hook goes in before the old one comes out, so no key event slips past both.
-// winq:modified（このファイルの先頭の改変点を参照）
 func runWinKeyHook() {
 	runtime.LockOSThread()
 	cb := syscall.NewCallback(hookCallback)

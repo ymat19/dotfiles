@@ -1,6 +1,7 @@
 // 出典: https://github.com/omacom/try-omarchy-windows の app/main.go の supervise / watch /
-// runLifecycleListener と pendingReboot・guestReady の宣言
-// （コミット 5b1617edaef21942de08c1c64575cd7638f4808a）。MIT License、全文は同じディレクトリの LICENSE。
+// runLifecycleListener（コミット 5b1617edaef21942de08c1c64575cd7638f4808a）。MIT License、全文は上流の LICENSE。
+// 上流からの改変が大きくパッチに向かないので、ここで持つ。元のままの宣言（pendingReboot・guestReady）は
+// ビルド時に上流から抜き出す（excerpts.txt）。
 //
 // 改変点（流れと判定は元のまま。持ち込まない機能に関わる枝を外した）:
 //   supervise
@@ -38,13 +39,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sync/atomic"
 	"time"
-)
-
-var (
-	pendingReboot atomic.Bool
-	guestReady    atomic.Bool
 )
 
 // supervise runs one guest lifetime: launch with the wedge watchdog, watch it
@@ -54,7 +49,6 @@ var (
 // liveness is probed (a QEMU wedged at guest poweroff cannot deliver its
 // SHUTDOWN event), and a read stays permanently pending so a fast exit after
 // guest-reset cannot discard the event (see docs/FINDINGS.md).
-// winq:modified（このファイルの先頭の改変点を参照）
 func supervise(cfg *config) bool {
 	var proc *exec.Cmd
 	var qmp *qmpConn
@@ -171,7 +165,6 @@ func supervise(cfg *config) bool {
 	return false
 }
 
-// winq:modified（このファイルの先頭の改変点を参照）
 func watch(cfg *config, qmp *qmpConn, exited <-chan error) bool {
 	logf("supervisor: watching guest lifecycle")
 	lines := qmp.readLines()
@@ -282,7 +275,6 @@ drained:
 // reboot-notify unit connects to 10.0.2.2:4450 (this listener via
 // user-net) and says "reboot" when the guest is rebooting rather than
 // powering off.
-// winq:modified（このファイルの先頭の改変点を参照）
 func runLifecycleListener() {
 	l, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", lifecyclePort))
 	if err != nil {

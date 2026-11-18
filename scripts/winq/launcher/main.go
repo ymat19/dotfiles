@@ -74,7 +74,8 @@ func main() {
 	flag.Visit(func(f *flag.Flag) { explicit[f.Name] = true })
 
 	cfg := &config{
-		qemu: filepath.Join(*winqDir, "bin", "qemu-system-x86_64.exe"), disk: *disk,
+		// 上流（app/main.go の qemuExe）と同じく、GUI 版の qemu-system-x86_64w.exe を使う。コンソール版だと起動のたびにコンソールの窓が出る。
+		qemu: filepath.Join(*winqDir, "bin", "qemu-system-x86_64w.exe"), disk: *disk,
 		memory: *memory, cpus: *cpus, gpuHostMem: *gpuHostMem, width: *width, height: *height,
 		sshPort: *sshPort, qmpPort: *qmpPort, share: *share, fullscreen: *fullscreen,
 	}
@@ -132,9 +133,12 @@ func main() {
 	runSessionWindow()
 	go runWinKeyHook()
 	go runCloseGuard()
+	go runFullscreenKeeper()
 
 	for relaunch := supervise(cfg); relaunch; relaunch = supervise(cfg) {
 	}
+	// 上流と同じく、ランチャーが終わるときにタスクバーへの全画面の印を取り消す。
+	clearFullscreenMarks()
 	logf("---- exiting ----")
 }
 

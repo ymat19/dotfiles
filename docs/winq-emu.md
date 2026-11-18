@@ -26,13 +26,17 @@ WINQ-EMU ランタイム（本家 Alpha10 のソースにパッチを足して�
 `scripts/winq/launcher/` と `scripts/winq/guest/` は
 [Try Omarchy for Windows](https://github.com/omacom/try-omarchy-windows)（MIT License）のランチャー（`app/`）と
 ゲスト側のスクリプト（`scripts/guest/`）を使う。上流は flake の入力 `try-omarchy-windows` で、URL にコミットを
-固定している。ランチャーは上流のファイルをビルド時にそのまま使い、改変は `patches/`、上流の大きなファイルから
-抜き出した宣言は `excerpts*.go` などに置く。抜き出しはビルド時に `tools/excerptcheck` で上流と照合する。
+固定している。上流のコードはリポジトリに置かない。ランチャーは上流のファイルをビルド時にそのまま使い、
+上流の大きなファイルからは `excerpts.txt` に名前を書いた宣言だけをビルド時に `tools/excerptgen` で抜き出す。
+改変は `patches/` のパッチで当てる。上流の関数を大きく削って書き直したもの（`supervise_windows.go`・
+`hook_windows.go`）だけは、パッチに向かないので自前で持つ。ゲスト側の `reboot-notify` と LICENSE も
+ビルド時に上流から取り込む。
 
 ### 上流への追従
 
 1. `flake.nix` の `try-omarchy-windows` の URL のコミットを上げ、`nix flake lock` する
-2. `nix build .#winq-launcher` する。パッチが当たらない、または抜き出しが上流と違うとビルドが止まるので直す
+2. `nix build .#winq-launcher` する。パッチが当たらない、または `excerpts.txt` の宣言が上流に無いとビルドが止まるので直す。
+   `supervise_windows.go`・`hook_windows.go` は上流の `app/main.go`・`app/winkey.go` の差分を見て手で追う
 3. 上流の `CHANGELOG.md` でランタイムの版が上がっていれば、1 章の zip と SHA256 を合わせて差し替える
 4. Windows でクリップボード、×、VM の中からの再起動を試してから push する
 
@@ -57,7 +61,7 @@ $sha  = '835d3b16697aa60b257f233d2de95ced47ee866ddd6aeef97b302fa336e46d57'
 $zip  = "$env:TEMP\winq-emu-portable.zip"
 Invoke-WebRequest $url -OutFile $zip
 if ((Get-FileHash $zip -Algorithm SHA256).Hash -ne $sha) { throw 'SHA256 が一致しない' }
-Expand-Archive $zip "$env:LOCALAPPDATA\WINQ-EMU" -Force   # bin\qemu-system-x86_64.exe ができる
+Expand-Archive $zip "$env:LOCALAPPDATA\WINQ-EMU" -Force   # bin\qemu-system-x86_64w.exe ができる
 ```
 
 ## 2. イメージとランチャーをビルドする

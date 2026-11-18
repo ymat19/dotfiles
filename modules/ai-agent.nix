@@ -44,6 +44,32 @@ let
       }
     ];
   };
+  codexHooksFile = jsonFormat.generate "codex-hooks.json" { hooks = codexHooks; };
+
+  # Orca (modules/nixos/orca.nix) の hook を足した設定。home-manager が生成する settings.json と
+  # 同じ内容を作って Orca に通す（home.file の値を参照すると自己参照になるため作り直している）
+  orcaHooked = (import ../lib/orca.nix { inherit pkgs; }).withHooks {
+    claudeSettings = jsonFormat.generate "claude-code-settings.json" (
+      config.programs.claude-code.settings
+      // {
+        "$schema" = "https://json.schemastore.org/claude-code-settings.json";
+      }
+    );
+    codexHooks = codexHooksFile;
+    agents = [
+      config.programs.claude-code.finalPackage
+      codexPackage
+    ];
+  };
+  # Orca の hook も Codex に信頼させるため、Orca が書いた後の hooks.json から信頼を計算する。
+  # 中身が参照する store path は hooks.json 自体が依存として保持するので、ここでは文脈を捨ててよい
+  trustedCodexHooks =
+    if onNixOS then
+      (builtins.fromJSON (
+        builtins.unsafeDiscardStringContext (builtins.readFile "${orcaHooked}/codex-hooks.json")
+      )).hooks
+    else
+      codexHooks;
 
   # Codex は config.toml に信頼を記録した hook しか動かさないが、config.toml は rebuild のたびに
   # 作り直されて対話で与えた信頼が消えるため、Codex と同じ計算で信頼を前もって書いておく。
@@ -92,7 +118,7 @@ let
             ) group.hooks
           ) groups
         )
-      ) codexHooks
+      ) trustedCodexHooks
     )
   );
 
@@ -557,9 +583,11 @@ in
     fi
   '';
 
-  home.file.".codex/hooks.json".source = jsonFormat.generate "codex-hooks.json" {
-    hooks = codexHooks;
-  };
+  home.file.".codex/hooks.json".source =
+    if onNixOS then "${orcaHooked}/codex-hooks.json" else codexHooksFile;
+  home.file."${config.programs.claude-code.configDir}/settings.json".source = lib.mkIf onNixOS (
+    lib.mkForce "${orcaHooked}/claude-settings.json"
+  );
 
   home.file.".codex/agents/pr-reviewer.toml".text = ''
     name = "pr_reviewer"

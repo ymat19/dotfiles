@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   inputs,
@@ -29,6 +30,71 @@ let
 
   mergeHooks = mergeHookSets extraHooks;
   mergeCodexHooks = mergeHookSets codexExtraHooks;
+
+  codexHooks = mergeCodexHooks {
+    SessionStart = [
+      {
+        hooks = [
+          {
+            type = "command";
+            command = "${herdrAgentStateHook "~/.codex/herdr-agent-state.sh"}";
+            timeout = 10;
+          }
+        ];
+      }
+    ];
+  };
+
+  # Codex は config.toml に信頼を記録した hook しか動かさないが、config.toml は rebuild のたびに
+  # 作り直されて対話で与えた信頼が消えるため、Codex と同じ計算で信頼を前もって書いておく。
+  # 計算は codex-rs/hooks/src/engine/discovery.rs の hook_key / hook_hash に合わせている。
+  # キーは hooks.json のパス・イベント名（snake_case）・グループ番号・hook 番号で、
+  # 値は省略値を補った hook 定義をキー順に並べた JSON の SHA-256。
+  # Nix の builtins.toJSON はキー順・空白なしで出力するので serde_json と同じ文字列になる
+  codexHooksJsonPath = "${config.home.homeDirectory}/.codex/hooks.json";
+  codexHookEventLabel =
+    event:
+    lib.concatStrings (
+      lib.imap0 (i: c: if lib.toLower c != c then (if i == 0 then "" else "_") + lib.toLower c else c) (
+        lib.stringToCharacters event
+      )
+    );
+  codexHookTrustState = lib.listToAttrs (
+    lib.concatLists (
+      lib.mapAttrsToList (
+        event: groups:
+        lib.concatLists (
+          lib.imap0 (
+            groupIndex: group:
+            lib.imap0 (
+              hookIndex: hook:
+              let
+                label = codexHookEventLabel event;
+                identity = {
+                  event_name = label;
+                  hooks = [
+                    (
+                      {
+                        type = "command";
+                        inherit (hook) command;
+                        timeout = hook.timeout or 600;
+                        async = hook.async or false;
+                      }
+                      // lib.optionalAttrs (hook ? statusMessage) { inherit (hook) statusMessage; }
+                    )
+                  ];
+                }
+                // lib.optionalAttrs (group ? matcher) { inherit (group) matcher; };
+              in
+              lib.nameValuePair "${codexHooksJsonPath}:${label}:${toString groupIndex}:${toString hookIndex}" {
+                trusted_hash = "sha256:${builtins.hashString "sha256" (builtins.toJSON identity)}";
+              }
+            ) group.hooks
+          ) groups
+        )
+      ) codexHooks
+    )
+  );
 
   # herdr のサイドバーは行を折り返さず 1 行に切り詰めるため、要約を表示幅で切って
   # $task1..$task3 の複数トークンに分け、rows 側で 1 トークン 1 行に並べる。
@@ -425,6 +491,7 @@ in
       tools = {
         web_search = true;
       };
+      hooks.state = codexHookTrustState;
       features = {
         codex_hooks = true;
         multi_agent = true;
@@ -490,19 +557,7 @@ in
   '';
 
   home.file.".codex/hooks.json".source = jsonFormat.generate "codex-hooks.json" {
-    hooks = mergeCodexHooks {
-      SessionStart = [
-        {
-          hooks = [
-            {
-              type = "command";
-              command = "${herdrAgentStateHook "~/.codex/herdr-agent-state.sh"}";
-              timeout = 10;
-            }
-          ];
-        }
-      ];
-    };
+    hooks = codexHooks;
   };
 
   home.file.".codex/agents/pr-reviewer.toml".text = ''

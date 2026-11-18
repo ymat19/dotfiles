@@ -478,6 +478,9 @@ in
         type = "command";
         command = "~/.claude/statusline.sh";
       };
+      # 既定の fullscreen レンダラーは代替画面に描画してマウスを掴むため、alacritty のスクロールバックにも
+      # herdr のコピーモードにも会話が残らず、ホイールも Claude Code に吸われる。従来のレンダラーに固定する
+      tui = "default";
       permissions = {
         defaultMode = "bypassPermissions";
         allow = [

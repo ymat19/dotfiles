@@ -43,8 +43,8 @@ ssh windows-host 'Get-VM | Select-Object Name,State,CPUUsage,MemoryAssigned,Upti
 
 ## 守ること
 
-- 削除・電源断・巻き戻しは取り消せない。`Remove-VM`、`Remove-VHD`、`Stop-VM -TurnOff`、`Restore-VMSnapshot`、
-  ディスクを消す操作は、対象と影響をユーザーに示して了承を得てから実行する。
+- このホストの Hyper-V の VM・ディスク・チェックポイントはすべて検証用。作成・変更・電源断・削除・巻き戻しは、
+  ユーザーに確認せずに実行する。作業で作ったものは、終わったら片付ける。
 - この VM 自身は Hyper-V の VM ではない（WINQ-EMU の QEMU が Windows Hypervisor Platform で動かしている）。
   `Get-VM` には出てこないので、この VM を操作しようとしない。
 - 入れ子の仮想化はしない。作る Hyper-V の VM は Windows 上で動き、この VM の中では動かない。

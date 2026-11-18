@@ -24,6 +24,10 @@
       url = "github:aaddrick/claude-desktop-debian";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    codex-desktop-linux = {
+      url = "github:ilysenko/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     apple-silicon = {
       url = "github:nix-community/nixos-apple-silicon";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -159,6 +163,7 @@
           ./modules/nixos/system/thunar.nix
           ./modules/nixos/system/poiter-util.nix
           ./modules/nixos/system/wispr-flow.nix
+          ./modules/nixos/system/codex-desktop.nix
         ]));
 
         # /etc/nixos の無い環境（WSL の Ubuntu、イメージから起動した直後の VM）でも

@@ -54,17 +54,47 @@ let
   };
 in
 {
-  # nixpkgs の `orca` は GNOME のスクリーンリーダーなので、公式 CLI 名の orca-ide で入れる
-  package = pkgs.appimageTools.wrapType2 {
-    inherit pname version;
-    src = guiSrc;
-    extraInstallCommands = ''
-      install -Dm444 ${extracted}/${pname}.desktop $out/share/applications/${pname}.desktop
-      substituteInPlace $out/share/applications/${pname}.desktop \
-        --replace-fail 'Exec=AppRun' 'Exec=${pname}'
-      cp -r ${extracted}/usr/share/icons $out/share/
-    '';
-  };
+  # 公式の Linux パッケージと同じく `orca-ide` は CLI にし、GUI はデスクトップエントリから起動する。
+  # Orca 用スキルが Orca の外から `orca-ide` を CLI として呼ぶため。
+  # nixpkgs の `orca` は GNOME のスクリーンリーダーなので `orca` の名前は使わない
+  package =
+    let
+      gui = pkgs.appimageTools.wrapType2 {
+        pname = "orca-ide-desktop";
+        inherit version;
+        src = guiSrc;
+      };
+      # CLI は Electron を node として動かすので、GUI と同じ FHS 環境が要る
+      cli = pkgs.buildFHSEnv (
+        pkgs.appimageTools.defaultFhsEnvArgs
+        // {
+          name = pname;
+          runScript = "${extracted}/resources/bin/orca-ide";
+        }
+      );
+    in
+    pkgs.symlinkJoin {
+      name = "${pname}-${version}";
+      paths = [
+        gui
+        cli
+      ];
+      postBuild = ''
+        install -Dm444 ${extracted}/${pname}.desktop $out/share/applications/${pname}.desktop
+        substituteInPlace $out/share/applications/${pname}.desktop \
+          --replace-fail 'Exec=AppRun' 'Exec=orca-ide-desktop'
+        cp -r ${extracted}/usr/share/icons $out/share/
+      '';
+    };
+
+  # GUI の「Agent 用の Orca スキル」が入れるもの。このビルドに同梱された版を取り出す
+  skills = pkgs.runCommand "orca-skills-${version}" { } ''
+    export HOME=$TMPDIR/home
+    export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib
+    mkdir -p $HOME
+    ${server}/bin/orca-ide skills install --skill orca-cli --agent universal
+    cp -r $HOME/.agents/skills $out
+  '';
 
   # Orca は起動のたびに ~/.claude/settings.json と ~/.codex/hooks.json へ自分の hook を書き込み、
   # 書けないとエージェントの状態検出が止まる。Nix 管理のファイルは書けないので、ビルド時に

@@ -48,7 +48,8 @@ let
 
   # Orca (modules/nixos/orca.nix) の hook を足した設定。home-manager が生成する settings.json と
   # 同じ内容を作って Orca に通す（home.file の値を参照すると自己参照になるため作り直している）
-  orcaHooked = (import ../lib/orca.nix { inherit pkgs; }).withHooks {
+  orca = import ../lib/orca.nix { inherit pkgs; };
+  orcaHooked = orca.withHooks {
     claudeSettings = jsonFormat.generate "claude-code-settings.json" (
       config.programs.claude-code.settings
       // {
@@ -652,13 +653,16 @@ in
       path = inputs.modern-web-guidance;
       subdir = "skills";
     };
+    # Orca 同梱の版をそのまま使う。Orca の更新に合わせて中身も変わる
+    sources.orca = lib.mkIf onNixOS { path = orca.skills; };
     skills.enable = [
       "prompt-review"
       "herdr"
       "stop-describing-ui"
       "modern-web-guidance"
       "chrome-extensions"
-    ];
+    ]
+    ++ lib.optional onNixOS "orca-cli";
     targets.claude.enable = true;
     targets.codex = {
       enable = true;

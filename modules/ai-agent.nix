@@ -191,21 +191,7 @@ let
     - **成功条件だけでなく失敗条件も必ず拾う**。ログのエラー、プロセスの終了、再起動回数の増加などを監視対象に含める。systemd の `Restart=` 付きユニットは失敗しても `failed` にならず `activating` のまま再起動を繰り返すので、状態だけを見て失敗を判定しない。
     - **長いタイムアウトを付けた 1 本の待機ではなく、短い間隔で状態とログを確認する**。最初の異常を見た時点で止めて原因を調べる。
     - 失敗するたびに重い処理をやり直す自動再起動は、初回セットアップ中は無効にするか、失敗したら止まる形にする。
-  ''
-  + (lib.optionalString onWSL ''
-
-    ## agent-browser (WSL)
-
-    agent-browser はデフォルト headless で動く (Windows Chrome へ CDP 接続)。ウィンドウ表示が必要なときだけ `--headed` を付けること。
-
-    ### 絶対禁止: chrome / daemon を pkill しない (再発防止)
-    agent-browser は **1 daemon が Chrome 1 個を CDP で管理する**構造。`pkill` / `kill -9` で chrome や daemon を横から殺すと、daemon が死んだ Chrome に再接続して **about:blank / wedge** になり、次のコマンドで daemon が再 spawn されて **daemon・孤児 Chrome が多重化**し、コマンドがどのインスタンスに当たるか不定の不安定状態になる (過去にこれで大量のトークンと時間を浪費した)。
-
-    - リセットは **`agent-browser close --all` のみ**。`pkill -9 chrome` / `pkill agent-browser` は使わない。
-    - 調査・計測シーケンスの**途中で kill しない**。1 インスタンスを壊さず使い続ける。
-    - about:blank 等の異常を見たら、結論を出す前に必ず自分の環境を疑う: `pgrep -fc 'chrome-linux64/chrome'` (健全な単一インスタンス = 6〜8 procs) と daemon 数を確認。多重化していたら掃除してから再開する。
-    - 「アプリが遅い/壊れている」と結論する前に、backend 応答 (`curl -w` で時間計測) と自環境のプロセス数を切り分ける。
-  '');
+  '';
 
 in
 {
@@ -217,154 +203,13 @@ in
   home.packages =
     let
       llmPkg = name: inputs.llm-agents-nix.packages.${pkgs.stdenv.hostPlatform.system}.${name};
-      agentBrowserBin = llmPkg "agent-browser";
-      #
-      # WSL から Windows 側の Chrome に CDP 接続する設計。WSL 内に Chromium を起動しない
-      # (WSLg 経由の描画オーバーヘッドと多重起動による負荷を避けるため)。
-      #
-      # ## 必要な Windows / WSL 側セットアップ (このラッパーの動作前提)
-      #
-      # ### 1. %USERPROFILE%\.wslconfig
-      #
-      #     [wsl2]
-      #     networkingMode=mirrored
-      #
-      #     [experimental]
-      #     hostAddressLoopback=true
-      #
-      # mirrored mode により WSL 内 `localhost` が Windows host の `localhost` と一致し、
-      # Windows Chrome の CDP に到達できる。変更後 `wsl --shutdown` で反映。
-      #
-      # ### 2. Windows netsh portproxy (v4tov6)
-      #
-      # Chrome の `--remote-debugging-port` は IPv6 (`[::1]:<port>`) のみで listen するため、
-      # 同じ port 番号で IPv4→IPv6 ブリッジを張る (管理者 PowerShell):
-      #
-      #     netsh interface portproxy add v4tov6 listenaddress=0.0.0.0 listenport=9222 \
-      #       connectaddress=::1 connectport=9222
-      #     netsh interface portproxy add v4tov6 listenaddress=0.0.0.0 listenport=9223 \
-      #       connectaddress=::1 connectport=9223
-      #
-      # 9222 = headed (`--headed` 指定時)、9223 = headless (デフォルト)。
-      # 両 mode を独立に常駐させるため別 port + 別 user-data-dir で分離している。
-      #
-      # ### 3. Hyper-V Firewall (mirrored mode で必須)
-      #
-      # mirrored mode の DefaultInboundAction=Block を WSL VM (VMCreatorId は固定値) で許可:
-      #
-      #     New-NetFirewallHyperVRule -Name 'WSL-Chrome-Debug' \
-      #       -DisplayName 'WSL Chrome Debug' \
-      #       -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' \
-      #       -Direction Inbound -Protocol TCP -LocalPorts 9222,9223 -Action Allow
-      #
-      # ### 4. Chrome 専用プロファイル
-      #
-      # 普段使いの Chrome と分離するため `%LOCALAPPDATA%\chrome-agent-profile`
-      # (headed) と `chrome-agent-profile-headless` (headless) を `--user-data-dir`
-      # に指定 (初回起動時に自動作成)。Chrome は同じ profile を 2 プロセスで開けない
-      # ため headed/headless でディレクトリを分離している。Windows username は
-      # whoami.exe から動的取得しているので個人情報のハードコードは無い。
-      #
-      # ## このラッパーの役割
-      #
-      # - デフォルトは headless (port 9223, `--headless=new`)、`--headed` 指定時のみ
-      #   headed (port 9222) に切り替えて Windows Chrome を on-demand 起動
-      # - 接続先を明示するため agent-browser には `--cdp <port>` を常に渡す
-      #   (AGENT_BROWSER_AUTO_CONNECT は使わない: 両モードが同時起動した際に
-      #   ユーザが意図しない方の Chrome に繋がる事故を防ぐ)
-      # - `NO_PROXY`: 企業内プロキシを bypass (localhost をプロキシ経由しない)
-      # - `XDG_RUNTIME_DIR` fallback: WSL の `/run/user/$UID` が無い環境向け
-      agentBrowserPkg =
-        if onWSL then
-          pkgs.writeShellScriptBin "agent-browser" ''
-            export NO_PROXY="''${NO_PROXY:-localhost,127.0.0.1,::1}"
-            export no_proxy="''${no_proxy:-localhost,127.0.0.1,::1}"
-            if [ -z "''${XDG_RUNTIME_DIR:-}" ] || [ ! -d "''${XDG_RUNTIME_DIR:-}" ]; then
-              export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
-              mkdir -p "$XDG_RUNTIME_DIR"
-              chmod 700 "$XDG_RUNTIME_DIR"
-            fi
-
-            # `--headed` の有無でモード判定。`--` 以降はサブコマンド引数なので走査しない。
-            wants_headed=0
-            for arg in "$@"; do
-              case "$arg" in
-                --) break ;;
-                --headed) wants_headed=1 ;;
-              esac
-            done
-
-            if [ "$wants_headed" = 1 ]; then
-              cdp_port=9222
-              profile_subdir=chrome-agent-profile
-              chrome_mode_args=()
-            else
-              cdp_port=9223
-              profile_subdir=chrome-agent-profile-headless
-              chrome_mode_args=(--headless=new)
-            fi
-
-            cdp_probe() {
-              ${pkgs.curl}/bin/curl -sf --max-time 1 --noproxy '*' \
-                "http://localhost:$cdp_port/json/version" >/dev/null 2>&1
-            }
-            if ! cdp_probe; then
-              # 並行起動でのレース回避用 lock (200ms 単位で取得試行、3秒で諦め)
-              lock="/tmp/agent-browser-chrome-launch-$cdp_port.lock"
-              for _ in $(seq 1 15); do
-                if ( set -C; : > "$lock" ) 2>/dev/null; then
-                  trap 'rm -f "$lock"' EXIT
-                  break
-                fi
-                cdp_probe && break
-                sleep 0.2
-              done
-
-              if ! cdp_probe; then
-                # cmd.exe は WSL cwd (UNCパス) で起動できないため、WSL Interop で chrome.exe を直接 spawn。
-                # Windows username は whoami.exe から動的取得 (DOMAIN\user 形式の user 部分)。
-                win_user=$(/mnt/c/Windows/System32/whoami.exe 2>/dev/null | sed 's/.*\\//' | tr -d '\r\n')
-                '/mnt/c/Program Files/Google/Chrome/Application/chrome.exe' \
-                  --remote-debugging-port=$cdp_port \
-                  "--user-data-dir=C:\\Users\\''${win_user}\\AppData\\Local\\''${profile_subdir}" \
-                  --no-first-run --no-default-browser-check \
-                  "''${chrome_mode_args[@]}" \
-                  </dev/null >/dev/null 2>&1 &
-                disown
-                # 起動完了待ち (最大 20 秒、Chrome の初回起動は重い)
-                for _ in $(seq 1 100); do
-                  cdp_probe && break
-                  sleep 0.2
-                done
-              fi
-            fi
-
-            # 接続できない場合は agent-browser CLI に渡さず即終了する。
-            # CLI 本体は --cdp 失敗時に自前 chromium を WSL 内へ install/起動する
-            # フォールバックを持つため、ここで止めないと WSL 内に Linux chromium が
-            # 落ちてきて意図しない経路が走る。
-            if ! cdp_probe; then
-              echo "agent-browser: Windows Chrome on port $cdp_port did not become reachable. Check Windows-side setup (portproxy / Hyper-V firewall / chrome.exe path)." >&2
-              exit 1
-            fi
-
-            exec ${agentBrowserBin}/bin/agent-browser --cdp "$cdp_port" "$@"
-          ''
-        else
-          agentBrowserBin;
     in
     [
-      agentBrowserPkg
       herdrTask
       (llmPkg "ccusage")
       (llmPkg "codex-acp")
       (llmPkg "oh-my-codex")
     ];
-
-  home.file.".agent-browser/config.json".source = jsonFormat.generate "agent-browser-config.json" {
-    # WSL: ラッパーが `--cdp <port>` を渡して Windows Chrome に接続するため設定不要。
-    # 非WSL環境では agent-browser CLI が自前でブラウザを起動する (デフォルト headless)。
-  };
 
   # WSL 上の Claude Code が頻繁に powershell.exe を起こして Windows プロファイルを
   # 取得しに行く挙動を抑制する。参考: https://zenn.dev/momonga/articles/ee5b114e038938
@@ -707,10 +552,6 @@ in
   programs.agent-skills = {
     enable = true;
     sources.local.path = ../configs/claude-code/skills;
-    sources.agent-browser = {
-      path = inputs.agent-browser;
-      subdir = "skills";
-    };
     # herdr 本体に同梱の SKILL.md を直接参照する。
     # 手元にコピーを置くとバージョン追従が手動になり、CLI 変更に追いつけなくなるため。
     sources.herdr = {
@@ -729,7 +570,6 @@ in
     };
     skills.enable = [
       "prompt-review"
-      "agent-browser"
       "herdr"
       "stop-describing-ui"
       "modern-web-guidance"

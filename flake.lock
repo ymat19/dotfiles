@@ -1,21 +1,5 @@
 {
   "nodes": {
-    "agent-browser": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794377000,
-        "narHash": "sha256-vskVPhO6M2cGu5U23+XfgteC+4h4TwKtAKdecvRbssY=",
-        "owner": "vercel-labs",
-        "repo": "agent-browser",
-        "rev": "2f1649cefb82f417abbb2712f5397439d010698e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "vercel-labs",
-        "repo": "agent-browser",
-        "type": "github"
-      }
-    },
     "agent-skills-nix": {
       "inputs": {
         "nixpkgs": [
@@ -558,7 +542,6 @@
     },
     "root": {
       "inputs": {
-        "agent-browser": "agent-browser",
         "agent-skills-nix": "agent-skills-nix",
         "apple-silicon": "apple-silicon",
         "claude-desktop": "claude-desktop",

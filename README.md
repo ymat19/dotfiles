@@ -294,6 +294,7 @@ touch ~/.gitconfig
 | **time** | タイムゾーン間の時刻取得・変換 |
 | **serena** | セマンティックなコード解析・シンボル操作（LSP ベース） |
 | **context7** | ライブラリの最新ドキュメント取得 |
+| **browse** | 普段の Vivaldi をエージェントが操作する（NixOS のみ。拡張機能と対で動く） |
 
 ### スキル（SKILL）
 
@@ -320,7 +321,6 @@ touch ~/.gitconfig
 | | web-artifacts-builder | React/Tailwind/shadcn を使った複雑な Web アーティファクト構築 |
 | | webapp-testing | Playwright を使った Web アプリテスト |
 | | xlsx | スプレッドシート (.xlsx) の操作 |
-| **agent-browser** | agent-browser | ブラウザ自動操作 CLI |
 | **local** | agent-team | Agent Teams のベスプラに基づくチーム編成・並列作業開始 |
 | | pr-sweep | subagents による一括 PR レビュー＆マージ |
 
@@ -341,7 +341,6 @@ touch ~/.gitconfig
 |----------|------|
 | **claude-code** | Anthropic 公式の CLI エージェント |
 | **codex** | OpenAI Codex CLI エージェント |
-| **agent-browser** | AI エージェント向けブラウザ自動操作 CLI |
 | **ccusage** | Claude Code の使用量トラッキング |
 
 ### Neovim 連携

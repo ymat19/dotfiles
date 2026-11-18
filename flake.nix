@@ -46,10 +46,6 @@
       url = "github:Kyure-A/agent-skills-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    agent-browser = {
-      url = "github:vercel-labs/agent-browser";
-      flake = false;
-    };
     herdr = {
       url = "github:herdrdev/herdr";
       inputs.nixpkgs.follows = "nixpkgs";

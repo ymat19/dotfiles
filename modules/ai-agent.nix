@@ -500,9 +500,9 @@ in
           "WebFetch(domain:www.pomerium.com)"
           "WebFetch(domain:code.claude.com)"
           "WebFetch(domain:dev.to)"
-          "Read(*)"
-          "Glob(*)"
-          "Grep(*)"
+          "Read"
+          "Glob"
+          "Grep"
         ];
       };
     };

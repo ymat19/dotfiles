@@ -86,6 +86,13 @@ in
   services.gnome.gnome-keyring.enable = false;
   security.pam.services.greetd.enableGnomeKeyring = lib.mkForce false; # baremetal.nix が有効にしている
 
+  # 起動したらそのまま niri にログインする（dms-greeter のモジュールの自動ログイン。起動直後の 1 回だけで、
+  # ログアウトすると通常のログイン画面になる）。VM は Windows のサインインの内側でしか開けない。
+  services.displayManager.autoLogin = {
+    enable = true;
+    user = username;
+  };
+
   # Windows からの ssh 用。launcher は 127.0.0.1 にだけ転送するので外には出ない。鍵でだけ入れる。
   services.openssh = {
     enable = true;

@@ -67,11 +67,6 @@ animations {
     }
 }
 
-window-rule {
-    match app-id="zen-alpha|zen-beta|zen"
-    opacity 0.9
-}
-
 // Scratchpad terminal
 window-rule {
     match app-id="alacritty-scratch"

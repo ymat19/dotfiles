@@ -76,7 +76,7 @@ sudo reboot
 
 ```mermaid
 graph TD
-    A["flake.nix<br/>Entry Point"] --> B["nixpkgs<br/>home-manager<br/>xremap<br/>zen-browser"]
+    A["flake.nix<br/>Entry Point"] --> B["nixpkgs<br/>home-manager<br/>xremap"]
 
     A -->|Standalone| C["homeConfigurations"]
     A -->|NixOS| D["nixosConfigurations<br/>ymat19/main/mini/dyna/air"]
@@ -135,7 +135,6 @@ graph TD
 - **rofi.nix**: アプリケーションランチャー
 - **screenshot.nix**: Grimblast + Swappy
 - **cliphist.nix**: クリップボード履歴
-- **zen-browser.nix**: Zen Browser (Firefox フォーク)
 - **vscode.nix**: VS Code
 - **remmina.nix**: リモートデスクトップ
 

@@ -93,6 +93,22 @@ in
     user = username;
   };
 
+  # ホストの Windows の Hyper-V を操作する Skill と、その接続先（docs/winq-emu.md の「VM から Hyper-V を操作する」）。
+  # winq-emu にだけ入れる。
+  home-manager.users.${username} = {
+    programs.agent-skills.skills.enable = [ "windows-hyperv" ];
+    programs.ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      settings."windows-host" = {
+        HostName = "10.0.2.2";
+        User = "hyperv-ssh";
+        IdentityFile = "~/.ssh/windows_ed25519";
+        IdentitiesOnly = true;
+      };
+    };
+  };
+
   # Windows からの ssh 用。launcher は 127.0.0.1 にだけ転送するので外には出ない。鍵でだけ入れる。
   services.openssh = {
     enable = true;

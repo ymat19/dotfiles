@@ -227,6 +227,79 @@ Windows の仮想デスクトップを 2 枚にし、左を Windows の作業用
 ランチャーが動いている間、右 Win+Tab で 2 枚を行き来する（VM が前面なら左へ、そうでなければ右へ）。
 Tab は VM にも Windows にも渡らない。niri の Mod+Tab（直近のウィンドウ切り替え）は winq-emu では割り当てていない。
 
+### VM から Hyper-V を操作する
+
+VM の中のエージェントが、ホストの Windows の Hyper-V を PowerShell で操作できるようにする（任意）。
+winq-emu には Skill `windows-hyperv` と ssh の別名 `windows-host`（`hyperv-ssh@10.0.2.2`、鍵 `~/.ssh/windows_ed25519`）が入る。
+`10.0.2.2` は QEMU の user ネットワークから見たホストで、Windows の `127.0.0.1` に届く。
+
+Windows 側では、Windows 標準の OpenSSH サーバーを `127.0.0.1` だけで待ち受けさせ、鍵でだけ入れるローカルユーザー `hyperv-ssh` を作る。
+
+- **ローカルユーザーにする理由**: ドメインのアカウントは、ドメインコントローラーに届かない間、
+  鍵が通ってもログオンを作れず入れない。
+- **Administrators にも入れる理由**: 管理者でないユーザーは鍵ログイン（ネットワークログオン）で WMI の `Win32_*` を読めず、
+  `New-VM` などが失敗する。Win32-OpenSSH では仕様とされている（PowerShell/Win32-OpenSSH #2077）。
+  Hyper-V Administrators などのグループや WMI の権限を足しても解決しない。
+- **入口は `hyperv-ssh` だけ**: 管理者権限を持つので、`AllowUsers` で ssh で入れるユーザーをこれだけに絞る。
+
+MSI 版の OpenSSH（PowerShell/Win32-OpenSSH）は入れない。Windows 標準のものと同じ `sshd` のサービス名を取り合い、
+Windows Update の後でサービスが消えることがある。
+
+管理者の PowerShell で:
+
+```powershell
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+# 導入済みなのに sshd サービスが無いときは、公式 install-sshd.ps1 と同じ定義で登録する
+if (-not (Get-Service sshd -ErrorAction SilentlyContinue)) {
+  New-Service -Name sshd -DisplayName 'OpenSSH SSH Server' -BinaryPathName '"C:\Windows\System32\OpenSSH\sshd.exe"' -StartupType Manual
+  sc.exe privs sshd SeAssignPrimaryTokenPrivilege/SeTcbPrivilege/SeBackupPrivilege/SeRestorePrivilege/SeImpersonatePrivilege
+}
+
+# ユーザー（パスワードは ssh では使わないが、ローカルのパスワード規則を満たす必要がある）
+New-LocalUser -Name hyperv-ssh -Password (Read-Host -AsSecureString) -PasswordNeverExpires -AccountNeverExpires
+Add-LocalGroupMember -Group (Get-LocalGroup -SID S-1-5-32-544) -Member hyperv-ssh   # Administrators
+Add-LocalGroupMember -Group (Get-LocalGroup -SID S-1-5-32-578) -Member hyperv-ssh   # Hyper-V Administrators
+
+# 鍵（Administrators の鍵はこのファイル。Administrators と SYSTEM だけが読めるようにする）
+$ak = "$env:ProgramData\ssh\administrators_authorized_keys"
+Set-Content $ak '<VM の ~/.ssh/windows_ed25519.pub の中身>' -Encoding ascii
+icacls $ak /inheritance:r /grant '*S-1-5-32-544:F' /grant '*S-1-5-18:F'
+
+# ssh したときのシェルを Windows PowerShell にする
+New-Item HKLM:\SOFTWARE\OpenSSH -Force | Out-Null
+New-ItemProperty HKLM:\SOFTWARE\OpenSSH -Name DefaultShell -Value "$env:WINDIR\System32\WindowsPowerShell\v1.0\powershell.exe" -Force | Out-Null
+```
+
+`C:\ProgramData\ssh\sshd_config` の有効な行を次のようにする（`AllowUsers` は `Match` より前）。
+
+```
+ListenAddress 127.0.0.1
+PubkeyAuthentication yes
+AuthorizedKeysFile	.ssh/authorized_keys
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+Subsystem	sftp	sftp-server.exe
+AllowUsers hyperv-ssh
+Match Group administrators
+       AuthorizedKeysFile __PROGRAMDATA__/ssh/administrators_authorized_keys
+```
+
+```powershell
+& 'C:\Windows\System32\OpenSSH\sshd.exe' -t   # 設定の検査
+Set-Service sshd -StartupType Automatic; Restart-Service sshd
+ssh-keyscan -t ed25519 127.0.0.1               # VM の known_hosts に入れるホスト鍵
+```
+
+VM 側で:
+
+```bash
+ssh-keygen -t ed25519 -N "" -C winq-emu-vm-to-windows -f ~/.ssh/windows_ed25519   # 公開鍵を上の $ak に入れる
+# 上の ssh-keyscan の出力の「127.0.0.1」を「10.0.2.2」に替えて ~/.ssh/known_hosts に足す
+ssh windows-host 'Get-VM'
+```
+
+確認: Windows で `Get-NetTCPConnection -LocalPort 22 -State Listen` が `127.0.0.1` だけ。VM から `ssh windows-host 'Get-VM'` が通る。
+
 ## 既知の問題
 
 - **画面が固まることがある**: 使用中に画面が更新されなくなったことがある。VM の中で、画面の更新が GPU の処理の

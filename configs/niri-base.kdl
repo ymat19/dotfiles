@@ -205,7 +205,6 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "s" "10%-"; }
 }
 
-spawn-at-startup "fcitx5"
 spawn-at-startup "alacritty" "--class" "alacritty-scratch"
 
 // Monitor configuration

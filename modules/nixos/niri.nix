@@ -346,19 +346,7 @@
     style.name = "adwaita-dark";
   };
 
-  # Fcitx5設定（hyprland.nixと同じ）
-  i18n.inputMethod = {
-    enable = true;
-    type = "fcitx5";
-    fcitx5.addons = with pkgs; [
-      fcitx5-mozc
-      qt6Packages.fcitx5-configtool
-    ];
-  };
-
   home.sessionVariables = lib.mkAfter ({
-    XMODIFIERS = "@im=fcitx";
-    INPUT_METHOD = "fcitx";
     WLR_EGL_NO_MODIFIERS = "1"; # NVIDIA 用
     LIBVA_DRIVER_NAME = "nvidia";
     XDG_SESSION_TYPE = "wayland";

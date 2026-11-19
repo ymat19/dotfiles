@@ -684,7 +684,6 @@ in
     # Orca 同梱の版をそのまま使う。Orca の更新に合わせて中身も変わる
     sources.orca = lib.mkIf onNixOS { path = orca.skills; };
     skills.enable = [
-      "prompt-review"
       "herdr"
       "stop-describing-ui"
       "modern-web-guidance"

@@ -18,7 +18,14 @@ let
   codexExtraHooksFile = /home/ymat19/.config/codex-local-hooks.json;
 
   readHooksFile =
-    path: if builtins.pathExists path then builtins.fromJSON (builtins.readFile path) else { };
+    path:
+    # pure 評価では flake の外にある実在ファイルも pathExists が false を返す。
+    if !(builtins ? currentSystem) then
+      throw "Local Claude Code and Codex hook configuration requires --impure. Re-run with --impure."
+    else if builtins.pathExists path then
+      builtins.fromJSON (builtins.readFile path)
+    else
+      { };
 
   extraHooks = readHooksFile extraHooksFile;
   codexExtraHooks = readHooksFile codexExtraHooksFile;

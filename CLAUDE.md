@@ -28,7 +28,7 @@ sudo systemctl restart nix-daemon
 home-manager switch --flake . --impure
 
 # Nix flake の構文チェック
-nix flake check --no-build
+nix flake check --no-build --impure
 
 # 旧 kvim 構成のデータを削除（kvim → nvim 統合後、各ホストで1回実行）
 rm -rf ~/.local/share/kvim ~/.local/state/kvim ~/.cache/kvim

@@ -36,7 +36,7 @@ curl -L https://install.determinate.systems/nix | sh
 2. 構成を適用:
 
 ```bash
-home-manager switch --flake .
+home-manager switch --flake . --impure
 ```
 
 #### NixOS のセットアップ
@@ -225,24 +225,24 @@ graph TD
 
 ### スタンドアロン home-manager (非 NixOS)
 ```bash
-home-manager switch --flake .
+home-manager switch --flake . --impure
 ```
 
 ### NixOS デスクトップ (main - ゲーミング環境)
 ```bash
-sudo nixos-rebuild switch --flake .#main
+sudo nixos-rebuild switch --flake .#main --impure
 ```
 含まれるもの: NVIDIA ドライバ + Steam + Hyprland + すべての開発ツール
 
 ### MacBook Air (Apple Silicon)
 ```bash
-sudo nixos-rebuild switch --flake .#air
+sudo nixos-rebuild switch --flake .#air --impure
 ```
 含まれるもの: Apple Silicon サポート + すべての開発ツール
 
 ### WSL 環境
 ```bash
-sudo nixos-rebuild switch --flake .#ymat19
+sudo nixos-rebuild switch --flake .#ymat19 --impure
 ```
 
 ## WSL 環境での注意点

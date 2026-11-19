@@ -74,6 +74,15 @@ in
     "console=tty0"
   ];
 
+  # journal もシリアルへ流し、QEMU が落ちる直前のログを Windows 側の serial.log に残す。
+  # ゲストのディスク上の journal は、QEMU が落ちると直前の 20〜30 秒分が書き出されずに失われるため。
+  # 量は平均 30 バイト/秒ほどで、負荷は無視できる。
+  services.journald.settings.Journal = {
+    ForwardToConsole = true;
+    TTYPath = "/dev/ttyS0";
+    MaxLevelConsole = "info";
+  };
+
   # Windows の VM はホストの Hyper-V で動かし、入れ子の仮想化はしない方針なので libvirt 一式は外す
   programs.virt-manager.enable = lib.mkForce false;
   virtualisation.libvirtd.enable = lib.mkForce false;

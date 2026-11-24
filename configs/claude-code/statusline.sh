@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 input=$(cat)
 
+# rate_limits は statusline の入力にしか現れず、Claude Code はどこにも保存しない。
+# 外部ツールが読めるよう最新値を書き出す。複数セッションが同時に書くので tmp + mv で置き換える
+RATE_LIMITS_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/claude-code"
+if RATE_LIMITS=$(echo "$input" | jq -ce '.rate_limits // empty' 2>/dev/null); then
+  mkdir -p "$RATE_LIMITS_DIR" &&
+    TMP=$(mktemp "$RATE_LIMITS_DIR/.rate-limits.XXXXXX") &&
+    jq -c --argjson at "$(date +%s)" '{captured_at: $at} + .' <<<"$RATE_LIMITS" >"$TMP" &&
+    mv -f "$TMP" "$RATE_LIMITS_DIR/rate-limits.json"
+fi
+
 MODEL=$(echo "$input" | jq -r '.model.display_name')
 COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 PCT=$(echo "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)

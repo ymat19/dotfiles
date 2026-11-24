@@ -9,8 +9,6 @@
   ...
 }:
 {
-  imports = [ ../modules/nixos/system/mozkey.nix ];
-
   # Bootloader.
   boot = {
     loader = {

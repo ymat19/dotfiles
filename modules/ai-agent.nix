@@ -540,6 +540,7 @@ in
         ];
       };
       agents = {
+        enabled = true;
         max_threads = 6;
         max_depth = 1;
         job_max_runtime_seconds = 1800;
@@ -548,11 +549,7 @@ in
         web_search = true;
       };
       hooks.state = codexHookTrustState;
-      features = {
-        codex_hooks = true;
-        multi_agent = true;
-        skills = true;
-      };
+      features.hooks = true;
     };
   };
 

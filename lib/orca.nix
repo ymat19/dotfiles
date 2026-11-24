@@ -1,27 +1,27 @@
 { pkgs }:
 
 let
-  version = "1.4.262";
+  version = "1.4.272";
   release = "https://github.com/stablyai/orca/releases/download/v${version}";
   sources = {
     x86_64-linux = {
       gui = {
         url = "${release}/orca-linux.AppImage";
-        hash = "sha256-igLnkE38kjwDHh6H4rgL1ZwnVzMZ8VjiEsuUpJ+Br34=";
+        hash = "sha256-OfiJ29GxEYKRcsaWN0cqRiQeRZEGRxmjDHmwE4tbHWo=";
       };
       server = {
         url = "${release}/orca-server-linux-x64.tar.gz";
-        hash = "sha256-4sXZysx48lcNJIAjiqABrukUGojsXEP5fn6+LGEie5M=";
+        hash = "sha256-tiwXzH9Z9XUSuGuuEfIIyCFqRpdjm5ueklWii4Zlddg=";
       };
     };
     aarch64-linux = {
       gui = {
         url = "${release}/orca-linux-arm64.AppImage";
-        hash = "sha256-2asHH5UZdMKobS7+XODW4wnzFrWVm9//yuYI6bFTh6w=";
+        hash = "sha256-PAj36D9t3KQKWi91oLeDJIBlMpiexatARE3A4nocX6M=";
       };
       server = {
         url = "${release}/orca-server-linux-arm64.tar.gz";
-        hash = "sha256-ULInVi5DLCc6xdZc3b6DDB2UE/wGviamiTwEk0Er3Dw=";
+        hash = "sha256-IwhcDbphFNZiTj6Og5H8dN6sSwMMZh1RAbm2TnT5I8s=";
       };
     };
   };

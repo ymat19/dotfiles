@@ -204,7 +204,6 @@
             modules = (mkNixOSModules "main") ++ [
               ./modules/nixos/system/nvidia.nix
               ./modules/nixos/system/steam.nix
-              ./modules/nixos/system/bedroom-audio.nix
               ./modules/nixos/system/discord.nix
             ];
             specialArgs = nixOSSpecialArgs // {

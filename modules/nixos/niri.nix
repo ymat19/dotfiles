@@ -203,11 +203,7 @@
         lock_cmd = "hyprlock";
       };
 
-      # main は寝室のモニタ（DP-3）でゲームパッドだけで遊ぶ。ゲームパッドの入力は niri に届かず
-      # アイドル扱いになるうえ、寝室にはキーボードが無いので、自動ロックがかかると解除できず、
-      # 画面が消えると点け直せない。そのため main では自動ロックも画面オフもしない。
-      # 寝室のモニタはモニタ本体の電源ボタンで点け消しする。
-      listener = lib.optionals (envName != "main") [
+      listener = [
         {
           timeout = 2100;
           on-timeout = "hyprlock";

@@ -209,9 +209,23 @@ spawn-at-startup "fcitx5"
 spawn-at-startup "alacritty" "--class" "alacritty-scratch"
 
 // Monitor configuration
+// DP-3 は寝室のモニタ（ワイヤレス HDMI 経由）。DP-1 は位置を書かず niri の自動配置で右隣に置く。
+// DP-1 は KVM 経由で、KVM を切り替えるたびに抜き差しされる。
 output "DP-3" {
     mode "1920x1080@60"
-    transform "90"
+    position x=0 y=0
+}
+
+// 寝室にはゲームパッドしか無く、ゲームパッドの入力は niri に届かないので、フォーカスを DP-3 に
+// 移す手段が無い。そこでパッドの Guide ボタンで Steam が開く Big Picture を DP-3 に全画面で出し、
+// フォーカスもそちらへ移す。Big Picture から起動したゲームはフォーカスのある DP-3 に開く。
+// ゲーム側を DP-3 に固定しないのは、デスク（DP-1）でも遊ぶため。
+window-rule {
+    // タイトルは Steam の表示言語で変わる（日本語では「Steam Big Pictureモード」）ので前方一致にする。
+    match app-id="^steam$" title="^Steam Big Picture"
+    open-on-output "DP-3"
+    open-fullscreen true
+    open-focused true
 }
 
 window-rule {

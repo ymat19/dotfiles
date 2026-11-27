@@ -35,7 +35,7 @@
         # でも xcb に固定して XWayland(:0) 経由で動かす。Steam 本体 UI は CEF なので影響なし。
         QT_QPA_PLATFORM = "xcb";
       }
-      # main では Steam とゲームの音を寝室用の仮想シンクへ出す（bedroom-audio.nix）。
+      # main では Steam とゲームの音を寝室用の仮想シンクへ出す（bedroom-gaming.nix）。
       # WirePlumber のストリームルールで振り分けないのは、Proton ゲームは wine のプロセスで
       # Steam 由来と見分ける属性が無いため。PULSE_SINK は出力だけに効き、マイク入力は動かさない。
       // lib.optionalAttrs (envName == "main") {
